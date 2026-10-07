@@ -2,7 +2,6 @@ import type { Article } from '@/types';
 import { getDict, type Locale } from '@/lib/i18n';
 import { formatDate } from '@/lib/data';
 import { safeExternalUrl } from '@/lib/sources/text';
-import { MachineTranslatedBadge } from './MachineTranslatedBadge';
 import { localizedTitle } from '@/lib/translate/display';
 
 const MAX_VISIBLE = 24;
@@ -52,12 +51,6 @@ export function SignalList({ signals, locale }: { signals: Article[]; locale: Lo
                 </div>
                 <p className="mt-0.5 text-[12.5px] leading-snug text-mist">
                   {sTitle.text}
-                  {sTitle.machine && (
-                    <>
-                      {' '}
-                      <MachineTranslatedBadge locale={locale} compact />
-                    </>
-                  )}
                 </p>
                 {href && (
                   <a

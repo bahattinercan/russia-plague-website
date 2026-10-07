@@ -10,7 +10,6 @@ import { LabelBadge } from './LabelBadge';
 import { ContradictionPanel } from './ContradictionPanel';
 import { EventModal } from './EventModal';
 import { TimeAgo } from './TimeAgo';
-import { MachineTranslatedBadge } from './MachineTranslatedBadge';
 import { localizedTitle } from '@/lib/translate/display';
 
 /**
@@ -74,11 +73,6 @@ export function EventCard({
         >
           {title.text}
         </button>
-        {title.machine && (
-          <span className="ml-2 align-middle">
-            <MachineTranslatedBadge locale={locale} />
-          </span>
-        )}
       </h3>
 
       {title.machine && event.titleOriginal && (
@@ -167,11 +161,6 @@ export function EventCard({
                       {!aTitle.machine && `${t.readOriginal}: `}
                       {aTitle.machine ? aTitle.text : fold(aTitle.text)}
                     </a>
-                    {aTitle.machine && (
-                      <span className="ml-1.5">
-                        <MachineTranslatedBadge locale={locale} />
-                      </span>
-                    )}
                   </li>
                 );
               })}

@@ -42,8 +42,10 @@ Türkçeye **düzgün** çevrilsin, ama orijinal her zaman görünür kalsın.
    "doğrulandı / teyit edildi / confirmed / verified" anlamı **katmamalı**. Kaynak
    "suspected / possibly / reportedly / allegedly" diyorsa Türkçe karşılığı da
    "şüpheli / olabileceği / bildirildi / iddia edildi" olmalı. Bu, §8'de otomatik kapıyla korunur.
-2. **Makine çevirisi etiketi zorunlu.** Çevrilmiş her başlık "makine çevirisi" olarak
-   işaretlenir ve **orijinal başlık her zaman görünür** (PLAN §10, methodology sayfası).
+2. **Makine çevirisi beyanı zorunlu — ama görünüm başına tek yerde.** Çeviri olduğu bilgisi olay
+   detayında (modal) başlığın altında tek satır olarak verilir ve **orijinal başlık her zaman
+   görünür** (PLAN §10, methodology sayfası). Liste/kart görünümünde tekrar eden rozet kullanılmaz
+   (gerekçe: §9 görsel kural).
 3. **Üretken özet yok.** Yalnızca çeviri yapılır; özet üretilmez, yeni bilgi eklenmez.
 4. **Telif.** Yalnızca başlık (ve mevcutsa kaynak özeti) çevrilir; tam metin çekilmez/çevrilmez.
    Başlık çevirisi türev eserdir → yalnızca başlık + link + `readOriginal` ile sınırlı kalınır.
@@ -285,16 +287,19 @@ Ağa çıkmayan saf fonksiyon testleri → CI'da hızlı ve deterministik.
 | Dosya | Değişiklik |
 |---|---|
 | `src/app/[lang]/page.tsx` | Etiket/başlık gösterimi değişmez; sayaçlara "çeviri" durumu opsiyonel eklenir |
-| `src/components/EventCard.tsx` | `title = locale==='tr' ? event.titleTr ?? event.title : event.title`; `titleTr` kullanıldıysa küçük **"makine çevirisi"** rozeti + altında `Orijinali oku: <orijinal>` satırı |
-| `src/components/EventModal.tsx` | Gösterilen başlık ≠ orijinal ise "Orijinali oku" satırı (mevcut koşul düzeltilir); iddialarda `claim.titleTr ?? claim.title` |
-| `src/components/TopEventList.tsx` | Aynı başlık seçimi |
-| `src/components/SignalList.tsx` | Aynı başlık seçimi |
+| `src/components/EventCard.tsx` | `title = locale==='tr' ? event.titleTr ?? event.title : event.title`; `titleTr` kullanıldıysa altında `Orijinali oku: <orijinal>` satırı (rozet yok) |
+| `src/components/EventModal.tsx` | Başlık çevrilmişse altında **tek** beyan satırı: `makine çevirisi · Orijinali oku: <orijinal>`; iddialarda `claim.titleTr ?? claim.title` |
+| `src/components/TopEventList.tsx` | Aynı başlık seçimi (rozet yok) |
+| `src/components/SignalList.tsx` | Aynı başlık seçimi (rozet yok) |
 | `src/components/ContradictionPanel.tsx` | `side.statement` yerine çevrilmiş iddia başlığı (claim'den çözülür) |
 | `src/lib/i18n.ts` | `machineTranslated` zaten var; `translationUnavailable: 'çevrilmedi' / 'not translated'` eklenir |
 | `src/app/[lang]/methodology/page.tsx` | "Çeviri yapılırsa makine çevirisidir" maddesi, hangi sağlayıcı/nasıl etiketlendiğiyle güncellenir |
 
-**Görsel/editoryal kural:** çeviri rozeti küçük ve mono (mevcut `font-mono text-[10px]` diliyle);
-`readOriginal` her zaman erişilebilir olmalı. `/en` görünümü **hiç değişmez**.
+**Görsel/editoryal kural (07 Eki 2026 revizyonu):** çeviri olduğu bilgisi görünüm başına **tek**
+kez verilir — detay modalında, başlığın hemen altındaki küçük mono satır. Liste/kart görünümünde
+tekrar eden rozet kullanılmaz: aynı etiket tek bir sayfada 100'den fazla kez çıktığı için
+okunabilirliği bozuyor ve "Çoklu bağımsız kaynak bildiriyor" gibi asıl editoryal sinyali
+bastırıyordu. `readOriginal` her görünümde erişilebilir kalır. `/en` görünümü **hiç değişmez**.
 
 ---
 
@@ -387,7 +392,7 @@ turdaki gerçek yeni içerik tipik olarak 0–15 başlık ≈ **0–2k karakter*
 |---|---|---|
 | 1 | Sağlayıcı | `auto`: **DeepL → OpenAI-uyumlu LLM → anahtarsız Google**. Anahtar yoksa Google devreye girer, çeviri kutudan çıktığı gibi çalışır. `TRANSLATE_PROVIDER=off` ile tamamen kapatılır. |
 | 2 | Kapsam | **Tamamı**: olay başlıkları + özetler + iddia başlıkları + sinyal başlıkları. |
-| 3 | Görünüm | TR birincil + kartta ve modalda **orijinal başlık** + "makine çevirisi" rozeti. |
+| 3 | Görünüm | TR birincil; orijinal başlık kartta "Orijinali oku" satırı, detayda başlığın altında; çeviri beyanı yalnızca detayda (07 Eki 2026 revizyonu). |
 | 4 | Backfill | Otomatik: anahtar/uygun sağlayıcı varsa ilk ingest turu mevcut içeriği çevirir (önbellek boş olduğu için). |
 | 5 | RU kaynaklar | Evet, aynı akıştan (RU→TR). |
 | 6 | EN görünümü | Değişmedi; `/en` daima orijinali gösterir. |

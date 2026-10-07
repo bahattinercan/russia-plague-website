@@ -16,7 +16,7 @@ Projenin ayırt edici özelliği hız değil, **güvenilirlik ve şeffaflıktır
 2. **Sistem "doğrulandı" demez.** Tam otomatik bir sistem doğrulama iddia edemez; yalnızca *hangi kaynak ne bildirdi* raporlanır. En yüksek etiket "çoklu bağımsız kaynak bildiriyor"dur.
 3. Sistem ne yaptığını açıklar: metodoloji sayfası, kaynak sağlık paneli, düzeltme günlüğü.
 4. Güncellik ölçülebilir: her kartta "yayın zamanı" + "sistemimizin gördüğü zaman" ayrı gösterilir.
-5. **TR + EN** çift dil; çeviri makine çevirisi olarak etiketlenir, orijinal başlık her zaman görünür.
+5. **TR + EN** çift dil; çevirinin makine çevirisi olduğu olay detayında belirtilir, orijinal başlık her zaman görünür.
 6. Telegram/X sinyalleri **düşük güvenli iddia katmanı** olarak dahildir — asla tek başına ana akışta "haber" olarak gösterilmez.
 
 ---
@@ -130,7 +130,7 @@ russia-plague-website/
                ▼
    ┌──────────────────────────┐
    │ 6. ÇEVİR / ÖZETLE        │  TR başlık + 2 cümle extractive özet
-   │  (opsiyonel/LLM)         │  → "makine çevirisi" etiketi ZORUNLU
+   │  (opsiyonel/LLM)         │  → makine çevirisi beyanı ZORUNLU (detayda)
    └───────────┬──────────────┘
                ▼
    ┌──────────────────────────┐
@@ -327,7 +327,7 @@ Tüm tablolarda `created_at` / `updated_at`; `claims` ve `metrics` **kaynak zoru
 | Konu | Karar |
 |---|---|
 | Telif | Başlık + ≤2 cümle alıntı + kaynak linki + arşiv linki. **Tam metin asla kopyalanmaz.** |
-| Çeviri | LLM kullanılırsa her TR metin "makine çevirisi" olarak etiketlenir; orijinal başlık her zaman görünür. |
+| Çeviri | LLM kullanılırsa her TR metin makine çevirisidir; beyan olay detayında verilir, orijinal başlık her zaman görünür. |
 | Özet | **Üretken değil, çıkarımsal (extractive):** kaynak metinden cümle seçilir, yeniden yazılmaz. Halüsinasyon yüzeyi sıfırlanır. |
 | Tıbbi tavsiye | Sitede açık uyarı: "Bu site haber izleme aracıdır, tıbbi tavsiye değildir. Resmi kurum açıklamalarını esas alın." |
 | Kişisel veri | Kişi adları yalnızca resmi kurum/kamuya açık bildirimde geçiyorsa gösterilir. Sağlık verisi işlenmez, KVKK/GDPR notu eklenir. |
@@ -401,7 +401,7 @@ Tüm tablolarda `created_at` / `updated_at`; `claims` ve `metrics` **kaynak zoru
 | 2 | **Otomasyon:** Tam otomatik, **"doğrulanmış" etiketi yok** | İnsan onayı yok → sistem doğrulama iddia etmez; en yüksek etiket "çoklu bağımsız kaynak bildiriyor". Ayrıca bkz. §5.3 dil kuralı |
 | 3 | **Telegram/X katmanı:** Dahil | T5, sadece "doğrulanmamış iddia" olarak; ana akışta tek başına haber sayılmaz |
 | 4 | **Repo:** Public | GitHub Actions cron sınırsız dakika; kaynak kod ve güven puanları şeffaf |
-| 5 | **TR çeviri:** Sağlayıcıdan bağımsız ingest-time çeviri + önbellek (7 Eki 2026) | `auto`: DeepL → OpenAI → anahtarsız Google; her çeviri "makine çevirisi" etiketli, orijinal başlık her zaman görünür; doğrulama kapıları editoryal kuralı korur. Ayrıntı: `docs/ceviri-plani.md` |
+| 5 | **TR çeviri:** Sağlayıcıdan bağımsız ingest-time çeviri + önbellek (7 Eki 2026) | `auto`: DeepL → OpenAI → anahtarsız Google; makine çevirisi beyanı olay detayında, orijinal başlık her zaman görünür; doğrulama kapıları editoryal kuralı korur. Ayrıntı: `docs/ceviri-plani.md` |
 
 ### Kalan açık sorular
 

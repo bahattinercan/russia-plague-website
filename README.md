@@ -140,7 +140,7 @@ Bu projede kaynak davranışı **iddia değil, ölçüm** ile belgelenir:
 
 İngilizce ve Rusça başlıklar `/tr` görünümünde Türkçeye çevrilir. Kurallar:
 
-- **Makine çevirisi etiketi zorunlu** ve **orijinal başlık her zaman görünür** (`Orijinali oku`).
+- **Makine çevirisi beyanı zorunlu** (olay detayında) ve **orijinal başlık her zaman görünür** (`Orijinali oku`). Liste/kart görünümünde tekrar eden rozet yok.
 - Çeviri **ingest sırasında** yapılır ve `content_hash` üzerinden önbelleğe alınır; aynı içerik her 10 dakikada yeniden çevrilmez.
 - **Doğrulama kapıları** (`npm run translation-check`): çıktıda `doğrulandı/teyit edildi` geçemez, belirsizlik (`suspected → şüpheli`) korunur, sayılar ve özel adlar (WHO, CDC, Rospotrebnadzor…) korunur. Kapıdan geçmeyen çeviri gösterilmez; orijinal başlık gösterilir.
 - Sağlayıcı **bağımsız**: `DEEPL_API_KEY` veya `OPENAI_API_KEY` varsa o kullanılır; yoksa anahtarsız Google katmanı devrededir (üretim için DeepL anahtarı önerilir). `TRANSLATE_PROVIDER=off` ile kapatılır.

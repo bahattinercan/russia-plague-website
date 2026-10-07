@@ -76,16 +76,19 @@ export function EventModal({
 
         <h2 id="event-detail-title" className="mt-3 text-[20px] font-semibold leading-snug text-chalk">
           {title.text}
-          {title.machine && (
-            <span className="ml-2 align-middle">
-              <MachineTranslatedBadge locale={locale} />
-            </span>
-          )}
         </h2>
 
-        {title.machine && event.titleOriginal && (
+        {/*
+         * Çeviri beyanı TEK yerde: modalın başlığı altında.
+         * Liste/kart görünümünde tekrar eden rozet kaldırıldı (aynı etiket bir
+         * sayfada 100+ kez çıkıp asıl sinyali bastırıyordu); rozeti kaldırınca
+         * listede kalan "Orijinali oku" satırı orijinal başlığı göstermeye
+         * devam ediyor.
+         */}
+        {title.machine && (
           <p className="mt-1.5 font-mono text-[10.5px] text-mist/70">
-            {t.readOriginal}: {event.titleOriginal}
+            <MachineTranslatedBadge locale={locale} />
+            {event.titleOriginal && <> · {t.readOriginal}: {event.titleOriginal}</>}
           </p>
         )}
 
@@ -94,12 +97,6 @@ export function EventModal({
         {event.summary && !fold(event.summary).startsWith(fold(event.title)) && (
           <p className="mt-3 text-[14px] leading-relaxed text-mist">
             {summary.text}
-            {summary.machine && (
-              <>
-                {' '}
-                <MachineTranslatedBadge locale={locale} />
-              </>
-            )}
           </p>
         )}
 
@@ -136,12 +133,6 @@ export function EventModal({
                 </div>
                 <p className="mt-1 text-[12.5px] leading-snug text-mist">
                   {cTitle.text}
-                  {cTitle.machine && (
-                    <>
-                      {' '}
-                      <MachineTranslatedBadge locale={locale} />
-                    </>
-                  )}
                 </p>
                 {href && (
                   <a
