@@ -152,6 +152,11 @@ export function normalizeItem(item: RawItem, sourceStale = false): Article | nul
     viaAggregator: item.viaAggregator ?? null,
     originalPublisher: item.originalPublisher ?? null,
     sourceStale,
+    titleTr: null,
+    excerptTr: null,
+    translatedAt: null,
+    translationProvider: null,
+    translationStatus: 'skipped',
   };
 }
 
@@ -307,7 +312,7 @@ function titleHasNegation(a: Article): boolean {
  */
 export function detectContradiction(articles: Article[]): {
   hasContradiction: boolean;
-  sides: { group: string; statement: string; sourceSlug: string }[];
+  sides: { group: string; statement: string; statementTr: string | null; sourceSlug: string }[];
 } {
   const negative = articles.filter(titleHasNegation);
   const positive = articles.filter((a) => {
@@ -331,6 +336,7 @@ export function detectContradiction(articles: Article[]): {
   const pick = (a: Article) => ({
     group: a.independenceGroup,
     statement: a.title,
+    statementTr: a.titleTr,
     sourceSlug: a.sourceSlug,
   });
 
@@ -349,6 +355,7 @@ function toClaim(a: Article): EventClaim {
     tier: a.tier,
     independenceGroup: a.independenceGroup,
     title: a.title,
+    titleTr: a.titleTr,
     url: a.url,
     publishedAt: a.publishedAt,
   };
@@ -406,6 +413,11 @@ export function buildEvent(cluster: Article[]): PlagueEvent {
     claims: sorted.map(toClaim),
     articles: sorted,
     contradiction,
+    titleTr: oldest.titleTr,
+    summaryTr: null,
+    translatedAt: null,
+    translationProvider: null,
+    translationStatus: 'skipped',
   };
 }
 

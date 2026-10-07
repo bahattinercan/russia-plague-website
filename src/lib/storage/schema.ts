@@ -43,6 +43,11 @@ export const articlesTable = pgTable('articles', {
   viaAggregator: text('via_aggregator'),
   originalPublisher: text('original_publisher'),
   sourceStale: boolean('source_stale').notNull().default(false),
+  titleTr: text('title_tr'),
+  excerptTr: text('excerpt_tr'),
+  translatedAt: timestamptz('translated_at'),
+  translationProvider: text('translation_provider'),
+  translationStatus: text('translation_status').notNull().default('skipped'),
   firstSeenAt: timestamptz('first_seen_at').notNull().defaultNow(),
   lastSeenAt: timestamptz('last_seen_at').notNull().defaultNow(),
 });
@@ -62,6 +67,11 @@ export const eventsTable = pgTable('events', {
     hasContradiction: false,
     sides: [],
   }),
+  titleTr: text('title_tr'),
+  summaryTr: text('summary_tr'),
+  translatedAt: timestamptz('translated_at'),
+  translationProvider: text('translation_provider'),
+  translationStatus: text('translation_status').notNull().default('skipped'),
   firstIngestedAt: timestamptz('first_ingested_at').notNull().defaultNow(),
   lastIngestedAt: timestamptz('last_ingested_at').notNull().defaultNow(),
 });
@@ -73,6 +83,7 @@ export const claimsTable = pgTable('event_claims', {
   tier: integer('tier').notNull(),
   independenceGroup: text('independence_group').notNull(),
   title: text('title').notNull(),
+  titleTr: text('title_tr'),
   url: text('url').notNull(),
   publishedAt: timestamptz('published_at'),
 });
@@ -130,6 +141,11 @@ CREATE TABLE IF NOT EXISTS articles (
   via_aggregator     text,
   original_publisher text,
   source_stale       boolean NOT NULL DEFAULT false,
+  title_tr           text,
+  excerpt_tr         text,
+  translated_at      timestamptz,
+  translation_provider text,
+  translation_status text NOT NULL DEFAULT 'skipped',
   first_seen_at      timestamptz NOT NULL DEFAULT now(),
   last_seen_at       timestamptz NOT NULL DEFAULT now()
 );
@@ -150,6 +166,11 @@ CREATE TABLE IF NOT EXISTS events (
   independent_group_count integer NOT NULL DEFAULT 0,
   groups                jsonb NOT NULL DEFAULT '[]',
   contradiction         jsonb NOT NULL DEFAULT '{"hasContradiction":false,"sides":[]}',
+  title_tr              text,
+  summary_tr            text,
+  translated_at         timestamptz,
+  translation_provider  text,
+  translation_status    text NOT NULL DEFAULT 'skipped',
   first_ingested_at     timestamptz NOT NULL DEFAULT now(),
   last_ingested_at      timestamptz NOT NULL DEFAULT now()
 );
@@ -163,6 +184,7 @@ CREATE TABLE IF NOT EXISTS event_claims (
   tier               integer NOT NULL,
   independence_group text NOT NULL,
   title              text NOT NULL,
+  title_tr           text,
   url                text NOT NULL,
   published_at       timestamptz,
   PRIMARY KEY (event_id, url)
@@ -204,6 +226,21 @@ CREATE TABLE IF NOT EXISTS ingest_reports (
   dead_man_message text NOT NULL
 );
 CREATE INDEX IF NOT EXISTS ingest_reports_finished_idx ON ingest_reports (finished_at DESC);
+
+-- Mevcut kurulumlara yeni kolonları ekle.
+-- DİKKAT: yukarıdaki CREATE TABLE IF NOT EXISTS var olan tabloya kolon EKLEMEZ;
+-- bu yüzden şema değişikliklerinde ALTER listesi de güncellenmelidir.
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS title_tr text;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS excerpt_tr text;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS translated_at timestamptz;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS translation_provider text;
+ALTER TABLE articles ADD COLUMN IF NOT EXISTS translation_status text NOT NULL DEFAULT 'skipped';
+ALTER TABLE events ADD COLUMN IF NOT EXISTS title_tr text;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS summary_tr text;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS translated_at timestamptz;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS translation_provider text;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS translation_status text NOT NULL DEFAULT 'skipped';
+ALTER TABLE event_claims ADD COLUMN IF NOT EXISTS title_tr text;
 `;
 
 /** Kaynak sağlık günlüğünü bu yaşın üzerinde tutmayız (Neon free: satır limiti). */

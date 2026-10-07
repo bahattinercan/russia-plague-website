@@ -137,6 +137,11 @@ const ARTICLE_COLUMNS = [
   'via_aggregator',
   'original_publisher',
   'source_stale',
+  'title_tr',
+  'excerpt_tr',
+  'translated_at',
+  'translation_provider',
+  'translation_status',
 ];
 
 const ARTICLE_UPDATE_COLUMNS = [
@@ -156,6 +161,11 @@ const ARTICLE_UPDATE_COLUMNS = [
   'via_aggregator',
   'original_publisher',
   'source_stale',
+  'title_tr',
+  'excerpt_tr',
+  'translated_at',
+  'translation_provider',
+  'translation_status',
   'last_seen_at',
 ];
 
@@ -171,6 +181,11 @@ const EVENT_COLUMNS = [
   'independent_group_count',
   'groups',
   'contradiction',
+  'title_tr',
+  'summary_tr',
+  'translated_at',
+  'translation_provider',
+  'translation_status',
 ];
 
 const EVENT_UPDATE_COLUMNS = [
@@ -184,6 +199,11 @@ const EVENT_UPDATE_COLUMNS = [
   'independent_group_count',
   'groups',
   'contradiction',
+  'title_tr',
+  'summary_tr',
+  'translated_at',
+  'translation_provider',
+  'translation_status',
   'last_ingested_at',
 ];
 
@@ -194,6 +214,7 @@ const CLAIM_COLUMNS = [
   'tier',
   'independence_group',
   'title',
+  'title_tr',
   'url',
   'published_at',
 ];
@@ -242,6 +263,11 @@ export async function saveFeedToPostgres(feed: FeedFile): Promise<SaveResult> {
       a.viaAggregator,
       a.originalPublisher,
       a.sourceStale,
+      a.titleTr,
+      a.excerptTr,
+      a.translatedAt,
+      a.translationProvider,
+      a.translationStatus,
     ]);
 
     const articles = await upsert(
@@ -265,6 +291,11 @@ export async function saveFeedToPostgres(feed: FeedFile): Promise<SaveResult> {
       e.independentGroupCount,
       JSON.stringify(e.groups),
       JSON.stringify(e.contradiction),
+      e.titleTr,
+      e.summaryTr,
+      e.translatedAt,
+      e.translationProvider,
+      e.translationStatus,
     ]);
 
     const events = await upsert(
@@ -296,6 +327,7 @@ export async function saveFeedToPostgres(feed: FeedFile): Promise<SaveResult> {
         c.tier,
         c.independenceGroup,
         c.title,
+        c.titleTr,
         c.url,
         c.publishedAt,
       ]),
@@ -306,7 +338,7 @@ export async function saveFeedToPostgres(feed: FeedFile): Promise<SaveResult> {
       CLAIM_COLUMNS,
       claimRows,
       ['event_id', 'url'],
-      ['source_name', 'tier', 'independence_group', 'title', 'published_at'],
+      ['source_name', 'tier', 'independence_group', 'title', 'title_tr', 'published_at'],
     );
 
     const linkRows = feed.events.flatMap((e) => e.articles.map((a) => [e.id, a.id]));
@@ -432,6 +464,7 @@ export async function loadFeedFromPostgres(limitEvents = 200): Promise<FeedFile 
           tier: c.tier,
           independenceGroup: c.independence_group,
           title: c.title,
+          titleTr: c.title_tr ?? null,
           url: c.url,
           publishedAt: iso(c.published_at),
         },
@@ -459,6 +492,11 @@ export async function loadFeedFromPostgres(limitEvents = 200): Promise<FeedFile 
       viaAggregator: a.via_aggregator,
       originalPublisher: a.original_publisher,
       sourceStale: a.source_stale,
+      titleTr: a.title_tr ?? null,
+      excerptTr: a.excerpt_tr ?? null,
+      translatedAt: iso(a.translated_at),
+      translationProvider: a.translation_provider ?? null,
+      translationStatus: a.translation_status ?? 'skipped',
     });
 
     for (const a of articlesRes.rows) {
@@ -481,6 +519,11 @@ export async function loadFeedFromPostgres(limitEvents = 200): Promise<FeedFile 
       claims: claimsByEvent.get(e.id) ?? [],
       articles: articlesByEvent.get(e.id) ?? [],
       contradiction: e.contradiction ?? { hasContradiction: false, sides: [] },
+      titleTr: e.title_tr ?? null,
+      summaryTr: e.summary_tr ?? null,
+      translatedAt: iso(e.translated_at),
+      translationProvider: e.translation_provider ?? null,
+      translationStatus: e.translation_status ?? 'skipped',
     }));
 
     const report: IngestReport = {

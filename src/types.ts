@@ -11,6 +11,18 @@
 export type Tier = 1 | 2 | 3 | 4 | 5;
 
 /**
+ * Makine çevirisi durumu.
+ *
+ * `ok`      → TR metin üretildi ve doğrulama kapılarından geçti
+ * `skipped` → çeviri gerekmedi (metin zaten TR) veya sağlayıcı yok
+ * `failed`  → çeviri denendi ama doğrulama düştü; UI orijinali gösterir
+ *
+ * Editoryal kural: `ok` bile olsa UI'da "makine çevirisi" etiketi ve
+ * orijinal başlık her zaman görünür kalır.
+ */
+export type TranslationStatus = 'ok' | 'skipped' | 'failed';
+
+/**
  * Bağımsızlık grubu = sahiplik/editoryal çatı.
  *
  * Kural: aynı gruptaki kaynaklar TEK kaynak sayılır. Çoğu kaynakta grup
@@ -102,6 +114,13 @@ export interface Article {
   originalPublisher: string | null;
   /** Bayat feed tespiti: kaynak canlı görünüp eski veri veriyorsa true. */
   sourceStale: boolean;
+  /** TR başlık (makine çevirisi). null → UI orijinali gösterir. */
+  titleTr: string | null;
+  /** TR özet/alıntı (makine çevirisi). null → gösterilmez. */
+  excerptTr: string | null;
+  translatedAt: string | null;
+  translationProvider: string | null;
+  translationStatus: TranslationStatus;
 }
 
 export interface EventClaim {
@@ -110,6 +129,8 @@ export interface EventClaim {
   tier: Tier;
   independenceGroup: IndependenceGroup;
   title: string;
+  /** TR başlık (makine çevirisi). null → UI orijinali gösterir. */
+  titleTr: string | null;
   url: string;
   publishedAt: string | null;
 }
@@ -139,10 +160,23 @@ export interface PlagueEvent {
   groups: IndependenceGroup[];
   claims: EventClaim[];
   articles: Article[];
+  /** TR temsilci başlık (makine çevirisi). null → UI orijinali gösterir. */
+  titleTr: string | null;
+  /** TR özet (makine çevirisi). null → gösterilmez. */
+  summaryTr: string | null;
+  translatedAt: string | null;
+  translationProvider: string | null;
+  translationStatus: TranslationStatus;
   /** Aynı olayda çelişen ifadeler varsa doldurulur. */
   contradiction: {
     hasContradiction: boolean;
-    sides: { group: IndependenceGroup; statement: string; sourceSlug: string }[];
+    sides: {
+      group: IndependenceGroup;
+      statement: string;
+      /** TR ifade (makine çevirisi). null → UI orijinali gösterir. */
+      statementTr: string | null;
+      sourceSlug: string;
+    }[];
   };
 }
 
