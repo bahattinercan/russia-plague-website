@@ -1,6 +1,6 @@
-# VebaTakip
+# Veba Takip
 
-Rusya'daki şüpheli veba (pnömonik/hıyarcıklı) olayları hakkındaki haberleri tek ekranda toplayan, **her haberi kaynağına ve doğruluk seviyesine göre etiketleyen** canlı izleme sitesi.
+Rusya'daki şüpheli veba (pnömonik/hıyarcıklı) olayları hakkındaki haberleri tek ekranda toplayan, **her haberi kaynağına ve kaç bağımsız kaynağın bildirdiğine göre etiketleyen** canlı izleme sitesi.
 
 > **Bu site haber izleme aracıdır. Tıbbi tavsiye değildir, resmî bilgi kaynağı değildir.**
 > Resmî kurum açıklamalarını (WHO, ECDC, Sağlık Bakanlıkları) esas alın.

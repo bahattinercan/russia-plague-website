@@ -1,4 +1,4 @@
-# VebaTakip — Rusya Veba Salgını Canlı Haber & Doğrulama Sitesi
+# Veba Takip — Rusya'daki Veba Olayları için Kaynak İzleme ve Şeffaflık Panosu
 
 **Plan sürümü:** 1.0
 **Tarih:** 6 Ekim 2026
@@ -402,10 +402,11 @@ Tüm tablolarda `created_at` / `updated_at`; `claims` ve `metrics` **kaynak zoru
 | 3 | **Telegram/X katmanı:** Dahil | T5, sadece "doğrulanmamış iddia" olarak; ana akışta tek başına haber sayılmaz |
 | 4 | **Repo:** Public | GitHub Actions cron sınırsız dakika; kaynak kod ve güven puanları şeffaf |
 | 5 | **TR çeviri:** Sağlayıcıdan bağımsız ingest-time çeviri + önbellek (7 Eki 2026) | `auto`: DeepL → OpenAI → anahtarsız Google; makine çevirisi beyanı olay detayında, orijinal başlık her zaman görünür; doğrulama kapıları editoryal kuralı korur. Ayrıntı: `docs/ceviri-plani.md` |
+| 6 | **Marka adı:** `Veba Takip` (7 Eki 2026) | Wordmark boşluklu yazılır (`Veba Takip`); crawler User-Agent teknik kimlik olarak boşluksuz kalır (`VebaTakipBot`, bkz. `sources/registry.ts`). UI `siteName` artık README ile aynı; eski "What is new about plague" başlığı kaldırıldı. Alan adı seçimi hâlâ açık. |
 
 ### Kalan açık sorular
 
-1. **Alan adı / marka:** Çalışma adı `VebaTakip` — değiştirilecek mi?
+1. **Alan adı:** Marka adı `Veba Takip` olarak kararlaştırıldı (7 Eki 2026, §15 karar 6). Özel alan adı seçimi açık — Vercel proje adı/URL buna bağlı.
 2. **LLM bütçesi:** Karar (7 Eki 2026): sağlayıcıdan bağımsız adaptör; `DEEPL_API_KEY`/`OPENAI_API_KEY` varsa o kullanılır, yoksa anahtarsız Google. Bkz. `docs/ceviri-plani.md` §15.
 3. **Neon hesabı:** Postgres connection string kime ait olacak (F1 sonunda gerekli)?
 4. **Bildirim:** Telegram bot / e-posta uyarısı isteniyor mu (F4)?
