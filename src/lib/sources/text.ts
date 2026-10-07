@@ -39,10 +39,30 @@ const ENTITIES: Record<string, string> = {
   '&rdquo;': '”',
 };
 
+/**
+ * Sayısal HTML varlığını karaktere çevirir; geçersizse ham metni korur.
+ *
+ * GÜVENLİK: `String.fromCodePoint` 0x10FFFF üstündeki kod noktaları için
+ * `RangeError` fırlatır. Dış kaynaklı bir `&#99999999;` bu yüzden
+ * `cleanTitle`/`stripHtml` çağrısını patlatıp kaynağın tüm taramasını
+ * düşürebiliyordu (kaynak bazlı DoS + yanlış "kaynak HATA" alarmı).
+ * Ayrıca vekil (surrogate) aralığı geçerli UTF-8 değildir; Postgres'e
+ * yazılamaz, o yüzden o da reddedilir.
+ */
+function decodeNumericEntity(match: string, code: string): string {
+  const n = Number(code);
+  if (!Number.isSafeInteger(n) || n < 0 || n > 0x10ffff) return match;
+  if (n >= 0xd800 && n <= 0xdfff) return match;
+  // NUL: geçerli bir metin karakteri ama Postgres text kolonuna yazılamaz
+  // ("unsupported Unicode escape") → kaynağın tüm yazımını düşürürdü.
+  if (n === 0) return match;
+  return String.fromCodePoint(n);
+}
+
 export function decodeEntities(input: string): string {
   return input
     .replace(/&[a-z]+;|&#\d+;/gi, (m) => ENTITIES[m.toLowerCase()] ?? m)
-    .replace(/&#(\d+);/g, (_, code: string) => String.fromCodePoint(Number(code)));
+    .replace(/&#(\d+);/g, decodeNumericEntity);
 }
 
 export function cleanTitle(input: string): string {

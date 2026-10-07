@@ -59,8 +59,20 @@ export function hasDatabase(): boolean {
   return typeof url === 'string' && /^(postgres|postgresql):\/\//.test(url);
 }
 
-/** Loglarda şifre görünmemesi için maskelenmiş connection string. */
+/**
+ * Loglarda şifre görünmemesi için maskelenmiş connection string.
+ *
+ * İki biçimi de maskeler:
+ *   1) userinfo:  `postgresql://kullanici:sifre@host` → `//***:***@host`
+ *   2) sorgu parametresi: `?password=sifre` / `&pwd=sifre` → `?password=***`
+ *
+ * Neden 2. biçim: eski regex yalnızca `//user:pass@` kalıbını maskeliyordu;
+ * şifresi sorgu parametresinde taşınan bir dize (Neon alternatifleri,
+ * yönetilen servisler) `console.warn` ile loglara açık sızıyordu.
+ */
 export function maskedDbUrl(): string {
   const url = process.env.DATABASE_URL ?? '';
-  return url.replace(/\/\/[^:]+:[^@]+@/, '//***:***@');
+  return url
+    .replace(/\/\/[^/@\s]*@/, '//***:***@')
+    .replace(/([?&](?:password|pwd)=)[^&\s]*/gi, '$1***');
 }

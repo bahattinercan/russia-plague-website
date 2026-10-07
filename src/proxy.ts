@@ -8,8 +8,30 @@
  * Kullanıcı manuel seçim yaparsa `lang` çerezi onu geçersiz kılar.
  */
 import { NextResponse, type NextRequest } from 'next/server';
+import { buildCsp, generateNonce } from '@/lib/security/csp';
 
 export const LOCALES = ['tr', 'en'] as const;
+
+/**
+ * CSP'yi istek başına üretir ve HEM istek HEM yanıt başlığına yazar.
+ *
+ * Neden istek başlığı da: Next.js nonce'u yalnızca istekteki
+ * `Content-Security-Policy` başlığından okuyup framework'ün inline
+ * script'lerine ekler. Yanıt başlığı ise tarayıcının uyguladığı politikadır.
+ */
+function withSecurityHeaders(req: NextRequest): NextResponse {
+  const nonce = generateNonce();
+  const csp = buildCsp(nonce, process.env.NODE_ENV === 'development');
+
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set('x-nonce', nonce);
+  requestHeaders.set('Content-Security-Policy', csp);
+
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  response.headers.set('Content-Security-Policy', csp);
+  return response;
+}
+
 export type Locale = (typeof LOCALES)[number];
 export const DEFAULT_LOCALE: Locale = 'en';
 
@@ -31,7 +53,7 @@ export function proxy(req: NextRequest) {
   const hasLocale = LOCALES.some(
     (l) => pathname === `/${l}` || pathname.startsWith(`/${l}/`),
   );
-  if (hasLocale) return NextResponse.next();
+  if (hasLocale) return withSecurityHeaders(req);
 
   const locale = pickLocale(req);
   const url = req.nextUrl.clone();
