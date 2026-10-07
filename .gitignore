@@ -1,0 +1,28 @@
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Ortam değişkenleri (Neon connection string vb.)
+.env
+.env.local
+.env*.local
+
+# Geçici inceleme klasörleri
+.tmp-probe/
+*.log
+
+# Editör / OS
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Not: data/feed.json MVP'de commit edilir (JSON deposu).
+# Postgres'e geçildiğinde burası gitignore'a alınmalı — aksi halde
+# her 10 dakikada bir commit spam'i oluşur (bkz. PLAN.md §6).
+
+# TypeScript derleme artefaktları
+*.tsbuildinfo
