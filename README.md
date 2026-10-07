@@ -35,6 +35,7 @@ npm run ingest          # tüm kaynakları tara, data/feed.json yaz
 npm run ingest -- --dry # yazmadan raporla
 npm run ingest -- --only=tass,meduza,reuters
 npm run typecheck
+npm run security-check   # güvenlik regresyon testleri (ReDoS, URL şeması, CSP)
 ```
 
 Örnek çıktı:
@@ -88,6 +89,7 @@ Bu projede kaynak davranışı **iddia değil, ölçüm** ile belgelenir:
 
 - [`docs/PLAN.md`](docs/PLAN.md) — tam proje planı: mimari, doğruluk katmanı, veri modeli, fazlar, riskler
 - [`docs/kaynak-envanteri.md`](docs/kaynak-envanteri.md) — kaynak listesi, erişim testleri, yedek yollar
+- [`docs/guvenlik-denetimi.md`](docs/guvenlik-denetimi.md) — güvenlik denetimi: bulgular, düzeltmeler, kalan riskler
 
 ---
 
