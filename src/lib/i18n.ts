@@ -73,7 +73,7 @@ export interface Dict {
 }
 
 const tr: Dict = {
-  siteName: 'Veba Takip',
+  siteName: 'Plague Tracker',
   tagline: 'Rusya’daki veba olayları için kaynak izleme ve şeffaflık panosu',
   disclaimerShort: 'Haber izleme aracıdır — tıbbi tavsiye değildir.',
   disclaimerLong:
@@ -132,7 +132,7 @@ const tr: Dict = {
 };
 
 const en: Dict = {
-  siteName: 'Veba Takip',
+  siteName: 'Plague Tracker',
   tagline: 'Source monitoring and transparency board for plague events in Russia',
   disclaimerShort: 'A news monitoring tool — not medical advice.',
   disclaimerLong:

@@ -1,4 +1,4 @@
-# Veba Takip
+# Plague Tracker
 
 Rusya'daki şüpheli veba (pnömonik/hıyarcıklı) olayları hakkındaki haberleri tek ekranda toplayan, **her haberi kaynağına ve kaç bağımsız kaynağın bildirdiğine göre etiketleyen** canlı izleme sitesi.
 

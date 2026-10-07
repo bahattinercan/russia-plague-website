@@ -19,7 +19,7 @@ import type { SourceDef, SourceIdentity, Tier } from '@/types';
  */
 
 export const USER_AGENT =
-  'VebaTakipBot/0.1 (+https://github.com/bahattinercan/russia-plague-website; plague news monitor; contact via repo issues)';
+  'PlagueTrackerBot/0.1 (+https://github.com/bahattinercan/russia-plague-website; plague news monitor; contact via repo issues)';
 
 /** Grup kimliği → insan-okur etiket. Metodoloji sayfası bundan üretilir. */
 export const GROUP_LABELS: Record<string, string> = {
