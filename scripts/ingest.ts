@@ -22,7 +22,8 @@ import {
   isRelevant,
   normalizeItem,
 } from '@/lib/ingest/pipeline';
-import { writeFeed } from '@/lib/storage/json';
+import { loadLocalEnv } from '@/lib/env';
+import { backendLabel, saveFeed } from '@/lib/storage/store';
 
 const STALE_DAYS = 30;
 const CONCURRENCY = 5;
@@ -151,6 +152,7 @@ function printReport(report: IngestReport): void {
 }
 
 async function main(): Promise<void> {
+  loadLocalEnv();
   const { only, dry } = parseArgs(process.argv.slice(2));
   const startedAt = new Date().toISOString();
   const t0 = Date.now();
@@ -223,13 +225,13 @@ async function main(): Promise<void> {
   printReport(report);
 
   if (!dry) {
-    await writeFeed({
+    const backend = await saveFeed({
       generatedAt: report.finishedAt,
       report,
       events,
       signals,
     });
-    console.log('✔ data/feed.json yazıldı.');
+    console.log(`✔ Feed yazıldı → ${backendLabel()} (${backend})`);
   } else {
     console.log('(dry run — dosya yazılmadı)');
   }

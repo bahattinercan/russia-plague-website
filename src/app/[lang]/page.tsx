@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import {
   formatDate,
-  getFeed,
+  getFeedSnapshot,
   healthSummary,
   rankEvents,
   topEvents,
@@ -77,7 +77,7 @@ export default async function HomePage({
   const locale: Locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const t = getDict(locale);
 
-  const feed = await getFeed();
+  const { feed, backend } = await getFeedSnapshot();
   const ranked = rankEvents(feed.events);
   const top = topEvents(feed.events, 5);
   const health = healthSummary(feed.report.sources);
@@ -92,6 +92,7 @@ export default async function HomePage({
         sources={feed.report.sources}
         events={feed.events}
         signals={feed.signals.length}
+        backend={backend}
       />
 
       <Ticker events={ranked} locale={locale} />

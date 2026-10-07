@@ -1,5 +1,6 @@
 import type { PlagueEvent, SourceHealth } from '@/types';
 import type { Locale } from '@/lib/i18n';
+import type { FeedBackend } from '@/lib/storage/store';
 import { getDict } from '@/lib/i18n';
 import { formatDate, healthSummary } from '@/lib/data';
 import { LangSwitch } from './LangSwitch';
@@ -16,12 +17,14 @@ export function StatusBar({
   sources,
   events,
   signals,
+  backend,
 }: {
   locale: Locale;
   generatedAt: string;
   sources: SourceHealth[];
   events: PlagueEvent[];
   signals: number;
+  backend: FeedBackend;
 }) {
   const t = getDict(locale);
   const health = healthSummary(sources);
@@ -78,6 +81,14 @@ export function StatusBar({
           )}
           <span className="hidden sm:inline">
             {t.signals}: <span className="tnum text-chalk">{signals}</span>
+          </span>
+          {/* Fail-safe görünür: DB erişilemezse site JSON yedeğinden çalışmaya devam eder.
+             Kullanıcıya "veri nereden geliyor" demek, sessiz düşüşten iyidir. */}
+          <span className="hidden lg:inline">
+            {t.dataSource}:{' '}
+            <span className={backend === 'postgres' ? 'text-chalk' : 'text-caution'}>
+              {backend === 'postgres' ? 'Neon Postgres' : 'JSON yedek'}
+            </span>
           </span>
           <span className="ml-auto hidden lg:inline">
             {t.dataFreshness}: {formatDate(generatedAt, locale)} UTC

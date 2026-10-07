@@ -69,8 +69,34 @@ Kaynak adaptörleri → normalize → relevance → dedupe → olay kümeleme
 | Metin normalizasyonu (TR/RU/EN diakritik katlama) | `src/lib/sources/text.ts` |
 | Doğruluk pipeline'ı | `src/lib/ingest/pipeline.ts` |
 | Güven skoru + etiket mantığı | `src/lib/trust.ts` |
-| Depo (MVP: JSON → Neon Postgres) | `src/lib/storage/json.ts` |
+| Depo seçimi (fail-safe) | `src/lib/storage/store.ts` |
+| Postgres şeması + Neon yazımı | `src/lib/storage/schema.ts`, `src/lib/storage/postgres.ts` |
+| JSON yedeği | `src/lib/storage/json.ts` |
 | Cron giriş noktası | `scripts/ingest.ts` |
+| Cron işi + dead man's switch | `.github/workflows/ingest.yml` |
+
+### Veri deposu: Neon Postgres, JSON yedeği ile
+
+`DATABASE_URL` tanımlıysa ingest Neon'a (eu-central-1) yazar; tanımlı **değilse** veya bağlantı koparsa `data/feed.json`'e düşer. JSON her zaman yazılır: lokal debug, CI artifact ve Vercel'de DB erişilemezse statik yedek. Site bu durumu üst barda **"Veri kaynağı: Neon Postgres / JSON yedek"** olarak gösterir — sessiz düşüş yoktur.
+
+Tablolar: `articles`, `events`, `event_claims`, `event_articles`, `source_health`, `ingest_reports`. Şema ilk bağlantıda `CREATE TABLE IF NOT EXISTS` ile kurulur (migration koşmak gerekmez). Retention: kaynak sağlığı 90 gün, makaleler 180 gün.
+
+```bash
+npm run db:check        # bağlantı + şema + satır sayıları
+npm run ingest          # tarar, Postgres'e (yoksa JSON'a) yazar
+```
+
+`.env.local` iki formatı da kabul eder: `DATABASE_URL=postgresql://...` veya ham connection string tek satır olarak.
+
+**Env değişkenleri**
+
+| Nerede | Değişken | Not |
+|---|---|---|
+| Lokal | `.env.local` (gitignore'da) | `DATABASE_URL` |
+| Cron | GitHub → Settings → Secrets → **`DATABASE_URL`** | yoksa ingest JSON'a düşer, cron yine çalışır |
+| Site | Vercel → Environment Variables → **`DATABASE_URL`** | Neon pooler bağlantısı |
+
+**Cron:** `.github/workflows/ingest.yml` 10 dakikada bir çalışır. İş başarısız olursa `ingest-failure` etiketli bir issue açılır (dead man's switch) ve `data/feed.json` debug artifact'ı yüklenir.
 
 ### Ölçülen kaynak gerçekleri
 

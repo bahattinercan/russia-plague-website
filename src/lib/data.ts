@@ -1,4 +1,6 @@
-import { readFeed, type FeedFile } from '@/lib/storage/json';
+import { loadLocalEnv } from '@/lib/env';
+import { loadFeed, type FeedBackend } from '@/lib/storage/store';
+import type { FeedFile } from '@/lib/storage/json';
 import type { PlagueEvent, SourceHealth } from '@/types';
 import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
 
@@ -27,8 +29,30 @@ export const EMPTY_FEED: FeedFile = {
   signals: [],
 };
 
+export interface FeedSnapshot {
+  feed: FeedFile;
+  backend: FeedBackend;
+}
+
+/**
+ * Kısa önbellek: Neon'a her istekte gitmek yerine 60 sn'lik snapshot kullanılır.
+ * Sıra: Postgres → data/feed.json → boş iskele. Site hiçbir koşulda çökmez.
+ */
+const CACHE_TTL_MS = 60_000;
+let cache: { snapshot: FeedSnapshot; at: number } | null = null;
+
+export async function getFeedSnapshot(): Promise<FeedSnapshot> {
+  loadLocalEnv();
+  if (cache && Date.now() - cache.at < CACHE_TTL_MS) return cache.snapshot;
+
+  const { feed, backend } = await loadFeed();
+  const snapshot: FeedSnapshot = { feed: feed ?? EMPTY_FEED, backend };
+  cache = { snapshot, at: Date.now() };
+  return snapshot;
+}
+
 export async function getFeed(): Promise<FeedFile> {
-  return (await readFeed()) ?? EMPTY_FEED;
+  return (await getFeedSnapshot()).feed;
 }
 
 export function healthSummary(sources: SourceHealth[]) {

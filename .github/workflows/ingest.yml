@@ -1,0 +1,65 @@
+name: ingest
+
+# Cron ingest: 10 dakikada bir kaynakları tarar, Neon Postgres'e yazar.
+# DATABASE_URL secret'ı yoksa ingest JSON'a düşer (fail-safe) — site çalışmaya devam eder.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: ingest
+  cancel: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Bağımlılıklar
+        run: npm ci
+
+      - name: DB bağlantısı kontrolü
+        run: npm run db:check
+
+      - name: Ingest
+        run: npm run ingest
+
+      - name: Debug artifact (feed.json)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: feed-snapshot
+          path: data/feed.json
+          retention-days: 7
+
+      # Dead man's switch: ingest başarısız olursa (adaptör çökmesi, DB
+      # erişilemezliği, --dry dışındaki herhangi bir hata) açık bir issue açılır.
+      # Sessizce eski veri göstermek yerine görünür alarm üretir.
+      - name: Dead man's switch
+        if: failure()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TITLE="Ingest başarısız — $(date -u +'%Y-%m-%d %H:%M UTC')"
+          BODY="GitHub Actions ingest çalışması başarısız oldu.\n\n- Run: ${{ github.run_url }}\n- Commit: ${{ github.sha }}\n- Zaman: $(date -u +'%Y-%m-%d %H:%M:%S UTC')\n\nSite muhtemelen önceki snapshot'ı göstermeye devam ediyor. Logları kontrol edin."
+          if gh issue list --label ingest-failure --state open --json | grep -q '"number"'; then
+            gh issue comment "$(gh issue list --label ingest-failure --state open --json | head -1 | grep -o '"number": [0-9]*' | grep -o '[0-9]*')" --body "$BODY"
+          else
+            gh issue create --title "$TITLE" --body "$BODY" --label ingest-failure
+          fi

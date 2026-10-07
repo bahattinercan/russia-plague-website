@@ -9,6 +9,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "ingest": "tsx scripts/ingest.ts",
+    "db:check": "tsx scripts/db-check.ts",
     "typecheck": "tsc --noEmit",
     "dev": "next dev",
     "build": "next build",
@@ -20,8 +21,10 @@
   "type": "module",
   "dependencies": {
     "cheerio": "^1.2.0",
+    "drizzle-kit": "^0.31.11",
     "drizzle-orm": "^0.45.3",
     "next": "^16.4.0",
+    "pg": "^8.23.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "rss-parser": "^3.13.0",
@@ -30,6 +33,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.6.4",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "postcss": "^8.5.29",

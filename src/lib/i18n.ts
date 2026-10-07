@@ -64,6 +64,7 @@ export interface Dict {
   readOriginal: string;
   updated: string;
   dataFreshness: string;
+  dataSource: string;
   aboutProject: string;
 }
 
@@ -118,6 +119,7 @@ const tr: Dict = {
   readOriginal: 'Orijinali oku',
   updated: 'Güncellendi',
   dataFreshness: 'Veri tazeliği',
+  dataSource: 'Veri kaynağı',
   aboutProject: 'Proje hakkında',
 };
 
@@ -172,6 +174,7 @@ const en: Dict = {
   readOriginal: 'Read original',
   updated: 'Updated',
   dataFreshness: 'Data freshness',
+  dataSource: 'Data source',
   aboutProject: 'About the project',
 };
 
