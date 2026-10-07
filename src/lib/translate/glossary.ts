@@ -96,19 +96,28 @@ export function entityInSource(source: string, entity: string): boolean {
   if (isAcronym(entity)) {
     return new RegExp(`(^|[^A-Za-z0-9])${escapeRegExp(entity)}([^A-Za-z0-9]|$)`).test(source);
   }
-  return wordMatch(fold(source), fold(entity));
+  return wordMatch(source, fold(entity));
 }
 
 /** Özel ad (veya kabul edilen eşdeğeri) çıktıda duruyor mu? */
 export function entityInOutput(output: string, entity: string): boolean {
-  const folded = fold(output);
   return [entity, ...(ENTITY_ALIASES[entity] ?? [])].some((candidate) =>
-    wordMatch(folded, fold(candidate)),
+    wordMatch(output, fold(candidate)),
   );
 }
 
-function wordMatch(haystack: string, needle: string): boolean {
-  return new RegExp(`(^|[^a-z0-9])${escapeRegExp(needle)}([^a-z0-9]|$)`).test(haystack);
+/**
+ * Kelime sınırı eşleşmesi.
+ *
+ * Tırnak/kesme işareti AYIRICI sayılır (fold onları siler): Türkçe ekler
+ * kesme işaretiyle bitişir ("DSÖ'ye", "WHO'ya"). Silinirse "DSÖ'ye" →
+ * "dsoye" olur ve "dso" kelimesi bulunamaz.
+ */
+function wordMatch(text: string, needle: string): boolean {
+  const haystack = ` ${fold(text.replace(/[’'`´]/g, ' '))
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()} `;
+  return haystack.includes(` ${needle} `);
 }
 
 /** Çıktıda ASLA geçmemesi gereken ifadeler (fold edilmiş). */

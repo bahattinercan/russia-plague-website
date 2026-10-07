@@ -61,6 +61,14 @@ check(
   validateTranslation('WHO monitors plague in Russia', "DSÖ Rusya'da vebayı izliyor", 'en').ok,
 );
 check(
+  "Türkçe ekli DSÖ'ye kabul edilir",
+  validateTranslation(
+    'Russia tells WHO there are no cases',
+    "Rusya DSÖ'ye vaka olmadığını bildirdi",
+    'en',
+  ).ok,
+);
+check(
   'WHO tamamen düşerse REDDEDİLİR',
   !validateTranslation('WHO monitors plague in Russia', "Rusya'da vebayı izliyor", 'en').ok,
 );
