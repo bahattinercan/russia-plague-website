@@ -50,7 +50,9 @@ export function validateTranslation(
   if (src === out) return { ok: false, reason: 'cevrilmemis' };
 
   // 3. Sayı korunumu
-  const numbers = source.match(/\d+/g) ?? [];
+  //    İngilizce sıra sayıları (2nd, 3rd) MT'de "ikinci", "üçüncü" olur;
+  //    rakamın kaybolması çeviri hatası değildir.
+  const numbers = source.match(/\d+(?![a-z])/gi) ?? [];
   for (const n of numbers) {
     if (!output.includes(n)) return { ok: false, reason: `sayi-kayip:${n}` };
   }

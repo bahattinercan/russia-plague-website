@@ -171,8 +171,12 @@ export const CERTAINTY_TARGET = [
   'teyit edildi',
   'teyit etti',
   'onayladi',
+  'onaylandi',
   'kesin',
-  'resmen',
+  // Tek başına "resmen" listede YOK: "formally"nin doğru karşılığıdır
+  // ("ABD resmen talep etti"), kesinlik iddiası değildir. Yalnızca
+  // "resmen onaylandı" gibi onay bildiren kalıp ihlal sayılır.
+  'resmen onaylandi',
 ];
 
 /**

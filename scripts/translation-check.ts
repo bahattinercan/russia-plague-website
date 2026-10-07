@@ -50,11 +50,27 @@ check(
   'kaynak kesinken "kesin" eklenirse REDDEDİLİR',
   !validateTranslation("Plague case in Russia", "Rusya'da veba vakası kesinleşti", 'en').ok,
 );
+check(
+  '"formally" → "resmen" kesinlik sayılmaz',
+  validateTranslation(
+    'US formally demands Russia explain plague outbreak',
+    "ABD resmen Rusya'dan veba salgınını açıklamasını talep etti",
+    'en',
+  ).ok,
+);
 
 console.log('\n── validate: sayı ve özel ad ────────────────────────────────────');
 check(
   'sayı kaybolursa REDDEDİLİR',
   !validateTranslation('3 people died of plague in Irkutsk in 2026', "Irkutsk'ta kişi öldü", 'en').ok,
+);
+check(
+  'sıra sayısı (2nd → ikinci) rakam kaybı sayılmaz',
+  validateTranslation(
+    'Plague info sought on 2nd reported death',
+    'Bildirilen ikinci ölüm hakkında veba bilgisi aranıyor',
+    'en',
+  ).ok,
 );
 check(
   'WHO hedef dilde DSÖ olarak çevrilebilir',
