@@ -53,6 +53,17 @@ BAYAT kaynaklar       : minzdrav, promed, who-euro
 Etiket dağılımı       : { corroborated: 13, single: 40, contradicted: 1 }
 ```
 
+### Yayın (Vercel)
+
+Bu depo Vercel projesine bağlıdır: **`main` dalına yapılan her push otomatik production deploy tetikler**
+(Vercel → Project → Git, production dalı `main`). PR/dal push'ları preview deploy üretir.
+
+Elle yayın gerekirse:
+
+```bash
+npx vercel --prod
+```
+
 ---
 
 ## Mimari
@@ -84,7 +95,7 @@ Kaynak adaptörleri → normalize → relevance → dedupe → olay kümeleme
 
 ### Veri deposu: Neon Postgres, JSON yedeği ile
 
-`DATABASE_URL` tanımlıysa ingest Neon'a (eu-central-1) yazar; tanımlı **değilse** veya bağlantı koparsa `data/feed.json`'e düşer. JSON her zaman yazılır: lokal debug, CI artifact ve Vercel'de DB erişilemezse statik yedek. Site bu durumu üst barda **"Veri kaynağı: Neon Postgres / JSON yedek"** olarak gösterir — sessiz düşüş yoktur.
+`DATABASE_URL` tanımlıysa ingest Neon'a (eu-central-1) yazar; tanımlı **değilse** veya bağlantı koparsa `data/feed.json`'e düşer. JSON her zaman yazılır: lokal debug, CI artifact ve Vercel'de DB erişilemezse statik yedek. Site bu durumu üst barda **"Veri kaynağı: Neon Postgres / JSON yedek"** olarak gösteriyordu; bu gösterge kaldırıldı. Yedek davranışı değişmedi — DB erişilemezse site JSON'dan çalışmaya devam eder. Üst barda kalan metrikler: olay sayısı, kaynak sağlığı, doğrulanmamış sinyal sayısı ve **son güncelleme** zamanı.
 
 Tablolar: `articles`, `events`, `event_claims`, `event_articles`, `source_health`, `ingest_reports`. Şema ilk bağlantıda `CREATE TABLE IF NOT EXISTS` ile kurulur (migration koşmak gerekmez). Retention: kaynak sağlığı 90 gün, makaleler 180 gün.
 

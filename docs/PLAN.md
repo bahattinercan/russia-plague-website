@@ -305,7 +305,7 @@ Tüm tablolarda `created_at` / `updated_at`; `claims` ve `metrics` **kaynak zoru
 
 ## 9. Arayüz Bölümleri
 
-1. **Durum Bandı (üst, sabit)** — WHO risk seviyesi · canlı tarama göstergesi · son güncelleme · "metodoloji" linki. Canlı ticker: son 10 başlık akan şerit.
+1. **Durum Bandı (üst, sabit)** — canlı tarama göstergesi · olay/kaynak sağlığı · doğrulanmamış sinyal sayısı · **son güncelleme** · "metodoloji" linki. (Haber şeridi ve veri kaynağı göstergesi kaldırıldı.)
 2. **"Şu an ne biliyoruz?"** — en fazla 6 madde, her madde kaynak rozetli ve doğruluk etiketli.
 3. **Taraflar ne diyor?** — çelişki paneli (otomatik).
 4. **Zaman Çizelgesi** — kronolojik akış; her kart: TR başlık (varsa orijinali yanında), kaynak badge'i, tier, doğruluk etiketi, bağımsız kaynak sayısı ("4 farklı kaynak grubu bildirdi"), yayın/sistem zamanları, arşiv linki.
@@ -318,7 +318,7 @@ Tüm tablolarda `created_at` / `updated_at`; `claims` ve `metrics` **kaynak zoru
 11. **Arşiv & Arama** — tarih aralığı, kaynak, etiket filtresi.
 12. **Bildirim (opsiyonel, Faz 4)** — Telegram bot (varsayılan sessiz; sadece "doğrulanmış + kritik" seviye).
 
-**Etkileşim dili:** scroll-reveal, ticker, sayaçlar, hover mikro-etkileşimleri — ancak **`prefers-reduced-motion` tamamen desteklenir**. Acil sağlık durumunda süsün bilgiyi gölgelemesi yasak: doğruluk etiketi ve kaynak her zaman en yüksek görsel öncelik.
+**Etkileşim dili:** scroll-reveal, sayaçlar, hover mikro-etkileşimleri — ancak **`prefers-reduced-motion` tamamen desteklenir**. Acil sağlık durumunda süsün bilgiyi gölgelemesi yasak: doğruluk etiketi ve kaynak her zaman en yüksek görsel öncelik.
 
 ---
 
