@@ -11,9 +11,7 @@ permissions:
   contents: read
   issues: write
 
-concurrency:
-  group: ingest
-  cancel: false
+concurrency: ingest
 
 jobs:
   ingest:
