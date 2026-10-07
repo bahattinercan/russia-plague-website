@@ -35,7 +35,7 @@ npm run ingest          # tüm kaynakları tara, data/feed.json yaz
 npm run ingest -- --dry # yazmadan raporla
 npm run ingest -- --only=tass,meduza,reuters
 npm run typecheck
-npm run security-check   # güvenlik regresyon testleri (ReDoS, URL şeması, CSP)
+npm run security-check   # güvenlik regresyon testleri (53 test: ReDoS, URL şeması, varlık DoS, log maskeleme, nonce CSP)
 ```
 
 Örnek çıktı:
@@ -74,6 +74,13 @@ Kaynak adaptörleri → normalize → relevance → dedupe → olay kümeleme
 | JSON yedeği | `src/lib/storage/json.ts` |
 | Cron giriş noktası | `scripts/ingest.ts` |
 | Cron işi + dead man's switch | `.github/workflows/ingest.yml` |
+| Dil yönlendirme + nonce'lu CSP | `src/proxy.ts`, `src/lib/security/csp.ts` |
+
+### Güvenlik
+
+- **CSP nonce tabanlı:** `script-src` istek başına üretilen nonce ile çalışır (`'unsafe-inline'` yok). Ek olarak HSTS, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP ve CORP başlıkları `next.config.ts`'te tanımlıdır.
+- **Dış veriye güvenilmez:** her bağlantı `safeExternalUrl()` (yalnızca http/https), her metin `stripHtml()` (linear zamanlı, 400 KB sınırlı) filtresinden geçer.
+- **Regresyon testleri:** `npm run security-check` — ayrıntılar ve kalan riskler: [`docs/guvenlik-denetimi.md`](docs/guvenlik-denetimi.md).
 
 ### Veri deposu: Neon Postgres, JSON yedeği ile
 
