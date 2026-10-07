@@ -100,7 +100,7 @@ npm run ingest          # tarar, Postgres'e (yoksa JSON'a) yazar
 
 ### Arayüz: olay detay modalı
 
-Karttaki **Detay** butonu olayın tüm iddialarını, bağımsızlık gruplarını ve kaynak bağlantılarını açar. Kapanma üç yoldan: **Esc**, **arka plana tıklama**, **Kapat ×**. Native `<dialog>` + `showModal()` kullanılıyor (top-layer) — kartların `transform`/`backdrop-filter` taşımaları `position: fixed` modalını hapsetmesin diye. Odak, kapanınca tetikleyiciye geri döner.
+Zaman çizelgesinde **kartın herhangi bir yerine**, başlığa veya **Detay** butonuna tıklamak olayın tüm iddialarını, bağımsızlık gruplarını ve kaynak bağlantılarını açar. "Şu an ne biliyoruz?" listesi de aynı modalı kullanır. Kapanma üç yoldan: **Esc**, **arka plana tıklama**, **Kapat ×**. Native `<dialog>` + `showModal()` kullanılıyor (top-layer) — kartların `transform`/`backdrop-filter` taşımaları `position: fixed` modalını hapsetmesin diye. Odak, kapanınca tetikleyiciye geri döner.
 
 ### Ölçülen kaynak gerçekleri
 

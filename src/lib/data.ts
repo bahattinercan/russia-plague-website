@@ -2,7 +2,9 @@ import { loadLocalEnv } from '@/lib/env';
 import { loadFeed, type FeedBackend } from '@/lib/storage/store';
 import type { FeedFile } from '@/lib/storage/json';
 import type { PlagueEvent, SourceHealth } from '@/types';
-import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
+
+// Saf biçimleyiciler ayrı modülde: client component'lar pg'yi import etmez.
+export { formatDate, formatRelative } from '@/lib/format';
 
 /** Veri yoksa gösterilecek iskelet — sayfa asla çökmez, "neden boş" açıklanır. */
 export const EMPTY_FEED: FeedFile = {
@@ -105,8 +107,7 @@ function titleSimilarity(a: string, b: string): number {
  * Kümeleme bazen aynı olayı iki ayrı kümeye ayırabiliyor (farklı diller,
  * farklı başlık kalıpları); bu fonksiyon aynı olayın iki kez görünmesini engeller.
  */
-export function topEvents(events: PlagueEvent[], n: number): PlagueEvent[] {
-  const picked: PlagueEvent[] = [];
+export function topEvents(events: PlagueEvent[], n: number): PlagueEvent[] {  const picked: PlagueEvent[] = [];
   for (const event of rankEvents(events)) {
     if (picked.some((p) => titleSimilarity(p.title, event.title) >= 0.5)) continue;
     picked.push(event);
@@ -115,36 +116,3 @@ export function topEvents(events: PlagueEvent[], n: number): PlagueEvent[] {
   return picked;
 }
 
-/**
- * Tarih biçimlendirme UTC'de sabitlenir; sunucu ve istemci aynı metni
- * üretir (hydration uyuşmazlığı olmaz).
- */
-export function formatDate(iso: string | null, locale: Locale = DEFAULT_LOCALE): string {
-  if (!iso) return '—';
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '—';
-  return new Intl.DateTimeFormat(locale === 'tr' ? 'tr-TR' : 'en-GB', {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-    timeZone: 'UTC',
-  }).format(d);
-}
-
-export function formatRelative(iso: string | null, locale: Locale): string {
-  if (!iso) return locale === 'tr' ? 'tarih yok' : 'no date';
-  const diff = Date.now() - new Date(iso).getTime();
-  const rtf = new Intl.RelativeTimeFormat(locale === 'tr' ? 'tr' : 'en', {
-    numeric: 'auto',
-  });
-  const units: [Intl.RelativeTimeFormatUnit, number][] = [
-    ['day', 86_400_000],
-    ['hour', 3_600_000],
-    ['minute', 60_000],
-  ];
-  for (const [unit, ms] of units) {
-    if (Math.abs(diff) >= ms) return rtf.format(-Math.round(diff / ms), unit);
-  }
-  return rtf.format(0, 'minute');
-}

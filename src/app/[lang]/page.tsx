@@ -15,11 +15,11 @@ import {
 import { StatusBar } from '@/components/StatusBar';
 import { Ticker } from '@/components/Ticker';
 import { EventCard } from '@/components/EventCard';
+import { TopEventList } from '@/components/TopEventList';
 import { SignalList } from '@/components/SignalList';
 import { SourceHealthPanel } from '@/components/SourceHealthPanel';
 import { Disclaimer, Footer } from '@/components/Disclaimer';
 import { Counter } from '@/components/Counter';
-import { LabelBadge } from '@/components/LabelBadge';
 import { TimeAgo } from '@/components/TimeAgo';
 
 export const dynamic = 'force-dynamic';
@@ -140,23 +140,7 @@ export default async function HomePage({
             <h2 className="reveal text-[19px] font-semibold tracking-tight text-chalk">
               {t.whatWeKnow}
             </h2>
-            <ul className="mt-4 space-y-2">
-              {top.map((event, i) => (
-                <li
-                  key={event.id}
-                  className="surface reveal card-lift flex flex-wrap items-start gap-x-3 gap-y-2 rounded-lg px-4 py-3"
-                  style={{ '--reveal-delay': `${i * 45}ms` } as React.CSSProperties}
-                >
-                  <LabelBadge label={event.label} locale={locale} size="sm" />
-                  <span className="min-w-0 flex-1 text-[13.5px] leading-snug text-chalk/95">
-                    {event.title}
-                  </span>
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-mist/70">
-                    {t.groupCount(event.independentGroupCount)}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <TopEventList events={top} locale={locale} />
           </section>
         )}
 
