@@ -10,6 +10,8 @@ import { LabelBadge } from './LabelBadge';
 import { ContradictionPanel } from './ContradictionPanel';
 import { EventModal } from './EventModal';
 import { TimeAgo } from './TimeAgo';
+import { MachineTranslatedBadge } from './MachineTranslatedBadge';
+import { localizedTitle } from '@/lib/translate/display';
 
 /**
  * Zaman çizelgesi kartı.
@@ -32,6 +34,7 @@ export function EventCard({
   index: number;
 }) {
   const t = getDict(locale);
+  const title = localizedTitle(locale, event);
   const [open, setOpen] = useState(false);
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const titleRef = useRef<HTMLButtonElement>(null);
@@ -69,9 +72,20 @@ export function EventCard({
           aria-haspopup="dialog"
           className="event-title text-left"
         >
-          {event.title}
+          {title.text}
         </button>
+        {title.machine && (
+          <span className="ml-2 align-middle">
+            <MachineTranslatedBadge locale={locale} />
+          </span>
+        )}
       </h3>
+
+      {title.machine && event.titleOriginal && (
+        <p className="mt-1 font-mono text-[10.5px] text-mist/60">
+          {t.readOriginal}: {event.titleOriginal}
+        </p>
+      )}
 
       <div className="mt-2 flex flex-wrap gap-1.5">
         {event.groups.map((group) => (
@@ -120,6 +134,7 @@ export function EventCard({
               {event.articles.map((a) => {
                 const href = safeExternalUrl(a.url);
                 if (!href) return null;
+                const aTitle = localizedTitle(locale, a);
                 return (
                   <li key={a.id} className="border-l-2 border-edge pl-3">
                     <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
@@ -146,10 +161,17 @@ export function EventCard({
                       href={href}
                       target="_blank"
                       rel="noopener noreferrer nofollow"
+                      title={a.titleOriginal}
                       className="link-underline mt-1 inline-block font-mono text-[10px] text-official/80"
                     >
-                      {t.readOriginal}: {fold(a.titleOriginal)}
+                      {!aTitle.machine && `${t.readOriginal}: `}
+                      {aTitle.machine ? aTitle.text : fold(aTitle.text)}
                     </a>
+                    {aTitle.machine && (
+                      <span className="ml-1.5">
+                        <MachineTranslatedBadge locale={locale} />
+                      </span>
+                    )}
                   </li>
                 );
               })}

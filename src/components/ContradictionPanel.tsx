@@ -1,6 +1,7 @@
 import type { PlagueEvent } from '@/types';
 import { getDict, type Locale } from '@/lib/i18n';
 import { LabelBadge } from './LabelBadge';
+import { localizedText } from '@/lib/translate/display';
 
 /**
  * Çelişki paneli: resmî açıklama ile bağımsız bildirim karşı karşıya.
@@ -37,7 +38,9 @@ export function ContradictionPanel({
             <p className="font-mono text-[10px] uppercase tracking-wider text-mist">
               {side.group}
             </p>
-            <p className="mt-1.5 text-[13px] leading-snug text-chalk/90">“{side.statement}”</p>
+            <p className="mt-1.5 text-[13px] leading-snug text-chalk/90">
+              “{localizedText(locale, side.statement, side.statementTr).text}”
+            </p>
             <p className="mt-1.5 font-mono text-[10px] text-mist/70">{side.sourceSlug}</p>
           </div>
         ))}

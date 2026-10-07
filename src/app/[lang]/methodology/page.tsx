@@ -241,7 +241,7 @@ const LABEL_DESC_EN: Record<string, string> = {
 const LIMITS_TR = [
   'Olay kümeleme başlık ve özet benzerliğine dayanır; farklı dillerdeki aynı olay bazen ayrı kümelenebilir.',
   'Çelişki tespiti deneyseldir ve iddia düzeyinde kalibre edilmektedir; şu an muhafazakâr davranır ve yanlış pozitif üretmemek için çoğu durumda susar.',
-  'Çeviri yapılırsa makine çevirisidir; orijinal başlık her zaman gösterilir.',
+  'Yalnızca Türkçe dışı kaynaklar (İngilizce/Rusça) TR görünümünde çevrilir; çeviri makine çevirisidir ve "makine çevirisi" etiketiyle işaretlenir. Orijinal başlık her zaman görünür kalır; doğrulama kapılarından geçmeyen çeviri gösterilmez, yerine orijinal başlık gelir.',
   'Bazı kaynaklar (Rospotrebnadzor, Novaya Gazeta Europe) doğrudan erişilemediği için toplayıcı üzerinden alınır.',
   'Kaynak güven puanları editoryal kararlardır; sürüm değişiklikleri şeffaf biçimde kaydedilir.',
   'Sistem yalnızca İngilizce, Türkçe ve Rusça metinlerde anahtar kelime taraması yapar; diğer dillerdeki içerik kaçabilir.',
@@ -250,7 +250,7 @@ const LIMITS_TR = [
 const LIMITS_EN = [
   'Event clustering relies on headline and summary similarity; the same event in different languages may sometimes cluster separately.',
   'Contradiction detection is experimental and being calibrated at the claim level; it is currently conservative and stays silent rather than risk false positives.',
-  'Any translation is machine translation; the original headline is always shown.',
+  'Only non-Turkish sources (English/Russian) are translated in the TR view; translation is machine translation and is labelled as such. The original headline always remains visible; a translation that fails validation is never shown — the original headline is shown instead.',
   'Some sources (Rospotrebnadzor, Novaya Gazeta Europe) are unreachable directly and are fetched via an aggregator.',
   'Source trust scores are editorial decisions; version changes are recorded transparently.',
   'Keyword scanning covers English, Turkish and Russian only; content in other languages may be missed.',

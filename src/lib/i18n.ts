@@ -61,6 +61,7 @@ export interface Dict {
   filters: string;
   all: string;
   machineTranslated: string;
+  translationUnavailable: string;
   readOriginal: string;
   updated: string;
   dataFreshness: string;
@@ -119,6 +120,7 @@ const tr: Dict = {
   filters: 'Filtreler',
   all: 'Tümü',
   machineTranslated: 'makine çevirisi',
+  translationUnavailable: 'çevrilmedi',
   readOriginal: 'Orijinali oku',
   updated: 'Güncellendi',
   dataFreshness: 'Veri tazeliği',
@@ -177,6 +179,7 @@ const en: Dict = {
   filters: 'Filters',
   all: 'All',
   machineTranslated: 'machine translation',
+  translationUnavailable: 'not translated',
   readOriginal: 'Read original',
   updated: 'Updated',
   dataFreshness: 'Data freshness',

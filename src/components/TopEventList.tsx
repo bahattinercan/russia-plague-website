@@ -5,6 +5,8 @@ import type { PlagueEvent } from '@/types';
 import { getDict, type Locale } from '@/lib/i18n';
 import { LabelBadge } from './LabelBadge';
 import { EventModal } from './EventModal';
+import { MachineTranslatedBadge } from './MachineTranslatedBadge';
+import { localizedTitle } from '@/lib/translate/display';
 
 /**
  * "Şu an ne biliyoruz?" listesi — satıra tıklamak olay detayını açar.
@@ -39,7 +41,13 @@ export function TopEventList({
             aria-haspopup="dialog"
             className="event-title min-w-0 flex-1 text-left text-[13.5px] leading-snug text-chalk/95"
           >
-            {event.title}
+            {localizedTitle(locale, event).text}
+            {localizedTitle(locale, event).machine && (
+              <>
+                {' '}
+                <MachineTranslatedBadge locale={locale} compact />
+              </>
+            )}
           </button>
           <span className="font-mono text-[10px] uppercase tracking-wider text-mist/70">
             {t.groupCount(event.independentGroupCount)}

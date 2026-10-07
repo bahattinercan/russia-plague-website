@@ -8,6 +8,8 @@ import { safeExternalUrl, fold } from '@/lib/sources/text';
 import { formatDate } from '@/lib/format';
 import { LabelBadge } from './LabelBadge';
 import { ContradictionPanel } from './ContradictionPanel';
+import { MachineTranslatedBadge } from './MachineTranslatedBadge';
+import { localizedText, localizedTitle } from '@/lib/translate/display';
 
 /**
  * Olay detay modalı — native <dialog> + showModal() (top-layer).
@@ -31,6 +33,8 @@ export function EventModal({
   onClose: () => void;
 }) {
   const t = getDict(locale);
+  const title = localizedTitle(locale, event);
+  const summary = localizedText(locale, event.summary, event.summaryTr);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
@@ -71,10 +75,15 @@ export function EventModal({
         </div>
 
         <h2 id="event-detail-title" className="mt-3 text-[20px] font-semibold leading-snug text-chalk">
-          {event.title}
+          {title.text}
+          {title.machine && (
+            <span className="ml-2 align-middle">
+              <MachineTranslatedBadge locale={locale} />
+            </span>
+          )}
         </h2>
 
-        {event.titleOriginal && event.titleOriginal !== event.title && (
+        {title.machine && event.titleOriginal && (
           <p className="mt-1.5 font-mono text-[10.5px] text-mist/70">
             {t.readOriginal}: {event.titleOriginal}
           </p>
@@ -83,7 +92,15 @@ export function EventModal({
         {/* Bazı feed'lerin excerpt'i başlığın aynısı (Google News: "başlık - Yayıncı").
            Yineleme göstermek yerine atlıyoruz. */}
         {event.summary && !fold(event.summary).startsWith(fold(event.title)) && (
-          <p className="mt-3 text-[14px] leading-relaxed text-mist">{event.summary}</p>
+          <p className="mt-3 text-[14px] leading-relaxed text-mist">
+            {summary.text}
+            {summary.machine && (
+              <>
+                {' '}
+                <MachineTranslatedBadge locale={locale} />
+              </>
+            )}
+          </p>
         )}
 
         <ContradictionPanel event={event} locale={locale} />
@@ -102,6 +119,7 @@ export function EventModal({
         <ul className="mt-4 space-y-3">
           {event.claims.map((claim) => {
             const href = safeExternalUrl(claim.url);
+            const cTitle = localizedTitle(locale, claim);
             return (
               <li key={`${claim.sourceSlug}-${claim.url}`} className="border-l-2 border-edge pl-3">
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
@@ -116,7 +134,15 @@ export function EventModal({
                     {formatDate(claim.publishedAt, locale)} UTC
                   </span>
                 </div>
-                <p className="mt-1 text-[12.5px] leading-snug text-mist">{claim.title}</p>
+                <p className="mt-1 text-[12.5px] leading-snug text-mist">
+                  {cTitle.text}
+                  {cTitle.machine && (
+                    <>
+                      {' '}
+                      <MachineTranslatedBadge locale={locale} />
+                    </>
+                  )}
+                </p>
                 {href && (
                   <a
                     href={href}
