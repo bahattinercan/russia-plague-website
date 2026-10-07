@@ -401,11 +401,12 @@ Tüm tablolarda `created_at` / `updated_at`; `claims` ve `metrics` **kaynak zoru
 | 2 | **Otomasyon:** Tam otomatik, **"doğrulanmış" etiketi yok** | İnsan onayı yok → sistem doğrulama iddia etmez; en yüksek etiket "çoklu bağımsız kaynak bildiriyor". Ayrıca bkz. §5.3 dil kuralı |
 | 3 | **Telegram/X katmanı:** Dahil | T5, sadece "doğrulanmamış iddia" olarak; ana akışta tek başına haber sayılmaz |
 | 4 | **Repo:** Public | GitHub Actions cron sınırsız dakika; kaynak kod ve güven puanları şeffaf |
+| 5 | **TR çeviri:** Sağlayıcıdan bağımsız ingest-time çeviri + önbellek (7 Eki 2026) | `auto`: DeepL → OpenAI → anahtarsız Google; her çeviri "makine çevirisi" etiketli, orijinal başlık her zaman görünür; doğrulama kapıları editoryal kuralı korur. Ayrıntı: `docs/ceviri-plani.md` |
 
 ### Kalan açık sorular
 
 1. **Alan adı / marka:** Çalışma adı `VebaTakip` — değiştirilecek mi?
-2. **LLM bütçesi:** TR çeviri için ücretli API kullanılabilir mi, yoksa ücretsiz/yerel model mi?
+2. **LLM bütçesi:** Karar (7 Eki 2026): sağlayıcıdan bağımsız adaptör; `DEEPL_API_KEY`/`OPENAI_API_KEY` varsa o kullanılır, yoksa anahtarsız Google. Bkz. `docs/ceviri-plani.md` §15.
 3. **Neon hesabı:** Postgres connection string kime ait olacak (F1 sonunda gerekli)?
 4. **Bildirim:** Telegram bot / e-posta uyarısı isteniyor mu (F4)?
 5. **Hedef kitle ağırlığı:** Türkiye kamuoyu mu, küresel takipçi mi? (UI vurgusunu etkiler)

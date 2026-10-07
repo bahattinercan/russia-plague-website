@@ -102,6 +102,9 @@ npm run ingest          # tarar, Postgres'e (yoksa JSON'a) yazar
 | Lokal | `.env.local` (gitignore'da) | `DATABASE_URL` |
 | Cron | GitHub → Settings → Secrets → **`DATABASE_URL`** | yoksa ingest JSON'a düşer, cron yine çalışır |
 | Site | Vercel → Environment Variables → **`DATABASE_URL`** | Neon pooler bağlantısı |
+| Çeviri (lokal/cron/Vercel) | `DEEPL_API_KEY` **veya** `OPENAI_API_KEY` | Tanımlıysa TR çeviri o sağlayıcıyla yapılır |
+| Çeviri (tercihe bağlı) | `TRANSLATE_PROVIDER` (`auto`/`deepl`/`openai`/`google`/`off`) | Tanımsızsa `auto`: DeepL → OpenAI → anahtarsız Google |
+| Çeviri (opsiyonel) | `TRANSLATE_MAX_MS`, `TRANSLATE_BUDGET_CHARS`, `TRANSLATE_CONCURRENCY` | Cron bütçesi ve kota koruması |
 
 **Cron:** `.github/workflows/ingest.yml` 10 dakikada bir çalışır. İş başarısız olursa `ingest-failure` etiketli bir issue açılır (dead man's switch) ve `data/feed.json` debug artifact'ı yüklenir.
 
@@ -122,9 +125,22 @@ Bu projede kaynak davranışı **iddia değil, ölçüm** ile belgelenir:
 
 ---
 
+### Çeviri (TR görünümü)
+
+İngilizce ve Rusça başlıklar `/tr` görünümünde Türkçeye çevrilir. Kurallar:
+
+- **Makine çevirisi etiketi zorunlu** ve **orijinal başlık her zaman görünür** (`Orijinali oku`).
+- Çeviri **ingest sırasında** yapılır ve `content_hash` üzerinden önbelleğe alınır; aynı içerik her 10 dakikada yeniden çevrilmez.
+- **Doğrulama kapıları** (`npm run translation-check`): çıktıda `doğrulandı/teyit edildi` geçemez, belirsizlik (`suspected → şüpheli`) korunur, sayılar ve özel adlar (WHO, CDC, Rospotrebnadzor…) korunur. Kapıdan geçmeyen çeviri gösterilmez; orijinal başlık gösterilir.
+- Sağlayıcı **bağımsız**: `DEEPL_API_KEY` veya `OPENAI_API_KEY` varsa o kullanılır; yoksa anahtarsız Google katmanı devrededir (üretim için DeepL anahtarı önerilir). `TRANSLATE_PROVIDER=off` ile kapatılır.
+- Detaylı plan: [`docs/ceviri-plani.md`](docs/ceviri-plani.md)
+
+---
+
 ## Dokümanlar
 
 - [`docs/PLAN.md`](docs/PLAN.md) — tam proje planı: mimari, doğruluk katmanı, veri modeli, fazlar, riskler
+- [`docs/ceviri-plani.md`](docs/ceviri-plani.md) — TR çeviri planı: sağlayıcı seçimi, doğrulama kapıları, veri modeli
 - [`docs/kaynak-envanteri.md`](docs/kaynak-envanteri.md) — kaynak listesi, erişim testleri, yedek yollar
 - [`docs/guvenlik-denetimi.md`](docs/guvenlik-denetimi.md) — güvenlik denetimi: bulgular, düzeltmeler, kalan riskler
 
