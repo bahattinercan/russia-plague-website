@@ -1,6 +1,7 @@
 import type { Article } from '@/types';
 import { getDict, type Locale } from '@/lib/i18n';
 import { formatDate } from '@/lib/data';
+import { safeExternalUrl } from '@/lib/sources/text';
 
 const MAX_VISIBLE = 24;
 
@@ -30,31 +31,36 @@ export function SignalList({ signals, locale }: { signals: Article[]; locale: Lo
           {title} · {items.length}
         </h3>
         <ul className="mt-2 space-y-2">
-          {visible.map((s) => (
-            <li
-              key={s.id}
-              className="border-l-2 border-alarm/30 pl-3 transition-colors hover:border-alarm/70"
-            >
-              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                <span className="font-mono text-[10px] uppercase tracking-wider text-alarm/80">
-                  {locale === 'tr' ? 'doğrulanmamış' : 'unverified'}
-                </span>
-                <span className="text-[12px] font-medium text-chalk/85">{s.sourceName}</span>
-                <span className="font-mono text-[10px] text-mist/60">
-                  {formatDate(s.publishedAt, locale)}
-                </span>
-              </div>
-              <p className="mt-0.5 text-[12.5px] leading-snug text-mist">{s.title}</p>
-              <a
-                href={s.url}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                className="link-underline mt-0.5 inline-block font-mono text-[10px] text-official/70"
+          {visible.map((s) => {
+            const href = safeExternalUrl(s.url);
+            return (
+              <li
+                key={s.id}
+                className="border-l-2 border-alarm/30 pl-3 transition-colors hover:border-alarm/70"
               >
-                {t.original} ↗
-              </a>
-            </li>
-          ))}
+                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-alarm/80">
+                    {locale === 'tr' ? 'doğrulanmamış' : 'unverified'}
+                  </span>
+                  <span className="text-[12px] font-medium text-chalk/85">{s.sourceName}</span>
+                  <span className="font-mono text-[10px] text-mist/60">
+                    {formatDate(s.publishedAt, locale)}
+                  </span>
+                </div>
+                <p className="mt-0.5 text-[12.5px] leading-snug text-mist">{s.title}</p>
+                {href && (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="link-underline mt-0.5 inline-block font-mono text-[10px] text-official/70"
+                  >
+                    {t.original} ↗
+                  </a>
+                )}
+              </li>
+            );
+          })}
         </ul>
         {items.length > visible.length && (
           <p className="mt-2 font-mono text-[10.5px] text-mist/60">

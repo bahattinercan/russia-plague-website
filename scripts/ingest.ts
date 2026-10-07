@@ -168,9 +168,11 @@ async function main(): Promise<void> {
   const staleSlugs = new Set(healths.filter((h) => h.stale).map((h) => h.sourceSlug));
 
   const rawItems = results.flatMap((r) => r.items);
-  const normalized: Article[] = rawItems.map((i) =>
-    normalizeItem(i, staleSlugs.has(i.sourceSlug)),
-  );
+  // GÜVENLİK: normalizeItem, http/https dışı şema taşıyan bağlantılar için
+  // null döner (javascript:, data: vb.) — bu öğeler burada elenir.
+  const normalized: Article[] = rawItems
+    .map((i) => normalizeItem(i, staleSlugs.has(i.sourceSlug)))
+    .filter((a): a is Article => a !== null);
 
   // Tarihsiz içerik yalnızca kimliği doğrulanmış kaynaklardan kabul edilir.
   // ÖLÇÜM: WHO IRIS gibi tarihsiz T5 depoları akışa sızıyordu (1971 tarihli

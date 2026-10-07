@@ -2,7 +2,7 @@ import type { PlagueEvent } from '@/types';
 import { getDict, type Locale } from '@/lib/i18n';
 import { GROUP_LABELS } from '@/lib/sources/registry';
 import { formatDate } from '@/lib/data';
-import { fold } from '@/lib/sources/text';
+import { fold, safeExternalUrl } from '@/lib/sources/text';
 import { LabelBadge } from './LabelBadge';
 import { ContradictionPanel } from './ContradictionPanel';
 import { TimeAgo } from './TimeAgo';
@@ -115,36 +115,41 @@ export function EventCard({
         </summary>
 
         <ul className="mt-3 space-y-2.5">
-          {event.claims.map((claim) => (
-            <li
-              key={`${claim.sourceSlug}-${claim.url}`}
-              className="border-l-2 border-edge pl-3"
-            >
-              <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                <span className="font-mono text-[10px] uppercase tracking-wider text-official/80">
-                  T{claim.tier}
-                </span>
-                <span className="text-[12.5px] font-medium text-chalk/95">
-                  {claim.sourceName}
-                </span>
-                <span className="font-mono text-[10px] text-mist/70">
-                  {groupLabel(claim.independenceGroup)}
-                </span>
-                <span className="font-mono text-[10px] text-mist/55">
-                  {formatDate(claim.publishedAt, locale)}
-                </span>
-              </div>
-              <p className="mt-1 text-[12.5px] leading-snug text-mist">{claim.title}</p>
-              <a
-                href={claim.url}
-                target="_blank"
-                rel="noopener noreferrer nofollow"
-                className="link-underline mt-0.5 inline-block font-mono text-[10px] text-official/80"
+          {event.claims.map((claim) => {
+            const href = safeExternalUrl(claim.url);
+            return (
+              <li
+                key={`${claim.sourceSlug}-${claim.url}`}
+                className="border-l-2 border-edge pl-3"
               >
-                {t.original} ↗
-              </a>
-            </li>
-          ))}
+                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+                  <span className="font-mono text-[10px] uppercase tracking-wider text-official/80">
+                    T{claim.tier}
+                  </span>
+                  <span className="text-[12.5px] font-medium text-chalk/95">
+                    {claim.sourceName}
+                  </span>
+                  <span className="font-mono text-[10px] text-mist/70">
+                    {groupLabel(claim.independenceGroup)}
+                  </span>
+                  <span className="font-mono text-[10px] text-mist/55">
+                    {formatDate(claim.publishedAt, locale)}
+                  </span>
+                </div>
+                <p className="mt-1 text-[12.5px] leading-snug text-mist">{claim.title}</p>
+                {href && (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="link-underline mt-0.5 inline-block font-mono text-[10px] text-official/80"
+                  >
+                    {t.original} ↗
+                  </a>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </details>
     </article>

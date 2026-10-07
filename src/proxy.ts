@@ -35,7 +35,15 @@ export function proxy(req: NextRequest) {
 
   const locale = pickLocale(req);
   const url = req.nextUrl.clone();
-  url.pathname = `/${locale}${pathname === '/' ? '' : pathname}`;
+
+  // Sertleştirme: yalnızca tek eğik çizgiyle başlayan normalize yol kullanılır.
+  // `//evil.com` gibi bir yol birleştirme sırasında protokol-göreli URL
+  // yorumlanmasına yol açmasın (açık yönlendirme savunması).
+  const safePath = pathname.startsWith('//')
+    ? `/${pathname.replace(/^\/+/, '')}`
+    : pathname;
+
+  url.pathname = `/${locale}${safePath === '/' ? '' : safePath}`;
   return NextResponse.redirect(url);
 }
 

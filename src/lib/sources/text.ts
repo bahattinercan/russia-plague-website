@@ -54,12 +54,63 @@ export function cleanTitle(input: string): string {
   );
 }
 
+/**
+ * HTML metinlerinde güvenli üst sınır.
+ * Kötü niyetli veya bozuk bir kaynak megabaytlarca gövde döndürüp
+ * bellek ve CPU yakmasın diye uygulanır.
+ */
+const MAX_TEXT_INPUT = 400_000;
+
+/**
+ * script/style bloklarını LINEAR zamanda temizler.
+ *
+ * ÖLÇÜM: önceki regex (`/<script[\s\S]*?<\/script>/gi`) kapanmayan
+ * etiketlerde O(n²) davranıyordu — 1 MB `<script>` tekrarı 4.9 saniye
+ * sürüyordu. Bu, ingest için gerçek bir DoS yüzeyiydi.
+ */
+function stripBlocks(input: string): string {
+  const lower = input.toLowerCase();
+  let out = '';
+  let i = 0;
+
+  while (i < input.length) {
+    const scriptIdx = lower.indexOf('<script', i);
+    const styleIdx = lower.indexOf('<style', i);
+
+    let next = -1;
+    let tag = '';
+    if (scriptIdx !== -1 && (styleIdx === -1 || scriptIdx < styleIdx)) {
+      next = scriptIdx;
+      tag = 'script';
+    } else if (styleIdx !== -1) {
+      next = styleIdx;
+      tag = 'style';
+    }
+
+    if (next === -1) {
+      out += input.slice(i);
+      break;
+    }
+
+    out += input.slice(i, next);
+    const closeIdx = lower.indexOf(`</${tag}`, next);
+    if (closeIdx === -1) {
+      i = input.length;
+    } else {
+      const gt = input.indexOf('>', closeIdx);
+      i = gt === -1 ? input.length : gt + 1;
+    }
+  }
+
+  return out;
+}
+
 export function stripHtml(input: string): string {
+  const bounded = input.length > MAX_TEXT_INPUT ? input.slice(0, MAX_TEXT_INPUT) : input;
   return decodeEntities(
-    input
-      .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-      .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-      .replace(/<[^>]+>/g, ' ')
+    stripBlocks(bounded)
+      // Nitelik uzunluğu sınırlı: iç içe niceleyici yok, geri izleme (backtracking) olmaz.
+      .replace(/<[^>]{0,4000}>/g, ' ')
       .replace(/\s+/g, ' ')
       .trim(),
   );
@@ -70,6 +121,25 @@ export function toIso(value: unknown): string | null {
   if (value === null || value === undefined || value === '') return null;
   const d = new Date(String(value));
   return Number.isNaN(d.getTime()) ? null : d.toISOString();
+}
+
+/**
+ * Yalnızca http/https URL'leri kabul eder; aksi halde null.
+ *
+ * Neden zorunlu: dış kaynaklardan gelen bir bağlantı `javascript:`,
+ * `data:` veya `vbscript:` şeması taşıyabilir. React `<a href>` değerini
+ * temizlemez — böyle bir bağlantı tıklandığında kod çalışır.
+ * Bu yüzden dış kaynaklı HER bağlantı bu filtreden geçer.
+ */
+export function safeExternalUrl(raw: string | null | undefined): string | null {
+  if (!raw) return null;
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+    return u.toString();
+  } catch {
+    return null;
+  }
 }
 
 /** URL'den takip parametrelerini temizler. */

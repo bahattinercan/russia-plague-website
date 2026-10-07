@@ -5,6 +5,46 @@ import { cleanTitle, stripHtml, toIso } from '../text';
 
 export const FETCH_TIMEOUT_MS = 20000;
 
+/** Tek bir yanıttan okunacak en fazla bayt — bellek tükenmesine karşı sınır. */
+export const MAX_RESPONSE_BYTES = 3_000_000;
+
+/**
+ * Yanıt gövdesini SINIRLI biçimde okur.
+ * `res.text()` sınırsızdır: bozuk/kötü niyetli bir kaynak gigabaytlarca
+ * gövde döndürüp ingest sürecini çökertebilir.
+ */
+export async function readLimitedText(
+  res: Response,
+  max = MAX_RESPONSE_BYTES,
+): Promise<string> {
+  const body = res.body;
+  if (!body) return '';
+
+  const reader = body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (!value) continue;
+    total += value.byteLength;
+    if (total > max) {
+      await reader.cancel();
+      break;
+    }
+    chunks.push(value);
+  }
+
+  const merged = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    merged.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder('utf-8').decode(merged.subarray(0, offset));
+}
+
 /**
  * Basit HTML listesi okuyucu.
  *
@@ -34,7 +74,7 @@ export async function fetchHtml(
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} — ${cfg.url}`);
 
-  const $ = cheerio.load(await res.text());
+  const $ = cheerio.load(await readLimitedText(res));
   const pattern = cfg.linkPattern ? new RegExp(cfg.linkPattern) : null;
   const seen = new Set<string>();
   const items: RawItem[] = [];

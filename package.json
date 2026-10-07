@@ -11,7 +11,8 @@
     "ingest": "tsx scripts/ingest.ts",
     "typecheck": "tsc --noEmit",
     "dev": "next dev",
-    "build": "next build"
+    "build": "next build",
+    "security-check": "tsx scripts/security-check.ts"
   },
   "keywords": [],
   "author": "",

@@ -14,6 +14,7 @@ import {
   archiveUrlFor,
   canonicalizeUrl,
   fold,
+  safeExternalUrl,
   shortHash,
   slugify,
 } from '@/lib/sources/text';
@@ -118,9 +119,18 @@ export function resolveSource(item: RawItem): SourceIdentity {
   };
 }
 
-export function normalizeItem(item: RawItem, sourceStale = false): Article {
+/**
+ * Ham öğeyi Article'a çevirir.
+ *
+ * GÜVENLİK: yalnızca http/https bağlantılar kabul edilir. Geçersiz şema
+ * taşıyan öğe için `null` döner ve çağıran taraf onu eler.
+ */
+export function normalizeItem(item: RawItem, sourceStale = false): Article | null {
+  const url = safeExternalUrl(item.url);
+  if (!url) return null;
+
   const source = resolveSource(item);
-  const canonicalUrl = canonicalizeUrl(item.url);
+  const canonicalUrl = canonicalizeUrl(url);
 
   return {
     id: shortHash(`${source.slug}|${canonicalUrl}`),
@@ -129,7 +139,7 @@ export function normalizeItem(item: RawItem, sourceStale = false): Article {
     tier: source.tier,
     independenceGroup: source.group,
     trustBase: source.trustBase,
-    url: item.url,
+    url,
     canonicalUrl,
     title: item.title,
     titleOriginal: item.title,

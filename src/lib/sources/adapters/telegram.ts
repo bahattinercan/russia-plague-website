@@ -2,7 +2,7 @@ import * as cheerio from 'cheerio';
 import type { RawItem, SourceDef } from '@/types';
 import { USER_AGENT } from '../registry';
 import { stripHtml, toIso } from '../text';
-import { FETCH_TIMEOUT_MS } from './html';
+import { FETCH_TIMEOUT_MS, readLimitedText } from './html';
 
 /**
  * Telegram genel kanal görünümü (t.me/s/<kanal>) okuyucu.
@@ -26,7 +26,7 @@ export async function fetchTelegram(source: SourceDef, channel: string): Promise
   });
   if (!res.ok) throw new Error(`HTTP ${res.status} — ${url}`);
 
-  const $ = cheerio.load(await res.text());
+  const $ = cheerio.load(await readLimitedText(res));
   const items: RawItem[] = [];
 
   $('.tgme_widget_message').each((_, el) => {
