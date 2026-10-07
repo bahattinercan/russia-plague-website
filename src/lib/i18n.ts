@@ -65,6 +65,9 @@ export interface Dict {
   updated: string;
   dataFreshness: string;
   dataSource: string;
+  detail: string;
+  close: string;
+  closeHint: string;
   aboutProject: string;
 }
 
@@ -120,6 +123,9 @@ const tr: Dict = {
   updated: 'Güncellendi',
   dataFreshness: 'Veri tazeliği',
   dataSource: 'Veri kaynağı',
+  detail: 'Detay',
+  close: 'Kapat',
+  closeHint: 'Esc veya arka plana tıklayarak kapatın',
   aboutProject: 'Proje hakkında',
 };
 
@@ -175,6 +181,9 @@ const en: Dict = {
   updated: 'Updated',
   dataFreshness: 'Data freshness',
   dataSource: 'Data source',
+  detail: 'Details',
+  close: 'Close',
+  closeHint: 'Press Esc or click outside to close',
   aboutProject: 'About the project',
 };
 

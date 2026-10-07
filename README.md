@@ -98,6 +98,10 @@ npm run ingest          # tarar, Postgres'e (yoksa JSON'a) yazar
 
 **Cron:** `.github/workflows/ingest.yml` 10 dakikada bir çalışır. İş başarısız olursa `ingest-failure` etiketli bir issue açılır (dead man's switch) ve `data/feed.json` debug artifact'ı yüklenir.
 
+### Arayüz: olay detay modalı
+
+Karttaki **Detay** butonu olayın tüm iddialarını, bağımsızlık gruplarını ve kaynak bağlantılarını açar. Kapanma üç yoldan: **Esc**, **arka plana tıklama**, **Kapat ×**. Native `<dialog>` + `showModal()` kullanılıyor (top-layer) — kartların `transform`/`backdrop-filter` taşımaları `position: fixed` modalını hapsetmesin diye. Odak, kapanınca tetikleyiciye geri döner.
+
 ### Ölçülen kaynak gerçekleri
 
 Bu projede kaynak davranışı **iddia değil, ölçüm** ile belgelenir:

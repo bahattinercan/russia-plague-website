@@ -27,3 +27,6 @@ Thumbs.db
 
 # TypeScript derleme artefaktları
 *.tsbuildinfo
+
+.vercel
+.env*

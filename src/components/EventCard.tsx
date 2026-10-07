@@ -5,6 +5,7 @@ import { formatDate } from '@/lib/data';
 import { fold, safeExternalUrl } from '@/lib/sources/text';
 import { LabelBadge } from './LabelBadge';
 import { ContradictionPanel } from './ContradictionPanel';
+import { EventDetail } from './EventDetail';
 import { TimeAgo } from './TimeAgo';
 
 function groupLabel(group: string): string {
@@ -100,6 +101,7 @@ export function EventCard({
           <span className="h-1 w-1 rounded-full bg-signal" aria-hidden />
           {t.updated}: <TimeAgo iso={event.lastUpdateAt} locale={locale} />
         </span>
+        <EventDetail event={event} locale={locale} />
       </footer>
 
       <details className="group mt-3 border-t border-edge-soft pt-3">
