@@ -288,7 +288,6 @@ Ağa çıkmayan saf fonksiyon testleri → CI'da hızlı ve deterministik.
 | `src/components/EventCard.tsx` | `title = locale==='tr' ? event.titleTr ?? event.title : event.title`; `titleTr` kullanıldıysa küçük **"makine çevirisi"** rozeti + altında `Orijinali oku: <orijinal>` satırı |
 | `src/components/EventModal.tsx` | Gösterilen başlık ≠ orijinal ise "Orijinali oku" satırı (mevcut koşul düzeltilir); iddialarda `claim.titleTr ?? claim.title` |
 | `src/components/TopEventList.tsx` | Aynı başlık seçimi |
-| `src/components/Ticker.tsx` | Aynı başlık seçimi |
 | `src/components/SignalList.tsx` | Aynı başlık seçimi |
 | `src/components/ContradictionPanel.tsx` | `side.statement` yerine çevrilmiş iddia başlığı (claim'den çözülür) |
 | `src/lib/i18n.ts` | `machineTranslated` zaten var; `translationUnavailable: 'çevrilmedi' / 'not translated'` eklenir |
@@ -374,7 +373,7 @@ turdaki gerçek yeni içerik tipik olarak 0–15 başlık ≈ **0–2k karakter*
 
 **Değişecek:** `src/types.ts`, `src/lib/ingest/pipeline.ts`, `scripts/ingest.ts`,
 `src/lib/storage/schema.ts`, `src/lib/storage/postgres.ts`, `src/lib/storage/json.ts` (opsiyonel),
-`src/components/{EventCard,EventModal,TopEventList,Ticker,SignalList,ContradictionPanel}.tsx`,
+`src/components/{EventCard,EventModal,TopEventList,SignalList,ContradictionPanel}.tsx`,
 `src/lib/i18n.ts`, `src/app/[lang]/methodology/page.tsx`, `docs/PLAN.md`, `README.md`,
 `package.json` (`translation-check` script), `.github/workflows/ingest.yml` (secret).
 
