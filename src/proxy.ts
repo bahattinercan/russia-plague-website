@@ -70,6 +70,13 @@ export function proxy(req: NextRequest) {
 }
 
 export const config = {
-  // Statik dosyalar, API ve Next iç yolları hariç her şeyi yakala.
-  matcher: ['/((?!_next|api|favicon.ico|robots.txt|sitemap.xml|.*\\..*).*)'],
+  // Statik dosyalar, API, metadata rotaları ve Next iç yolları hariç her şeyi
+  // yakala.
+  //
+  // DİKKAT: `apple-icon` gibi UZANTISIZ metadata route'ları ayrıca listelenmeli;
+  // aksi hâlde dil yönlendirmesi onları da yakalar (`/apple-icon` →
+  // `/en/apple-icon` → 404). Nokta içerenler (`icon.svg`, `robots.txt`,
+  // `manifest.webmanifest`) zaten `.*\..*` kuralına takılıyor — ileride
+  // `opengraph-image` gibi uzantısız bir route eklenirse buraya yazılmalı.
+  matcher: ['/((?!_next|api|favicon.ico|apple-icon|robots.txt|sitemap.xml|.*\\..*).*)'],
 };
