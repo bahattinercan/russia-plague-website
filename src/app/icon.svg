@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Plague Tracker">
+  <!--
+    Sekme simgesi. Sitenin başlığındaki amber "pulse-dot" ile aynı kimlik:
+    iç içe iki halka + merkez nokta (radar ping'i = kaynak izleme).
+    Kendi koyu zeminini taşır; açık ve koyu tarayıcı temalarında aynı görünür.
+    16 px'te okunurluk için ölçüler kaba tutuldu (halka kalınlığı 2.6/32 ≈ 1.3 px).
+  -->
+  <rect width="32" height="32" rx="7" fill="#0a0f17"/>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="6.5" fill="none" stroke="#1e2836"/>
+  <circle cx="16" cy="16" r="10.5" fill="none" stroke="#f2b544" stroke-width="2.6" opacity="0.45"/>
+  <circle cx="16" cy="16" r="5.6" fill="none" stroke="#f2b544" stroke-width="2.6" opacity="0.85"/>
+  <circle cx="16" cy="16" r="2.5" fill="#f2b544"/>
+</svg>
