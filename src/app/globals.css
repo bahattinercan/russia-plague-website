@@ -91,29 +91,6 @@ body {
   transform: none;
 }
 
-/* ── Ticker ────────────────────────────────────────────────────────────── */
-.ticker-mask {
-  mask-image: linear-gradient(to right, transparent, black 4%, black 96%, transparent);
-  overflow: hidden;
-}
-.ticker-track {
-  display: flex;
-  width: max-content;
-  gap: 2.5rem;
-  animation: ticker 78s linear infinite;
-}
-.ticker-mask:hover .ticker-track {
-  animation-play-state: paused;
-}
-@keyframes ticker {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-50%);
-  }
-}
-
 /* ── Canlı gösterge ────────────────────────────────────────────────────── */
 .pulse-dot {
   animation: pulseDot 2.4s ease-in-out infinite;
@@ -236,16 +213,5 @@ body {
   .reveal {
     opacity: 1 !important;
     transform: none !important;
-  }
-  .ticker-track {
-    animation: none !important;
-    flex-wrap: nowrap;
-    width: 100%;
-    gap: 1.75rem;
-    overflow-x: auto;
-  }
-  .ticker-mask {
-    mask-image: none;
-    overflow-x: auto;
   }
 }

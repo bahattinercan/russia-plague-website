@@ -13,7 +13,6 @@ import {
   type Locale,
 } from '@/lib/i18n';
 import { StatusBar } from '@/components/StatusBar';
-import { Ticker } from '@/components/Ticker';
 import { EventCard } from '@/components/EventCard';
 import { TopEventList } from '@/components/TopEventList';
 import { SignalList } from '@/components/SignalList';
@@ -77,7 +76,7 @@ export default async function HomePage({
   const locale: Locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const t = getDict(locale);
 
-  const { feed, backend } = await getFeedSnapshot();
+  const { feed } = await getFeedSnapshot();
   const ranked = rankEvents(feed.events);
   const top = topEvents(feed.events, 5);
   const health = healthSummary(feed.report.sources);
@@ -92,10 +91,7 @@ export default async function HomePage({
         sources={feed.report.sources}
         events={feed.events}
         signals={feed.signals.length}
-        backend={backend}
       />
-
-      <Ticker events={ranked} locale={locale} />
 
       <main className="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
         {/* ── HERO ─────────────────────────────────────────────────────── */}

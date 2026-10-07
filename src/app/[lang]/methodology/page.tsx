@@ -35,7 +35,7 @@ export default async function MethodologyPage({
   const { lang } = await params;
   const locale: Locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const t = getDict(locale);
-  const { feed, backend } = await getFeedSnapshot();
+  const { feed } = await getFeedSnapshot();
   const health = healthSummary(feed.report.sources);
 
   const tr = locale === 'tr';
@@ -49,7 +49,6 @@ export default async function MethodologyPage({
         sources={feed.report.sources}
         events={feed.events}
         signals={feed.signals.length}
-        backend={backend}
       />
 
       <main className="mx-auto max-w-3xl px-4 pt-10 sm:px-6">
