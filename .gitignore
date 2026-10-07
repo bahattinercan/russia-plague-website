@@ -11,6 +11,7 @@ dist/
 
 # Geçici inceleme klasörleri
 .tmp-probe/
+.shots/
 *.log
 
 # Editör / OS

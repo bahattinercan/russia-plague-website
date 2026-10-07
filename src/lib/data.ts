@@ -1,0 +1,126 @@
+import { readFeed, type FeedFile } from '@/lib/storage/json';
+import type { PlagueEvent, SourceHealth } from '@/types';
+import { DEFAULT_LOCALE, type Locale } from '@/lib/i18n';
+
+/** Veri yoksa gösterilecek iskelet — sayfa asla çökmez, "neden boş" açıklanır. */
+export const EMPTY_FEED: FeedFile = {
+  generatedAt: new Date(0).toISOString(),
+  report: {
+    startedAt: new Date(0).toISOString(),
+    finishedAt: new Date(0).toISOString(),
+    durationMs: 0,
+    sources: [],
+    articlesFetched: 0,
+    articlesNew: 0,
+    articlesRelevant: 0,
+    events: 0,
+    labelCounts: {
+      official: 0,
+      corroborated: 0,
+      single: 0,
+      unverified: 0,
+      contradicted: 0,
+    },
+    deadManSwitch: { ingestHealthy: false, message: 'Henüz ingest çalıştırılmadı' },
+  },
+  events: [],
+  signals: [],
+};
+
+export async function getFeed(): Promise<FeedFile> {
+  return (await readFeed()) ?? EMPTY_FEED;
+}
+
+export function healthSummary(sources: SourceHealth[]) {
+  return {
+    total: sources.length,
+    healthy: sources.filter((s) => s.ok && !s.stale).length,
+    stale: sources.filter((s) => s.ok && s.stale).length,
+    failed: sources.filter((s) => !s.ok).length,
+  };
+}
+
+/** Etiket önceliği: çelişki ve çoklu kaynak en üstte. */
+const LABEL_RANK: Record<string, number> = {
+  contradicted: 0,
+  corroborated: 1,
+  official: 2,
+  single: 3,
+  unverified: 4,
+};
+
+export function rankEvents(events: PlagueEvent[]): PlagueEvent[] {
+  return [...events].sort((a, b) => {
+    const rank = (LABEL_RANK[a.label] ?? 9) - (LABEL_RANK[b.label] ?? 9);
+    if (rank !== 0) return rank;
+    return new Date(b.lastUpdateAt).getTime() - new Date(a.lastUpdateAt).getTime();
+  });
+}
+
+function normTitle(input: string): Set<string> {
+  return new Set(
+    input
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ')
+      .split(/\s+/)
+      .filter((w) => w.length >= 4),
+  );
+}
+
+function titleSimilarity(a: string, b: string): number {
+  const A = normTitle(a);
+  const B = normTitle(b);
+  if (A.size === 0 || B.size === 0) return 0;
+  let inter = 0;
+  for (const t of A) if (B.has(t)) inter++;
+  return inter / (A.size + B.size - inter);
+}
+
+/**
+ * "Şu an ne biliyoruz?" listesi için çeşitlendirilmiş seçim.
+ * Kümeleme bazen aynı olayı iki ayrı kümeye ayırabiliyor (farklı diller,
+ * farklı başlık kalıpları); bu fonksiyon aynı olayın iki kez görünmesini engeller.
+ */
+export function topEvents(events: PlagueEvent[], n: number): PlagueEvent[] {
+  const picked: PlagueEvent[] = [];
+  for (const event of rankEvents(events)) {
+    if (picked.some((p) => titleSimilarity(p.title, event.title) >= 0.5)) continue;
+    picked.push(event);
+    if (picked.length >= n) break;
+  }
+  return picked;
+}
+
+/**
+ * Tarih biçimlendirme UTC'de sabitlenir; sunucu ve istemci aynı metni
+ * üretir (hydration uyuşmazlığı olmaz).
+ */
+export function formatDate(iso: string | null, locale: Locale = DEFAULT_LOCALE): string {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  return new Intl.DateTimeFormat(locale === 'tr' ? 'tr-TR' : 'en-GB', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'UTC',
+  }).format(d);
+}
+
+export function formatRelative(iso: string | null, locale: Locale): string {
+  if (!iso) return locale === 'tr' ? 'tarih yok' : 'no date';
+  const diff = Date.now() - new Date(iso).getTime();
+  const rtf = new Intl.RelativeTimeFormat(locale === 'tr' ? 'tr' : 'en', {
+    numeric: 'auto',
+  });
+  const units: [Intl.RelativeTimeFormatUnit, number][] = [
+    ['day', 86_400_000],
+    ['hour', 3_600_000],
+    ['minute', 60_000],
+  ];
+  for (const [unit, ms] of units) {
+    if (Math.abs(diff) >= ms) return rtf.format(-Math.round(diff / ms), unit);
+  }
+  return rtf.format(0, 'minute');
+}
