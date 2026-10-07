@@ -57,12 +57,24 @@ check(
   !validateTranslation('3 people died of plague in Irkutsk in 2026', "Irkutsk'ta kişi öldü", 'en').ok,
 );
 check(
-  'WHO korunmazsa REDDEDİLİR',
-  !validateTranslation('WHO monitors plague in Russia', "Dünya Sağlık Örgütü Rusya'da vebayı izliyor", 'en').ok,
+  'WHO hedef dilde DSÖ olarak çevrilebilir',
+  validateTranslation('WHO monitors plague in Russia', "DSÖ Rusya'da vebayı izliyor", 'en').ok,
+);
+check(
+  'WHO tamamen düşerse REDDEDİLİR',
+  !validateTranslation('WHO monitors plague in Russia', "Rusya'da vebayı izliyor", 'en').ok,
 );
 check(
   'WHO korunursa GEÇER',
   validateTranslation('WHO monitors plague in Russia', "WHO Rusya'da vebayı izliyor", 'en').ok,
+);
+check(
+  'küçük harf "who" özel ad sayılmaz (ilgi zamiri)',
+  validateTranslation(
+    'Lab worker who died of plague in Russia',
+    "Rusya'da vebadan ölen laboratuvar çalışanı",
+    'en',
+  ).ok,
 );
 
 console.log('\n── validate: no-op / boş / Kiril sızıntısı ──────────────────────');
@@ -87,6 +99,10 @@ console.log('\n── glossary ────────────────�
 const gi = glossaryInstructions('Suspected plague case in Irkutsk monitored by WHO');
 check('plague → veba sözlükte', gi.includes('"plague" → "veba"'));
 check('WHO korunur olarak işaretlenir', gi.includes('"WHO" aynen korunur'));
+check(
+  'küçük harf "who" korunacak ad olarak işaretlenmez',
+  !glossaryInstructions('Lab worker who died of plague').includes('"WHO"'),
+);
 
 console.log('\n── sağlayıcı ayrıştırıcıları ────────────────────────────────────');
 check(

@@ -69,6 +69,48 @@ export const PROTECTED_ENTITIES = [
   'Yersinia pestis',
 ];
 
+/**
+ * Hedef dilde kabul edilen eşdeğerler.
+ *
+ * Gerçek MT kurum adlarını çevirir: Google "WHO"yu "DSÖ" yapar. Bu hâliyle
+ * çeviri "özel ad kayboldu" diye reddediliyordu.
+ */
+export const ENTITY_ALIASES: Record<string, string[]> = {
+  WHO: ['DSÖ', 'Dünya Sağlık Örgütü'],
+  CDC: ['ABD Hastalık Kontrol ve Önleme Merkezleri'],
+};
+
+/** Kısaltmalar (WHO, CDC…) kaynakta yalnızca BÜYÜK harfli hâliyle sayılır. */
+function isAcronym(entity: string): boolean {
+  return /^[A-Z]{2,6}$/.test(entity);
+}
+
+/**
+ * Özel ad kaynakta geçiyor mu?
+ *
+ * Kısaltmalarda büyük/küçük harf ayrımı şart: İngilizce "who" (ilgi zamiri)
+ * aksi hâlde "WHO" ile eşleşip "lab worker who died…" gibi başlıkların
+ * çevirisini reddettiriyordu.
+ */
+export function entityInSource(source: string, entity: string): boolean {
+  if (isAcronym(entity)) {
+    return new RegExp(`(^|[^A-Za-z0-9])${escapeRegExp(entity)}([^A-Za-z0-9]|$)`).test(source);
+  }
+  return wordMatch(fold(source), fold(entity));
+}
+
+/** Özel ad (veya kabul edilen eşdeğeri) çıktıda duruyor mu? */
+export function entityInOutput(output: string, entity: string): boolean {
+  const folded = fold(output);
+  return [entity, ...(ENTITY_ALIASES[entity] ?? [])].some((candidate) =>
+    wordMatch(folded, fold(candidate)),
+  );
+}
+
+function wordMatch(haystack: string, needle: string): boolean {
+  return new RegExp(`(^|[^a-z0-9])${escapeRegExp(needle)}([^a-z0-9]|$)`).test(haystack);
+}
+
 /** Çıktıda ASLA geçmemesi gereken ifadeler (fold edilmiş). */
 export const FORBIDDEN_OUTPUT = [
   'dogrulandi',
@@ -138,7 +180,7 @@ export function glossaryInstructions(sourceText: string): string {
     }
   }
   for (const entity of PROTECTED_ENTITIES) {
-    if (new RegExp(`(^|[^a-z0-9])${escapeRegExp(fold(entity))}([^a-z0-9]|$)`).test(folded)) {
+    if (entityInSource(sourceText, entity)) {
       lines.push(`- "${entity}" aynen korunur (çevrilmez)`);
     }
   }

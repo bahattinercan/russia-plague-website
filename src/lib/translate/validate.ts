@@ -22,17 +22,14 @@ import {
   HEDGE_SOURCE,
   HEDGE_TARGET,
   PROTECTED_ENTITIES,
-  escapeRegExp,
+  entityInOutput,
+  entityInSource,
 } from './glossary';
 import { looksTurkish } from './detect';
 
 export interface ValidationResult {
   ok: boolean;
   reason?: string;
-}
-
-function containsWord(text: string, word: string): boolean {
-  return new RegExp(`(^|[^a-z0-9])${escapeRegExp(word)}([^a-z0-9]|$)`).test(text);
 }
 
 export function validateTranslation(
@@ -58,10 +55,10 @@ export function validateTranslation(
     if (!output.includes(n)) return { ok: false, reason: `sayi-kayip:${n}` };
   }
 
-  // 4. Özel ad korunumu
+  // 4. Özel ad korunumu (kısaltmalarda büyük/küçük harf ayrımı ve kabul
+  //    edilen eşdeğerler için bkz. glossary.ts).
   for (const entity of PROTECTED_ENTITIES) {
-    const folded = fold(entity);
-    if (containsWord(src, folded) && !containsWord(out, folded)) {
+    if (entityInSource(source, entity) && !entityInOutput(output, entity)) {
       return { ok: false, reason: `ozel-ad-kayip:${entity}` };
     }
   }
