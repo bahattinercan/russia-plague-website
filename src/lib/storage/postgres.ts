@@ -317,6 +317,15 @@ export async function saveFeedToPostgres(feed: FeedFile): Promise<SaveResult> {
         'DELETE FROM event_articles WHERE event_id = ANY($1::text[])',
         [eventIds],
       );
+
+      // Olaylar her turda kümelemeden yeniden üretilir; küme kimliği içeriğe
+      // göre değiştiği için eski kümeler tabloda kalıyor ve sitede birikiyordu
+      // (ölçüldü: güncel feed'de 56 olay varken sayfada 99 kart). Bu satırlar
+      // ayrıca çeviri adımından ÖNCEki turlardan geldiği için title_tr'leri boş
+      // kalıyor ve /tr sayfasında sonsuza kadar İngilizce görünüyordu.
+      await client.query('DELETE FROM events WHERE NOT (id = ANY($1::text[]))', [eventIds]);
+    } else {
+      await client.query('DELETE FROM events');
     }
 
     const claimRows = feed.events.flatMap((e) =>
