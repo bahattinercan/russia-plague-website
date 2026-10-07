@@ -20,6 +20,11 @@ jobs:
 
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      # TR çeviri: DEEPL_API_KEY (önerilir) veya OPENAI_API_KEY tanımlıysa o
+      # sağlayıcı kullanılır; ikisi de yoksa anahtarsız Google katmanı devrededir.
+      DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      TRANSLATE_PROVIDER: ${{ vars.TRANSLATE_PROVIDER }}
 
     steps:
       - uses: actions/checkout@v4

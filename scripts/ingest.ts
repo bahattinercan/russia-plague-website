@@ -24,6 +24,7 @@ import {
 } from '@/lib/ingest/pipeline';
 import { loadLocalEnv } from '@/lib/env';
 import { backendLabel, saveFeed } from '@/lib/storage/store';
+import { translateFeed } from '@/lib/translate';
 
 const STALE_DAYS = 30;
 const CONCURRENCY = 5;
@@ -109,12 +110,22 @@ async function mapLimit<T, R>(
   return out;
 }
 
-function parseArgs(argv: string[]): { only: Set<string> | null; dry: boolean } {
+function parseArgs(argv: string[]): {
+  only: Set<string> | null;
+  dry: boolean;
+  translate: boolean;
+  noTranslate: boolean;
+} {
   const onlyArg = argv.find((a) => a.startsWith('--only='));
   const only = onlyArg
     ? new Set(onlyArg.slice('--only='.length).split(',').map((s) => s.trim()))
     : null;
-  return { only, dry: argv.includes('--dry') };
+  return {
+    only,
+    dry: argv.includes('--dry'),
+    translate: argv.includes('--translate'),
+    noTranslate: argv.includes('--no-translate'),
+  };
 }
 
 function pad(s: string, n: number): string {
@@ -153,7 +164,7 @@ function printReport(report: IngestReport): void {
 
 async function main(): Promise<void> {
   loadLocalEnv();
-  const { only, dry } = parseArgs(process.argv.slice(2));
+  const { only, dry, translate: forceTranslate, noTranslate } = parseArgs(process.argv.slice(2));
   const startedAt = new Date().toISOString();
   const t0 = Date.now();
 
@@ -189,6 +200,27 @@ async function main(): Promise<void> {
   const signals = deduped.filter((a) => a.tier === 5);
   const mainstream = deduped.filter((a) => a.tier !== 5);
   const events = buildEvents(mainstream);
+
+  // ── ÇEVİRİ ─────────────────────────────────────────────────────────────
+  // Kümeleme/etiketleme BİTTİKTEN SONRA, yayından hemen önce. Hedef dil TR;
+  // sağlayıcı yoksa veya --no-translate verilmişse sessizce atlanır
+  // (fail-open: site orijinal başlıklarla çalışmaya devam eder).
+  const translateNow = !noTranslate && (forceTranslate || !dry);
+  if (translateNow) {
+    const tr = await translateFeed(
+      { events, signals },
+      {
+        maxMs: Number(process.env.TRANSLATE_MAX_MS ?? '') || undefined,
+        budgetChars: Number(process.env.TRANSLATE_BUDGET_CHARS ?? '') || undefined,
+        log: (m) => console.log(m),
+      },
+    );
+    console.log(
+      `Çeviri (${tr.provider ?? 'yok'}): ${tr.applied} uygulandı, ${tr.failed} reddedildi, ` +
+        `${tr.attempted} denendi, ${tr.chars} karakter, ${tr.elapsedMs} ms` +
+        (tr.note ? ` — ${tr.note}` : ''),
+    );
+  }
 
   const labelCounts = events.reduce(
     (acc, e) => {
