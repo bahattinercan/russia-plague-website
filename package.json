@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "dev": "next dev",
     "build": "next build",
-    "security-check": "tsx scripts/security-check.ts"
+    "security-check": "tsx scripts/security-check.ts",
+    "translation-check": "tsx scripts/translation-check.ts"
   },
   "keywords": [],
   "author": "",
