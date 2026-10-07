@@ -2,6 +2,10 @@ name: ingest
 
 # Cron ingest: 10 dakikada bir kaynakları tarar, Neon Postgres'e yazar.
 # DATABASE_URL secret'ı yoksa ingest JSON'a düşer (fail-safe) — site çalışmaya devam eder.
+#
+# NOT: `schedule` yalnızca varsayılan daldaki (main) workflow dosyası için tetiklenir
+# ve GitHub zamanlayıcısı ilk kayıtta gecikebilir. Veri bayatladıysa
+# `gh workflow run ingest.yml --ref main` ile elle çalıştırın.
 on:
   schedule:
     - cron: "*/10 * * * *"
