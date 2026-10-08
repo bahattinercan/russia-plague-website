@@ -1,10 +1,9 @@
 import type { Article } from '@/types';
+import { Time } from './Time';
 import { getDict, type Locale } from '@/lib/i18n';
 import { formatDate } from '@/lib/format';
 import { archiveUrlFor, safeExternalUrl } from '@/lib/sources/text';
 import { localizedTitle } from '@/lib/translate/display';
-
-const MAX_VISIBLE = 24;
 
 /**
  * Doğrulanmamış sinyaller katmanı.
@@ -12,6 +11,10 @@ const MAX_VISIBLE = 24;
  * Telegram kanalları ve kayıt dışı yayıncılar burada, ana akıştan AYRI ve
  * görsel olarak geri planda gösterilir. Bunlar haber olarak sayılmaz
  * (PLAN.md §5.3).
+ *
+ * Bu bileşen ARTIK KESME YAPMAZ: verilen listeyi olduğu gibi gösterir.
+ * Sayfalama/kesme kararı sayfaya aittir (`/signals` → `?page=`), böylece
+ * "+N kayıt" satırı ile sayfa bağlantısı çelişmez.
  */
 export function SignalList({ signals, locale }: { signals: Article[]; locale: Locale }) {
   const t = getDict(locale);
@@ -24,11 +27,11 @@ export function SignalList({ signals, locale }: { signals: Article[]; locale: Lo
 
   const renderGroup = (title: string, items: Article[]) => {
     if (items.length === 0) return null;
-    const visible = items.slice(0, MAX_VISIBLE);
+    const visible = items;
 
     return (
       <div key={title} className="mt-4">
-        <h3 className="font-mono text-[10.5px] uppercase tracking-wider text-mist/70">
+        <h3 className="font-mono text-[11px] uppercase tracking-wider text-mist-2">
           {title} · {items.length}
         </h3>
         <ul className="mt-2 space-y-2">
@@ -43,12 +46,12 @@ export function SignalList({ signals, locale }: { signals: Article[]; locale: Lo
                 className="border-l-2 border-alarm/30 pl-3 transition-colors hover:border-alarm/70"
               >
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-alarm/80">
+                  <span className="font-mono text-[11px] uppercase tracking-wider text-alarm">
                     {locale === 'tr' ? 'doğrulanmamış' : 'unverified'}
                   </span>
-                  <span className="text-[12px] font-medium text-chalk/85">{s.sourceName}</span>
-                  <span className="font-mono text-[10px] text-mist/60">
-                    {formatDate(s.publishedAt, locale)}
+                  <span className="text-[12px] font-medium text-chalk">{s.sourceName}</span>
+                  <span className="font-mono text-[11px] text-mist-2">
+                    <Time iso={s.publishedAt} locale={locale} />
                   </span>
                 </div>
                 <p className="mt-0.5 text-[12.5px] leading-snug text-mist">
@@ -59,7 +62,7 @@ export function SignalList({ signals, locale }: { signals: Article[]; locale: Lo
                     href={href}
                     target="_blank"
                     rel="noopener noreferrer nofollow"
-                    className="link-underline mt-0.5 inline-block font-mono text-[10px] text-official/70"
+                    className="link-underline mt-0.5 inline-block font-mono text-[11px] text-official"
                   >
                     {t.original} ↗
                   </a>
@@ -69,7 +72,7 @@ export function SignalList({ signals, locale }: { signals: Article[]; locale: Lo
                     href={archive}
                     target="_blank"
                     rel="noopener noreferrer nofollow"
-                    className="link-underline ml-2 mt-0.5 inline-block font-mono text-[10px] text-mist/60"
+                    className="link-underline ml-2 mt-0.5 inline-block font-mono text-[11px] text-mist-2"
                   >
                     {t.archive} ↗
                   </a>
@@ -78,11 +81,6 @@ export function SignalList({ signals, locale }: { signals: Article[]; locale: Lo
             );
           })}
         </ul>
-        {items.length > visible.length && (
-          <p className="mt-2 font-mono text-[10.5px] text-mist/60">
-            +{items.length - visible.length} {locale === 'tr' ? 'kayıt' : 'more'}
-          </p>
-        )}
       </div>
     );
   };
@@ -90,8 +88,8 @@ export function SignalList({ signals, locale }: { signals: Article[]; locale: Lo
   return (
     <section id="sinyaller" className="reveal surface rounded-xl p-5">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-[17px] font-semibold tracking-tight text-chalk">{t.signals}</h2>
-        <p className="max-w-md text-[11.5px] leading-relaxed text-mist/75">{t.signalsHint}</p>
+        <h2 className="narrative text-[19px] font-semibold tracking-tight text-chalk">{t.signals}</h2>
+        <p className="max-w-md text-[11.5px] leading-relaxed text-mist">{t.signalsHint}</p>
       </div>
 
       {renderGroup(locale === 'tr' ? 'Telegram' : 'Telegram', social)}

@@ -21,8 +21,7 @@ export function formatDate(iso: string | null, locale: Locale = DEFAULT_LOCALE):
   }).format(d);
 }
 
-export function formatRelative(iso: string | null, locale: Locale): string {
-  if (!iso) return locale === 'tr' ? 'tarih yok' : 'no date';
+export function formatRelative(iso: string | null, locale: Locale): string {  if (!iso) return locale === 'tr' ? 'tarih yok' : 'no date';
   const diff = Date.now() - new Date(iso).getTime();
   const rtf = new Intl.RelativeTimeFormat(locale === 'tr' ? 'tr' : 'en', {
     numeric: 'auto',
@@ -36,6 +35,21 @@ export function formatRelative(iso: string | null, locale: Locale): string {
     if (Math.abs(diff) >= ms) return rtf.format(-Math.round(diff / ms), unit);
   }
   return rtf.format(0, 'minute');
+}
+
+/**
+ * Gün başlığı — zaman çizelgesindeki tarih grupları için.
+ * Mutlak (UTC) ve yıl içerir: izleme panosunda gün sınırı tartışmalı olmasın.
+ */
+export function formatDay(iso: string, locale: Locale = DEFAULT_LOCALE): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '—';
+  return new Intl.DateTimeFormat(locale === 'tr' ? 'tr-TR' : 'en-GB', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  }).format(d);
 }
 
 /**

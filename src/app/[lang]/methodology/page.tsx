@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import { getFeedSnapshot, healthSummary, formatDate } from '@/lib/data';
+import { Time } from '@/components/Time';
+import { getFeedSnapshot, healthSummary } from '@/lib/data';
 import {
   DEFAULT_LOCALE,
   LABEL_TEXT_I18N,
@@ -47,19 +48,17 @@ export default async function MethodologyPage({
         locale={locale}
         generatedAt={feed.generatedAt}
         sources={feed.report.sources}
-        events={feed.events}
-        signals={feed.signals.length}
       />
 
-      <main className="mx-auto max-w-3xl px-4 pt-10 sm:px-6">
+      <main id="icerik" className="mx-auto max-w-3xl px-4 pt-10 sm:px-6">
         <a
           href={`/${locale}`}
-          className="link-underline font-mono text-[10.5px] uppercase tracking-wider text-mist/70"
+          className="link-underline font-mono text-[11px] uppercase tracking-wider text-mist-2"
         >
           ← {tr ? 'Panoya dön' : 'Back to board'}
         </a>
 
-        <h1 className="reveal mt-5 text-[30px] font-semibold tracking-tight text-chalk">
+        <h1 className="reveal narrative mt-5 text-[28px] font-semibold tracking-tight text-chalk sm:text-[34px]">
           {t.methodology}
         </h1>
         <p className="reveal mt-3 text-[14.5px] leading-relaxed text-mist">
@@ -70,7 +69,7 @@ export default async function MethodologyPage({
 
         {/* ── 1. Temel kural ─────────────────────────────────────────── */}
         <section className="reveal mt-10">
-          <h2 className="text-[19px] font-semibold tracking-tight text-chalk">
+          <h2 className="narrative text-[21px] font-semibold tracking-tight text-chalk">
             1. {tr ? 'Sistem “doğrulandı” demez' : 'The system never says “confirmed”'}
           </h2>
           <p className="mt-3 text-[13.5px] leading-relaxed text-mist">
@@ -82,7 +81,7 @@ export default async function MethodologyPage({
 
         {/* ── 2. Etiketler ───────────────────────────────────────────── */}
         <section className="reveal mt-10">
-          <h2 className="text-[19px] font-semibold tracking-tight text-chalk">
+          <h2 className="narrative text-[21px] font-semibold tracking-tight text-chalk">
             2. {tr ? 'Etiketler ve anlamları' : 'Labels and their meanings'}
           </h2>
           <ul className="mt-4 space-y-3">
@@ -99,7 +98,7 @@ export default async function MethodologyPage({
 
         {/* ── 3. Bağımsızlık grupları ────────────────────────────────── */}
         <section className="reveal mt-10">
-          <h2 className="text-[19px] font-semibold tracking-tight text-chalk">
+          <h2 className="narrative text-[21px] font-semibold tracking-tight text-chalk">
             3. {tr ? 'Bağımsızlık grupları — en kritik kural' : 'Independence groups — the most important rule'}
           </h2>
           <p className="mt-3 text-[13.5px] leading-relaxed text-mist">
@@ -108,14 +107,14 @@ export default async function MethodologyPage({
               : 'Sources under the same ownership umbrella count as ONE source. If TASS, RIA, RT and Sputnik all publish the same story, the independent source count is 1. This is the core protection against “showing one source as many”.'}
           </p>
           <div className="surface mt-4 rounded-lg p-4">
-            <p className="font-mono text-[10.5px] uppercase tracking-wider text-mist/70">
+            <p className="font-mono text-[11px] uppercase tracking-wider text-mist-2">
               {tr ? 'Kullanılan gruplar' : 'Groups in use'}
             </p>
             <div className="mt-2.5 flex flex-wrap gap-1.5">
               {groups.map((g) => (
                 <span
                   key={g}
-                  className="rounded border border-edge-soft bg-abyss/60 px-2 py-0.5 font-mono text-[10px] text-mist/85"
+                  className="rounded border border-edge-soft bg-abyss/60 px-2 py-0.5 font-mono text-[11px] text-mist"
                 >
                   {GROUP_LABELS[g] ?? g}
                 </span>
@@ -126,7 +125,7 @@ export default async function MethodologyPage({
 
         {/* ── 4. Güven puanı ─────────────────────────────────────────── */}
         <section className="reveal mt-10">
-          <h2 className="text-[19px] font-semibold tracking-tight text-chalk">
+          <h2 className="narrative text-[21px] font-semibold tracking-tight text-chalk">
             4. {tr ? 'Güven puanı nasıl hesaplanır?' : 'How is the trust score computed?'}
           </h2>
           <pre className="surface mt-3 overflow-x-auto rounded-lg p-4 font-mono text-[11.5px] leading-relaxed text-mist">
@@ -143,13 +142,13 @@ export default async function MethodologyPage({
 
         {/* ── 5. Sınırlar ────────────────────────────────────────────── */}
         <section className="reveal mt-10">
-          <h2 className="text-[19px] font-semibold tracking-tight text-chalk">
+          <h2 className="narrative text-[21px] font-semibold tracking-tight text-chalk">
             5. {tr ? 'Sınırlar ve bilinen zayıflıklar' : 'Limits and known weaknesses'}
           </h2>
           <ul className="mt-3 space-y-2.5 text-[13px] leading-relaxed text-mist">
             {(tr ? LIMITS_TR : LIMITS_EN).map((line) => (
               <li key={line} className="flex gap-2.5">
-                <span aria-hidden className="text-mist/50">
+                <span aria-hidden className="text-mist-2">
                   —
                 </span>
                 <span>{line}</span>
@@ -160,7 +159,7 @@ export default async function MethodologyPage({
 
         {/* ── 6. Kaynaklar ───────────────────────────────────────────── */}
         <section className="reveal mt-10">
-          <h2 className="text-[19px] font-semibold tracking-tight text-chalk">
+          <h2 className="narrative text-[21px] font-semibold tracking-tight text-chalk">
             6. {tr ? 'Taranan kaynaklar' : 'Sources being monitored'}
           </h2>
           <p className="mt-3 text-[13px] text-mist">
@@ -172,13 +171,13 @@ export default async function MethodologyPage({
             <ul className="divide-y divide-edge-soft">
               {SOURCES.map((s) => (
                 <li key={s.slug} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 px-4 py-2.5">
-                  <span className="font-mono text-[10.5px] text-official/80">T{s.tier}</span>
-                  <span className="text-[12.5px] text-chalk/95">{s.name}</span>
-                  <span className="font-mono text-[10px] text-mist/70">
+                  <span className="font-mono text-[11px] text-official">T{s.tier}</span>
+                  <span className="text-[12.5px] text-chalk">{s.name}</span>
+                  <span className="font-mono text-[11px] text-mist-2">
                     {GROUP_LABELS[s.group] ?? s.group}
                   </span>
                   {s.notes && (
-                    <span className="w-full text-[11px] leading-relaxed text-mist/65">
+                    <span className="w-full text-[11px] leading-relaxed text-mist-2">
                       {s.notes}
                     </span>
                   )}
@@ -190,7 +189,7 @@ export default async function MethodologyPage({
 
         {/* ── 7. Tazelik ─────────────────────────────────────────────── */}
         <section className="reveal mt-10">
-          <h2 className="text-[19px] font-semibold tracking-tight text-chalk">
+          <h2 className="narrative text-[21px] font-semibold tracking-tight text-chalk">
             7. {t.dataFreshness}
           </h2>
           <p className="mt-3 text-[13px] leading-relaxed text-mist">
@@ -198,8 +197,8 @@ export default async function MethodologyPage({
               ? 'Veri 5–10 dakikalık aralıklarla yenilenir. Bayat feed’ler tespit edilir: bir kaynak yanıt veriyor ama içeriği eskiyse “BAYAT” olarak işaretlenir ve panelde görünür.'
               : 'Data refreshes every 5–10 minutes. Stale feeds are detected: if a source responds but its content is old, it is flagged as “STALE” and shown in the panel.'}
           </p>
-          <p className="mt-2 font-mono text-[10.5px] uppercase tracking-wider text-mist/60">
-            {t.lastScan}: {formatDate(feed.generatedAt, locale)} UTC
+          <p className="mt-2 font-mono text-[11px] uppercase tracking-wider text-mist-2">
+            {t.lastScan}: <Time iso={feed.generatedAt} locale={locale} />
           </p>
         </section>
 
