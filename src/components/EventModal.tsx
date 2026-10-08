@@ -140,7 +140,12 @@ export function EventModal({
               : '';
             const isTitleCopy =
               rawSummary.length > 0 &&
-              fold(rawSummary).startsWith(fold(cTitle.text).slice(0, 30));
+              // Özet Google News kalıntısı olabilir ("başlık + yayıncı adı").
+              // Hem ÇEVRİLMİŞ hem ORİJİNAL başlıkla karşılaştır: TR görünümde özet
+              // İngilizce kalırken başlık çevrildiği için tek karşılaştırma yetmiyor.
+              [cTitle.text, claim.title].some((t) =>
+                fold(rawSummary).startsWith(fold(t).slice(0, 30)),
+              );
             const sourceSummary = isTitleCopy ? '' : firstSentences(rawSummary);
             return (
               <li key={`${claim.sourceSlug}-${claim.url}`} className="border-l-2 border-edge pl-3">
