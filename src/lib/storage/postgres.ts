@@ -425,10 +425,32 @@ function iso(value: unknown): string | null {
  * JSON deposundaki FeedFile şekliyle birebir aynı döner — UI fark etmez.
  */
 export async function loadFeedFromPostgres(limitEvents = 200): Promise<FeedFile | null> {
-  await ensureSchema();
   const client = await getPool().connect();
 
   try {
+    /*
+     * OKUMA YOLUNDA DDL ÇALIŞTIRILMAZ.
+     *
+     * Önceden burada koşulsuz `await ensureSchema()` vardı; yani her okuma
+     * `CREATE TABLE IF NOT EXISTS` + `CREATE INDEX IF NOT EXISTS` çalıştırıyordu.
+     * Bu DDL, 10 dakikada bir çalışan cron ingest'i ile kilit çakışmasına
+     * girip `deadlock detected` (SQLSTATE 40P01) üretebiliyordu. Okuma
+     * başarısız olunca `store.loadFeed()` sessizce `data/feed.json` yedeğine
+     * düşüyordu — yani site ESKİ veriyi gösteriyordu ve bunu kimse görmüyordu.
+     *
+     * Artık önce ucuz bir varlık kontrolü yapılır; şema varsa hiç DDL koşmaz.
+     * Şema yoksa (ilk kurulum) bir kez kurulur. Yazma yolu (`saveFeedToPostgres`)
+     * zaten şemayı garanti ediyor.
+     */
+    if (!schemaReady) {
+      const probe = await client.query("SELECT to_regclass('public.events') AS t");
+      if (probe.rows[0]?.t == null) {
+        await ensureSchema();
+      } else {
+        schemaReady = true;
+      }
+    }
+
     const reportRes = await client.query(
       'SELECT * FROM ingest_reports ORDER BY finished_at DESC LIMIT 1',
     );
