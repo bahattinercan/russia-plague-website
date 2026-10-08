@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import type { PlagueEvent } from '@/types';
+import type { Article, PlagueEvent } from '@/types';
 import { getDict, type Locale } from '@/lib/i18n';
 import { GROUP_LABELS } from '@/lib/sources/registry';
 import { safeExternalUrl, fold } from '@/lib/sources/text';
-import { formatDate } from '@/lib/format';
+import { firstSentences, formatDate } from '@/lib/format';
 import { LabelBadge } from './LabelBadge';
 import { ContradictionPanel } from './ContradictionPanel';
 import { MachineTranslatedBadge } from './MachineTranslatedBadge';
@@ -37,6 +37,23 @@ export function EventModal({
   const summary = localizedText(locale, event.summary, event.summaryTr);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+
+  /*
+   * İddia → makale eşlemesi: kaynağın KENDİ özeti iddia listesinde gösterilir.
+   *
+   * Neden gerekli: iddia kaydı yalnızca BAŞLIĞI taşıyor; kaynağın 1-2 cümlelik
+   * özeti `articles[].excerpt` içinde. Bu yüzden detay, haberin ne dediğini
+   * gösterebilmek için makale kaydına bakar.
+   *
+   * Telif kuralı: `firstSentences(..., 2)` ile en fazla 2 cümle (PLAN.md §329).
+   * Google News üzerinden gelen eski öğelerde özet başlığın kopyasıydı; onları
+   * basmıyoruz (başlık hemen üstünde zaten var).
+   */
+  const articleByUrl = new Map<string, Article>();
+  for (const article of event.articles) {
+    articleByUrl.set(article.url, article);
+    if (article.canonicalUrl) articleByUrl.set(article.canonicalUrl, article);
+  }
 
   useEffect(() => {
     dialogRef.current?.showModal();
@@ -117,6 +134,14 @@ export function EventModal({
           {event.claims.map((claim) => {
             const href = safeExternalUrl(claim.url);
             const cTitle = localizedTitle(locale, claim);
+            const linked = articleByUrl.get(claim.url);
+            const rawSummary = linked
+              ? localizedText(locale, linked.excerpt, linked.excerptTr).text
+              : '';
+            const isTitleCopy =
+              rawSummary.length > 0 &&
+              fold(rawSummary).startsWith(fold(cTitle.text).slice(0, 30));
+            const sourceSummary = isTitleCopy ? '' : firstSentences(rawSummary);
             return (
               <li key={`${claim.sourceSlug}-${claim.url}`} className="border-l-2 border-edge pl-3">
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
@@ -134,6 +159,12 @@ export function EventModal({
                 <p className="mt-1 text-[12.5px] leading-snug text-mist">
                   {cTitle.text}
                 </p>
+                {sourceSummary && (
+                  <p className="mt-1.5 border-l-2 border-edge-soft pl-2.5 text-[12px] leading-relaxed text-mist/85">
+                    <span className="label">{t.sourceSummary}: </span>
+                    {sourceSummary}
+                  </p>
+                )}
                 {href && (
                   <a
                     href={href}
@@ -141,7 +172,7 @@ export function EventModal({
                     rel="noopener noreferrer nofollow"
                     className="link-underline mt-1 inline-block font-mono text-[10px] text-official/80"
                   >
-                    {t.original} ↗
+                    {t.readAtSource} ↗
                   </a>
                 )}
               </li>

@@ -45,6 +45,10 @@ export interface Dict {
   showSources: (n: number) => string;
   hideSources: string;
   viaAggregator: string;
+  /** Kaynağın kendi 1-2 cümlelik özeti (telif kuralı: ≤2 cümle). */
+  sourceSummary: string;
+  /** İddia satırındaki dış bağlantı: haberi kaynağında oku. */
+  readAtSource: string;
   stale: string;
   staleHint: string;
   failed: string;
@@ -104,6 +108,8 @@ const tr: Dict = {
   showSources: (n) => `${n} kaynağı göster`,
   hideSources: 'Kaynakları gizle',
   viaAggregator: 'toplayıcı üzerinden',
+  sourceSummary: 'Kaynağın özeti',
+  readAtSource: 'Haberi kaynağında oku',
   stale: 'BAYAT',
   staleHint: 'Feed canlı görünüyor ama içerik eski',
   failed: 'HATA',
@@ -163,6 +169,8 @@ const en: Dict = {
   showSources: (n) => `Show ${n} sources`,
   hideSources: 'Hide sources',
   viaAggregator: 'via aggregator',
+  sourceSummary: 'Source summary',
+  readAtSource: 'Read at the source',
   stale: 'STALE',
   staleHint: 'Feed responds but content is old',
   failed: 'FAILED',

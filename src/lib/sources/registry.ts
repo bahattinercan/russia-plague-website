@@ -218,7 +218,9 @@ export const SOURCES: SourceDef[] = [
     group: 'bbc',
     trustBase: 85,
     lang: 'en',
-    adapter: gn('site:bbc.com plague russia OR siberia'),
+    adapter: { kind: 'rss', url: 'https://feeds.bbci.co.uk/news/world/rss.xml' },
+    notes:
+      'Google News yerine DOĞRUDAN RSS (08 Eki 2026): gerçek makale linki + kaynağın kendi özeti geliyor. Genel dünya akışı → relevance filtresi zorunlu.',
   },
   {
     slug: 'aljazeera',
@@ -228,7 +230,9 @@ export const SOURCES: SourceDef[] = [
     group: 'aljazeera',
     trustBase: 82,
     lang: 'en',
-    adapter: gn('site:aljazeera.com plague russia'),
+    adapter: { kind: 'rss', url: 'https://www.aljazeera.com/xml/rss/all.xml' },
+    notes:
+      'Google News yerine DOĞRUDAN RSS (08 Eki 2026): gerçek makale linki + kaynağın kendi özeti. Genel akış → relevance filtresi zorunlu.',
   },
   {
     slug: 'euronews',
@@ -238,8 +242,84 @@ export const SOURCES: SourceDef[] = [
     group: 'euronews',
     trustBase: 80,
     lang: 'en',
-    adapter: gn('site:euronews.com plague russia OR siberia'),
+    adapter: { kind: 'rss', url: 'https://www.euronews.com/rss?level=theme&name=news' },
+    notes:
+      'Google News yerine DOĞRUDAN RSS (08 Eki 2026): gerçek makale linki + kaynak özeti. Genel akış → relevance filtresi zorunlu.',
   },
+  {
+    slug: 'guardian',
+    name: 'The Guardian',
+    aliases: ['Guardian'],
+    homepage: 'https://www.theguardian.com/world',
+    tier: 2,
+    group: 'guardian',
+    trustBase: 80,
+    lang: 'en',
+    adapter: { kind: 'rss', url: 'https://www.theguardian.com/world/rss' },
+    notes:
+      'Doğrudan RSS (08 Eki 2026). Önceden yalnızca keşif (discovery) ile geliyordu, kaynak olarak taranmıyordu. Genel dünya akışı → relevance filtresi zorunlu.',
+  },
+  {
+    slug: 'nbc',
+    name: 'NBC News',
+    aliases: ['NBC'],
+    homepage: 'https://www.nbcnews.com',
+    tier: 2,
+    group: 'nbc',
+    trustBase: 82,
+    lang: 'en',
+    adapter: { kind: 'rss', url: 'https://feeds.nbcnews.com/nbcnews/public/news' },
+    notes:
+      'Doğrudan RSS (08 Eki 2026). Önceden yalnızca keşif ile geliyordu. Genel haber akışı → relevance filtresi zorunlu.',
+  },
+  {
+    slug: 'axios',
+    name: 'Axios',
+    homepage: 'https://www.axios.com',
+    tier: 2,
+    group: 'axios',
+    trustBase: 78,
+    lang: 'en',
+    adapter: { kind: 'rss', url: 'https://api.axios.com/feed/' },
+    notes:
+      'Doğrudan RSS (08 Eki 2026, 100 öğe). Genel akış → relevance filtresi zorunlu.',
+  },
+
+  // ── Doğrudan RSS'e geçen yayıncılar (08 Eki 2026) ────────────────────────
+  //
+  // Neden: Google News öğeleri ne kaynak özeti taşıyordu ne de makale adresini
+  // sunucuya veriyordu (yönlenme tarayıcıda JS ile oluyor, curl ile ölçüldü:
+  // 302 → kendisi). Yayıncının KENDİ RSS'i hem gerçek makale linkini hem de
+  // kaynağın kendi 1-2 cümlelik özetini verir — telif kuralı zaten
+  // "başlık + ≤2 cümle + link" diyor (PLAN.md §329).
+  //
+  // Bu feed'lerin hepsi GENEL akış (dünya haberi) → relevance filtresi zorunlu.
+  // Ölçüm (267 öğe / 6 kaynak): 12 öğe ilgili çıktı, YANLIŞ POZİTİF YOK.
+  //
+  // Kimlik değerleri (tier/trustBase/aliases) KNOWN_PUBLISHERS'tan birebir
+  // alındı ki keşif yoluyla gelen aynı yayıncı ile çelişmesin.
+  // Tek satırlık biçim bilinçli: bu blok bir veri tablosu, kod değil.
+  // Eklenmeyenler: CNN (feed'i yalnızca `http://` ile çalışıyor — şifresiz dış
+  // kaynak alınmaz) ve WSJ (feed'i ölü: en yeni öğe 2025-01-27 → ölçüldü,
+  // ingest'te BAYAT olarak işaretleniyordu, kaldırıldı). Independent ve
+  // Telegraph bot koruması (403) nedeniyle zaten erişilemiyor.
+  { slug: 'nytimes', name: 'The New York Times', aliases: ['New York Times', 'NYT'], homepage: 'https://www.nytimes.com', tier: 2, group: 'nytimes', trustBase: 85, lang: 'en', adapter: { kind: 'rss', url: 'https://rss.nytimes.com/services/xml/rss/nyt/World.xml' } },
+  { slug: 'wapo', name: 'The Washington Post', aliases: ['Washington Post'], homepage: 'https://www.washingtonpost.com', tier: 2, group: 'wapo', trustBase: 84, lang: 'en', adapter: { kind: 'rss', url: 'https://feeds.washingtonpost.com/rss/world' } },
+  { slug: 'npr', name: 'NPR', homepage: 'https://www.npr.org', tier: 2, group: 'npr', trustBase: 82, lang: 'en', adapter: { kind: 'rss', url: 'https://feeds.npr.org/1004/rss.xml' } },
+  { slug: 'pbs', name: 'PBS NewsHour', aliases: ['PBS'], homepage: 'https://www.pbs.org/newshour', tier: 2, group: 'pbs', trustBase: 82, lang: 'en', adapter: { kind: 'rss', url: 'https://www.pbs.org/newshour/feeds/rss/world' } },
+  { slug: 'lemonde', name: 'Le Monde', homepage: 'https://www.lemonde.fr/en', tier: 2, group: 'lemonde', trustBase: 82, lang: 'en', adapter: { kind: 'rss', url: 'https://www.lemonde.fr/en/rss/une.xml' } },
+  { slug: 'abc', name: 'ABC News', homepage: 'https://abcnews.go.com', tier: 2, group: 'abc', trustBase: 78, lang: 'en', adapter: { kind: 'rss', url: 'https://abcnews.go.com/abcnews/internationalheadlines' } },
+  { slug: 'cnbc', name: 'CNBC', homepage: 'https://www.cnbc.com', tier: 2, group: 'cnbc', trustBase: 78, lang: 'en', adapter: { kind: 'rss', url: 'https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114' } },
+  { slug: 'atlantic', name: 'The Atlantic', aliases: ['Atlantic'], homepage: 'https://www.theatlantic.com', tier: 2, group: 'atlantic', trustBase: 78, lang: 'en', adapter: { kind: 'rss', url: 'https://www.theatlantic.com/feed/all/' } },
+  { slug: 'skynews', name: 'Sky News', homepage: 'https://news.sky.com', tier: 2, group: 'skynews', trustBase: 75, lang: 'en', adapter: { kind: 'rss', url: 'https://feeds.skynews.com/feeds/rss/world.xml' } },
+  { slug: 'globalnews', name: 'Global News', homepage: 'https://globalnews.ca', tier: 2, group: 'globalnews', trustBase: 75, lang: 'en', adapter: { kind: 'rss', url: 'https://globalnews.ca/world/feed/' } },
+  { slug: 'thehill', name: 'The Hill', homepage: 'https://thehill.com', tier: 2, group: 'thehill', trustBase: 72, lang: 'en', adapter: { kind: 'rss', url: 'https://thehill.com/feed/' } },
+  { slug: 'vox', name: 'Vox', homepage: 'https://www.vox.com', tier: 2, group: 'vox', trustBase: 72, lang: 'en', adapter: { kind: 'rss', url: 'https://www.vox.com/rss/index.xml' } },
+  { slug: 'newsweek', name: 'Newsweek', homepage: 'https://www.newsweek.com', tier: 2, group: 'newsweek', trustBase: 65, lang: 'en', adapter: { kind: 'rss', url: 'https://www.newsweek.com/rss' } },
+  { slug: 'nypost', name: 'New York Post', homepage: 'https://nypost.com', tier: 2, group: 'nypost', trustBase: 62, lang: 'en', adapter: { kind: 'rss', url: 'https://nypost.com/feed/' } },
+  { slug: 'foxnews', name: 'Fox News', homepage: 'https://www.foxnews.com', tier: 2, group: 'foxnews', trustBase: 60, lang: 'en', adapter: { kind: 'rss', url: 'https://moxie.foxnews.com/google-publisher/world.xml' } },
+  { slug: 'science', name: 'Science', homepage: 'https://www.science.org', tier: 2, group: 'science', trustBase: 90, lang: 'en', adapter: { kind: 'rss', url: 'https://www.science.org/rss/news_current.xml' } },
+
   {
     slug: 'bmj',
     name: 'The BMJ',
