@@ -20,6 +20,7 @@ Bu dosya, isteğin ölçülmüş veriyle karşılaştırması ve uygulama planı
 | 08 Eki 2026 | **Mobil işaretçi çakışması düzeltildi** (ölçüm: dünya çerçevesinde Sibirya–İrkutsk 13 px → 26 px rozetler üst üste). Odak çerçevesi + Sibirya temsilî noktası 95°D → 85°D. Yeni aralık ~42 px. | ✅ Yapıldı |
 | 08 Eki 2026 | **R2 uygulandı:** `cases` ölçütü küratörlü 3 kayıtla açıldı (0 · 0 · 2). `figures-check` değer kapısı `cases` için 0'a izin verir hâle getirildi; `FigureCards` çelişkiyi artık işaretliyor. | ✅ Yapıldı |
 | 08 Eki 2026 | **Kapılar:** `check-all` 6/6 geçti · `layout-check` 12/12 geçti (360/390/768/1280/1440 px taşma 0 · pano 1440px'te 3367 px, bütçe 6000). | ✅ Doğrulandı |
+| 08 Eki 2026 (akşam) | **`cases-none-tass` KALDIRILDI.** Bağ cümlesi ("WHO confirms no new plague cases…") feed penceresinden düştü — ölçüm 22:41, Postgres: `qgn8g` yok, cümle hiçbir kayıtta geçmiyor. `cases` artık 2 kayıt (0 · 2), çelişki işaretli. `check-all` yeniden 6/6. | ✅ Doğrulandı |
 
 ---
 
@@ -140,7 +141,7 @@ cevaplar ve bilmediğini açıkça yazar.
 └────────────────────────────────────────────────────────────┘
 
 Rakamlar ayrı bölümde (mevcut `Rakamlar` kartları) ve R2 ile artık vaka da var:
-  vaka  0 · 2 (3 kaynak, 4 bağımsız grup) ⚑ kaynaklar farklı değer veriyor
+  vaka  0 · 2 (2 kaynak, 6 bağımsız grup) ⚑ kaynaklar farklı değer veriyor
   ölüm  1 (CIDRAP)
   kısıtlama ≈200 (CIDRAP · NBC · CNBC)
 ```
@@ -213,7 +214,7 @@ Harita bölümü **iki farklı eşiğe** tabidir — biri bugün, biri koroplet 
 |---|---|---|---|
 | Bağlam haritası (Seçenek A) — **sayı iddiası yok** | Ülke katmanı gerekmez; işaretçiler yalnızca doğrulanmış bölge toplamları | siberian 24 · irkutsk 8 · moscow 3 | ✅ Uygulandı |
 | Koroplet / ülke boyaması (Seçenek B) | ≥3 anlamlı ülke **ve** kapsama ≥ %60 **ve** ilgisiz eşleşme = 0 | 1 anlamlı ülke · %41 · Ukrayna ilgisiz eşleşiyor | ❌ Geçmiyor (bilinçli olarak yok) |
-| Vaka sayısı gösterimi | `cases` metriğinde ≥1 çözülen kayıt | 3 kayıt (0/0/2), 4 bağımsız grup, çelişki işaretli | ✅ R2 ile karşılandı |
+| Vaka sayısı gösterimi | `cases` metriğinde ≥1 çözülen kayıt | 2 kayıt (0/2), 6 bağımsız grup, çelişki işaretli | ✅ R2 ile karşılandı |
 
 **Yedek plan:** koroplet kapısı geçmediği sürece ülke boyaması yapılmaz; harita bağlam
 katmanı olarak kalır ve kapsama notu görünür olur. Bu, `/locations` sayfasının bugünkü
@@ -229,6 +230,9 @@ dürüst davranışının (`"harita değil liste: kapsama %60'ın altında"`) ha
 3. ~~Vaka sayısı R1 mi, R2 mi?~~ → **R2** (iddia/ret çifti küratörlü kayıt olarak
    eklendi; çelişki arayüzde işaretli). Yorum riski `_readme`de yazılı:
    `value: 2` bir TOPLAM değil, kaynağın cümlesindeki sıra sayısıdır.
+   **Güncelleme (08 Eki 2026, akşam):** çiftin "ret" tarafı (`cases-none-tass`)
+   feed penceresinden düştüğü için kaldırıldı; çelişki yine duruyor, çünkü
+   0 tarafı Reuters'ın kendi cümlesinden geliyor ("no plague cases").
 4. ~~Harita ayrı bölüm mü, mevcut bölümde mi?~~ → **Pano sayfasında**, mevcut
    `Bölgeler` bölümünün içinde (harita üstte, liste altta). Aynı üç bölgeyi
    ~200 px arayla iki kez göstermek, §1'de kaldırdığımız çift gösterimin
