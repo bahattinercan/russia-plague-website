@@ -5,7 +5,7 @@ import type { PlagueEvent } from '@/types';
 import { getDict, type Locale } from '@/lib/i18n';
 import { GROUP_LABELS } from '@/lib/sources/registry';
 import { formatDate } from '@/lib/format';
-import { fold, safeExternalUrl } from '@/lib/sources/text';
+import { archiveUrlFor, fold, safeExternalUrl } from '@/lib/sources/text';
 import { LabelBadge } from './LabelBadge';
 import { ContradictionPanel } from './ContradictionPanel';
 import { EventModal } from './EventModal';
@@ -129,6 +129,9 @@ export function EventCard({
                 const href = safeExternalUrl(a.url);
                 if (!href) return null;
                 const aTitle = localizedTitle(locale, a);
+                // §13.2: her kayıtta arşiv bağlantısı erişilebilir olmalı.
+                // Google News toplayıcı linkleri arşivlenemez → archiveUrlFor null döner.
+                const archive = safeExternalUrl(a.archiveUrl ?? archiveUrlFor(a.url));
                 return (
                   <li key={a.id} className="border-l-2 border-edge pl-3">
                     <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
@@ -161,6 +164,16 @@ export function EventCard({
                       {!aTitle.machine && `${t.readOriginal}: `}
                       {aTitle.machine ? aTitle.text : fold(aTitle.text)}
                     </a>
+                    {archive && (
+                      <a
+                        href={archive}
+                        target="_blank"
+                        rel="noopener noreferrer nofollow"
+                        className="link-underline ml-2 mt-1 inline-block font-mono text-[10px] text-mist/60"
+                      >
+                        {t.archive} ↗
+                      </a>
+                    )}
                   </li>
                 );
               })}

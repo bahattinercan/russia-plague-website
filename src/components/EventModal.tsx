@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import type { Article, PlagueEvent } from '@/types';
 import { getDict, type Locale } from '@/lib/i18n';
 import { GROUP_LABELS } from '@/lib/sources/registry';
-import { safeExternalUrl, fold } from '@/lib/sources/text';
+import { archiveUrlFor, safeExternalUrl, fold } from '@/lib/sources/text';
 import { firstSentences, formatDate } from '@/lib/format';
 import { LabelBadge } from './LabelBadge';
 import { ContradictionPanel } from './ContradictionPanel';
@@ -147,6 +147,8 @@ export function EventModal({
                 fold(rawSummary).startsWith(fold(t).slice(0, 30)),
               );
             const sourceSummary = isTitleCopy ? '' : firstSentences(rawSummary);
+            // §13.2: her kayıtta arşiv bağlantısı erişilebilir olmalı.
+            const archiveHref = safeExternalUrl(linked?.archiveUrl ?? archiveUrlFor(claim.url));
             return (
               <li key={`${claim.sourceSlug}-${claim.url}`} className="border-l-2 border-edge pl-3">
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
@@ -178,6 +180,16 @@ export function EventModal({
                     className="link-underline mt-1 inline-block font-mono text-[10px] text-official/80"
                   >
                     {t.readAtSource} ↗
+                  </a>
+                )}
+                {archiveHref && (
+                  <a
+                    href={archiveHref}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="link-underline ml-2 mt-1 inline-block font-mono text-[10px] text-mist/60"
+                  >
+                    {t.archive} ↗
                   </a>
                 )}
               </li>

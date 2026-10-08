@@ -1,7 +1,7 @@
 import type { Article } from '@/types';
 import { getDict, type Locale } from '@/lib/i18n';
 import { formatDate } from '@/lib/data';
-import { safeExternalUrl } from '@/lib/sources/text';
+import { archiveUrlFor, safeExternalUrl } from '@/lib/sources/text';
 import { localizedTitle } from '@/lib/translate/display';
 
 const MAX_VISIBLE = 24;
@@ -35,6 +35,8 @@ export function SignalList({ signals, locale }: { signals: Article[]; locale: Lo
           {visible.map((s) => {
             const href = safeExternalUrl(s.url);
             const sTitle = localizedTitle(locale, s);
+            // §13.2: sinyaller de kayıt — arşiv bağlantısı erişilebilir olmalı.
+            const archive = safeExternalUrl(s.archiveUrl ?? archiveUrlFor(s.url));
             return (
               <li
                 key={s.id}
@@ -60,6 +62,16 @@ export function SignalList({ signals, locale }: { signals: Article[]; locale: Lo
                     className="link-underline mt-0.5 inline-block font-mono text-[10px] text-official/70"
                   >
                     {t.original} ↗
+                  </a>
+                )}
+                {archive && (
+                  <a
+                    href={archive}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="link-underline ml-2 mt-0.5 inline-block font-mono text-[10px] text-mist/60"
+                  >
+                    {t.archive} ↗
                   </a>
                 )}
               </li>
