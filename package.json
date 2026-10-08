@@ -14,7 +14,8 @@
     "dev": "next dev",
     "build": "next build",
     "security-check": "tsx scripts/security-check.ts",
-    "translation-check": "tsx scripts/translation-check.ts"
+    "translation-check": "tsx scripts/translation-check.ts",
+    "ingest:trigger": "tsx scripts/trigger-ingest.ts"
   },
   "keywords": [],
   "author": "",

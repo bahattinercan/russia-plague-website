@@ -1,11 +1,25 @@
 name: ingest
 
-# Cron ingest: 10 dakikada bir kaynakları tarar, Neon Postgres'e yazar.
+# Cron ingest: kaynakları tarar, Neon Postgres'e yazar.
 # DATABASE_URL secret'ı yoksa ingest JSON'a düşer (fail-safe) — site çalışmaya devam eder.
 #
-# NOT: `schedule` yalnızca varsayılan daldaki (main) workflow dosyası için tetiklenir
-# ve GitHub zamanlayıcısı ilk kayıtta gecikebilir. Veri bayatladıysa
-# `gh workflow run ingest.yml --ref main` ile elle çalıştırın.
+# TETİKLEYİCİLER — iki tane var, ikisi de aynı `concurrency: ingest` grubunda,
+# yani üst üste binen istekler birikmez (1 çalışır + 1 kuyrukta bekler):
+#
+#  1) `schedule` (aşağıda) — YEDEK. GitHub'ın zamanlayıcısı ücretsiz katmanda
+#     ağır kısıtlı: "her 10 dakika" pratikte saatte bire düşüyor, bazen hiç
+#     çalışmıyor. Ölçüm: 2026-10-07'de 9 saatlik pencerede yalnızca 1 zamanlanmış
+#     çalışma tetiklendi.
+#  2) cron-job.org → workflow_dispatch API — ASIL tetikleyici, gerçek 10 dk kadansı.
+#     Kurulum: docs/dispatch-tetikleme.md
+#
+# MALİYET: Bu repo PUBLIC olduğu için public repolarda Actions dakikaları
+# sınırsızdır; 10 dk kadansı bedava. Repo tekrar PRIVATE yapılırsa Free plan
+# 2.000 dk/ay verir ve 10 dk kadansı (~7.600 dk/ay) kotayı ~8 günde bitirir —
+# o durumda kadansı 45–60 dk'ya çekin. Ayrıntı: docs/dispatch-tetikleme.md
+#
+# NOT: `schedule` yalnızca varsayılan daldaki (main) workflow dosyası için tetiklenir.
+# Veri bayatladıysa `gh workflow run ingest.yml --ref main` ile elle çalıştırın.
 on:
   schedule:
     - cron: "*/10 * * * *"
