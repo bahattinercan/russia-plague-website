@@ -8,13 +8,19 @@ import { TimeZoneToggle } from './TimeZoneToggle';
 import { Nav } from './Nav';
 
 /**
- * Sabit durum bandı: veri tazeliği ve kaynak sağlığı her zaman görünür.
+ * Sabit durum bandı: veri tazeliği her zaman görünür; kaynak sağlığı yalnızca
+ * noktanın renginde (sayı olarak değil).
  * Tazelik iddiası ölçülebilir olmalı — bu yüzden "son tarama" burada.
  *
  * TEKRAR KURALI (ölçüldü, docs/arayuz-plani.md §1.6): olay/kaynak/sinyal
  * SAYILARI burada gösterilmez — panodaki durum kartlarında var. Üst barda
- * yalnızca panonun göstermediği şey kalır: ani tazelik ve ARIZA/BAYATLIK
- * uyarıları (gizlenmez, yalnızca tekrar edilmez).
+ * yalnızca panonun göstermediği şey kalır: ani tazelik.
+ *
+ * BAYAT/HATA SAYILARI (kullanıcı kararı): buradan kaldırıldı — üst bar
+ * "marka + son tarama + gezinme" olarak sade kalır (docs/arayuz-plani.md §4
+ * navigasyon satırı: marka + canlı nokta + son tarama + dil + metodoloji).
+ * Uyarı kaybolmadı: nokta rengi sağlığı yansıtır, sayılar durum şeridinde
+ * ("N kaynakta sorun") ve /sources sayfasında görünür.
  */
 export function StatusBar({
   locale,
@@ -44,17 +50,6 @@ export function StatusBar({
         <span className="font-mono text-[11px] uppercase tracking-wider text-mist-2">
           {t.lastScan}: <TimeAgo iso={generatedAt} locale={locale} className="text-mist" />
         </span>
-
-        {health.stale > 0 && (
-          <span className="font-mono text-[11px] uppercase tracking-wider text-caution">
-            {health.stale} {t.stale}
-          </span>
-        )}
-        {health.failed > 0 && (
-          <span className="font-mono text-[11px] uppercase tracking-wider text-critical">
-            {health.failed} {t.failed}
-          </span>
-        )}
 
         <div className="ml-auto flex items-center gap-3">
           <a
