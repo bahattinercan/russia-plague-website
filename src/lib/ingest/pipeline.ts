@@ -226,9 +226,32 @@ function tokens(input: string): Set<string> {
   );
 }
 
-/** Kümeleme başlık + özet üzerinden yapılır; başlık tek başına zayıftı. */
-function clusterTokens(a: Article): Set<string> {
-  return tokens(`${a.title} ${a.excerpt}`);
+/**
+ * Kümeleme benzerliği: BAŞLIK ağırlıklı (0.7) + başlık+özet (0.3).
+ *
+ * ÖLÇÜM (120 makale, 08 Eki 2026, canlı feed):
+ *   A) yalnızca başlık+özet Jaccard, temsilci karşılaştırması → 84 olay,
+ *      4 parçalanma çifti (aynı haber ayrı olay)
+ *   B) 0.7·başlık + 0.3·özet, temsilci → 77 olay, PARÇALANMA 0,
+ *      çok üyeli küme 16 → 18
+ *   C) B + tüm üyelerle karşılaştırma → 64 olay, çok üyeli 7 (AŞIRI
+ *      birleştirme: farklı olaylar tek kümeye giriyor) → reddedildi
+ *   D) IDF ağırlıklı benzerlik → 104 olay, parçalanma 5 → reddedildi;
+ *      bu korpusta "plague/russia" gibi ORTAK token'lar aynı olayın işareti,
+ *      nadir token'lar ise yayıncıya özgü (ayırıcı değil).
+ *
+ * Neden gerekli oldu: kaynaklar gerçek RSS özetlerine geçince özet token'ları
+ * çoğaldı ve Jaccard düştü; aynı haber farklı olaylara bölünüyordu.
+ */
+const TITLE_WEIGHT = 0.7;
+const EXCERPT_WEIGHT = 1 - TITLE_WEIGHT;
+
+function clusterSimilarity(a: Article, b: Article): number {
+  return (
+    TITLE_WEIGHT * jaccard(tokens(a.title), tokens(b.title)) +
+    EXCERPT_WEIGHT *
+      jaccard(tokens(`${a.title} ${a.excerpt}`), tokens(`${b.title} ${b.excerpt}`))
+  );
 }
 
 function jaccard(a: Set<string>, b: Set<string>): number {
@@ -255,10 +278,7 @@ export function clusterArticles(articles: Article[]): Article[][] {
   for (const a of sorted) {
     const target = clusters.find((c) => {
       const rep = c[0];
-      return (
-        withinWindow(a, rep) &&
-        jaccard(clusterTokens(a), clusterTokens(rep)) >= JACCARD_THRESHOLD
-      );
+      return withinWindow(a, rep) && clusterSimilarity(a, rep) >= JACCARD_THRESHOLD;
     });
     if (target) target.push(a);
     else clusters.push([a]);
