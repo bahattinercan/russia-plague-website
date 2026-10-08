@@ -105,14 +105,25 @@ aynı ağırlık, aynı çerçeve** — etiket sistemi "biri önemli" diyor, yer
 
 | Katman | Kod | Ölçüm | Arayüz |
 |---|---|---|---|
-| Sayısal durum (`PLAN §9.5`) | `src/lib/figures.ts` — `buildFigures()` | `figures-check` **geçiyor**: ölüm 1 (2 bağımsız grup) · kısıtlama 200 (4 grup) · vaka yok | **yok** — hiçbir component `figures.ts`'i import etmiyor |
+| Sayısal durum (`PLAN §9.5`) | `src/lib/figures.ts` — `buildFigures()` | `figures-check` **geçiyor**: ölüm 1 (2 bağımsız grup) · kısıtlama 200 (4 grup) · ~~vaka yok~~ vaka 0/2 (4 grup) | **yok** — hiçbir component `figures.ts`'i import etmiyor |
 | Konum (`PLAN §9.6`) | `src/lib/geo/location.ts` — `aggregateLocations()` | `geo-check`: kapsama **16/57 (%28)**, plan gereği harita değil **R1-B liste** | **yok** |
 
 Yani iki veri katmanı, testleri yeşil şekilde bekliyor.
 
+> **Güncelleme (08 Eki 2026): ikisi de ekrana çıktı.** Rakamlar panodaki `Rakamlar`
+> kartlarında (`FigureCards`) ve `/figures` tablosunda; konum haritası `Bölgeler`
+> bölümünde (`WorldMap` — dünya varlığı + işaretçiler). Satır 1'in "vaka yok"
+> ölçümü de değişti: `cases` ölçütü küratörlü iki kayıtla açıldı (0 vs 2, çelişki
+> arayüzde işaretli) — gerekçe `data/figures.json` `_readme` ve
+> **`docs/harita-plani.md`** §4. Harita kararının ölçümü ve kapıları da o dosyada.
+> Kapsama ölçümü son durumda **29/70 (%41)**.
+
 ### 1.6 🟡 Diğer sürtünmeler
 
-- **Aynı sayılar iki kez:** durum bandı + hero'daki 4 kutu, ~300 px arayla aynı metrikleri söylüyor.
+- ~~**Aynı sayılar iki kez:** durum bandı + hero'daki 4 kutu, ~300 px arayla aynı metrikleri söylüyor.~~
+  **Çözüldü (08 Eki 2026):** hero'daki 4 toplam kutusu kaldırıldı; değişimi `StatusStrip`,
+  toplamları `Diğer katmanlar` ve `Rakamlar` bölümleri söylüyor. (Yalnızca "bağımsız grup"
+  toplamı artık panoda yok; kavram `Rakamlar` kartlarında ölçüt bazında duruyor.)
 - **Karışık saat dili:** nav `08 Eki 14:20 UTC` · kart `Yayın: 08 Eki 10:00 UTC` + `Güncellendi: 17 dakika önce`.
 - **Sinyaller düz metin duvarı:** 121 sinyal, 24'ü gösteriliyor, arama/gezinme yok.
 - **Sakin durum yok:** hiçbir şey olmadığında ekran "74 olay" diyor; "şu an durum nedir?" cevabı vermiyor.
@@ -194,8 +205,11 @@ Dikey sıra (her blok tek bir soruyu cevaplar):
    Kural: **etiket rozeti manşetin ÜSTÜNDE**; sansasyon yok.
 3. **Rakamlar** (3 kart): Vaka / Ölüm / Kısıtlanan kişi → değer + `qualifier` ("neredeyse 200") +
    `as_of` + bağımsız grup sayısı; çelişkide **iki değer birlikte**. Detay → `/figures`.
-4. **Bölgeler** (liste, R1-B): Sibirya 12 · İrkutsk 5 · Buryatya 1 + **"57 olayın 16'sında konum
-   belirlenebildi (%28)"** dürüstlük satırı. Detay → `/locations`.
+4. **Bölgeler** (harita + liste): dünya haritası — Rusya vurgulu, olay bildirilen bölgeler
+   sayı rozetiyle işaretli (mobilde odak çerçevesi) + `Sibirya 24 · İrkutsk 8 · Moskova 3`
+   listesi + **"70 olayın 29'unda konum belirlenebildi (%41)"** dürüstlük satırı ve
+   "işaretçideki sayı OLAY sayısıdır, vaka değildir" notu. **Ülke boyaması yok** — kapsama
+   %60 kapısını geçmiyor (`docs/harita-plani.md` §2.1, §5). Detay → `/locations`.
 5. **Son gelişmeler** (5 satır, kompakt ledger) → "Tüm akış (74) →"
 6. **Sinyaller + Kaynaklar özeti** (tek satır sayı + link; 24'lük duvar panodan kalkar)
 7. **Uyarı** (disclaimer) + footer
@@ -502,5 +516,9 @@ Bu ikisi, planın geri kalanı için de **ölçüm altyapısını** kurar.
 1. **404 gövdesi istemcide render edilir.** Next 16'da `notFound()` ile üretilen yanıtta SSR DOM'u boştur; içerik yalnızca RSC yükünde gelir. Denenen yollar: `params` (gelmiyor), saf sunucu bileşeni (DOM'da yok), `headers()`/`cookies()` (statik prerender'ı bozuyor, gövde yine boş), `html[lang]`+CSS (nitelikler 404 yanıtında kayboluyor). Sonuç: **JS kapalıysa 404 boş görünür**; JS'li ziyaretçi doğru dilde okunur bir 404 görür (HTTP durumu 404 kalır).
 2. **Olay bağlantıları yeniden gruplamada kayabilir.** Yumuşak çözümleme bağlantıyı karşılar ama garanti vermez; kalıcı `publicRef` (F3b) hâlâ opsiyonel ve yapılmadı.
 3. **`data/figures.json` bakım ister.** Uygulama sırasında 2 küratörlü kaydın bağ cümlesi canlı feed penceresinden düştü (`figures.ts` başlığındaki bilinen kırılganlık: The Moscow Times makale seti değişti). Kayıtlar kaldırıldı, gerekçe dosyanın `_readme` alanına yazıldı; panel o sırada kaydı **göstermedi** ve uyarı verdi (tasarlandığı gibi).
-4. **Konum kapsaması %38** (28/74). Harita bu yüzden yok; liste + kapsama notu var.
+4. **Konum kapsaması %41** (29/70, ölçüm 08 Eki 2026). Harita artık VAR ama **ülke boyaması
+   bilinçli olarak yok**: kapsama %60 kapısını geçmediği için koplet yanlış yoğunluk gösterirdi
+   (ölçüm: "Ukrayna" ilgisiz bir cümleyle eşleşiyor). Harita yalnızca Rusya'yı vurgular ve
+   konumu belirlenebilen olayların işaretçilerini gösterir; kapsama notu ekranda yazılıdır.
+   Ayrıntı ve kapılar: `docs/harita-plani.md`.
 5. **`sitemap.xml` olay adreslerini her ingest'te yeniden üretir** (slug devinimi). Google tarafında geçici 404'ler görülebilir; F3b bu maddeleri de çözer.
