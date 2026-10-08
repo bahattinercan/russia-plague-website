@@ -3,33 +3,33 @@
 **Kapsam:** `russia-plague-website` (public repo, canlıya çıkmadan önce)
 **Yöntem:** Otomatik tarama (sır, bağımlılık, kod deseni), manuel kod incelemesi, canlı başlık doğrulaması, sentetik saldırı testleri.
 
-| Tur | Tarih | Not |
-|---|---|---|
-| 1 | 7 Ekim 2026 | İlk denetim — B-1…B-5 bulundu ve düzeltildi |
-| 2 | 7 Ekim 2026 | Bağımsız yeniden doğrulama — B-6…B-9 bulundu ve düzeltildi |
+| Tur | Tarih       | Not                                                        |
+| --- | ----------- | ---------------------------------------------------------- |
+| 1   | 7 Ekim 2026 | İlk denetim — B-1…B-5 bulundu ve düzeltildi                |
+| 2   | 7 Ekim 2026 | Bağımsız yeniden doğrulama — B-6…B-9 bulundu ve düzeltildi |
 
 ---
 
 ## 1. Doğrulanan kontroller
 
-| Kontrol | Sonuç | Kanıt |
-|---|---|---|
-| Sır / API anahtarı taraması (repo) | ✅ Temiz | `git grep` + `git log --all` — api_key/secret/token/private key deseni yok |
-| `.env` dosyalarının git durumu | ⚠️ Ayrıntı B-7 | `.env.local` **çalışma dizininde var** (canlı Neon + Vercel OIDC) ama `.gitignore` kapsamında ve geçmişte **hiç commit edilmemiş** |
-| `.gitignore` kapsamı | ✅ Yeterli | `.env*`, `.next/`, `node_modules/`, `*.tsbuildinfo`, `.shots/`, `.vercel` |
-| Bağımlılık zafiyetleri | ⚠️ Ayrıntı B-8 | `npm audit` → 4 moderate, hepsi **dev-only** (drizzle-kit → esbuild) |
-| Lisans uyumu | ✅ Temiz | next/react/react-dom/cheerio/rss-parser/zod MIT, drizzle-orm Apache-2.0 |
-| XSS yüzeyi (kod) | ✅ Yok | `dangerouslySetInnerHTML`, `innerHTML`, `eval`, `new Function`, `document.write` hiç kullanılmıyor |
-| Dış link şema filtresi | ✅ Tam | Tüm dinamik `href` değerleri `safeExternalUrl()`'den geçer |
-| `target="_blank"` güvenliği | ✅ Tam | 3/3 kullanımda `rel="noopener noreferrer nofollow"` |
-| Açık yönlendirme (proxy) | ✅ Yok | `//evil.com` → `308 /evil.com`; `%2e%2e%2f` → 404 |
-| SQL enjeksiyonu | ✅ Yok | Tüm sorgular parametreli; tablo/kolon adları sabit (kullanıcı girdisi değil) |
-| Komut enjeksiyonu | ✅ Yok | `child_process`/`exec` hiç yok; dosya yolları sabit |
-| GitHub Actions | ✅ Yeterli | `permissions` minimal, `pull_request_target` yok, fork secret'ı yok, `npm ci` |
-| Next.js dosya sözleşmesi | ✅ Doğru | Next 16'da `middleware.ts` → `proxy.ts`; dosya `src/proxy.ts` (docs ile teyit edildi) |
-| `X-Powered-By` | ✅ Kapalı | Canlı yanıtta başlık yok (`poweredByHeader: false`) |
-| Feed içeriği şema kontrolü | ✅ Tam | 214 bağlantının tamamı http(s) |
-| TypeScript derlemesi | ✅ Temiz | `tsc --noEmit` hatasız |
+| Kontrol                            | Sonuç          | Kanıt                                                                                                                              |
+| ---------------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Sır / API anahtarı taraması (repo) | ✅ Temiz       | `git grep` + `git log --all` — api_key/secret/token/private key deseni yok                                                         |
+| `.env` dosyalarının git durumu     | ⚠️ Ayrıntı B-7 | `.env.local` **çalışma dizininde var** (canlı Neon + Vercel OIDC) ama `.gitignore` kapsamında ve geçmişte **hiç commit edilmemiş** |
+| `.gitignore` kapsamı               | ✅ Yeterli     | `.env*`, `.next/`, `node_modules/`, `*.tsbuildinfo`, `.shots/`, `.vercel`                                                          |
+| Bağımlılık zafiyetleri             | ⚠️ Ayrıntı B-8 | `npm audit` → 4 moderate, hepsi **dev-only** (drizzle-kit → esbuild)                                                               |
+| Lisans uyumu                       | ✅ Temiz       | next/react/react-dom/cheerio/rss-parser/zod MIT, drizzle-orm Apache-2.0                                                            |
+| XSS yüzeyi (kod)                   | ✅ Yok         | `dangerouslySetInnerHTML`, `innerHTML`, `eval`, `new Function`, `document.write` hiç kullanılmıyor                                 |
+| Dış link şema filtresi             | ✅ Tam         | Tüm dinamik `href` değerleri `safeExternalUrl()`'den geçer                                                                         |
+| `target="_blank"` güvenliği        | ✅ Tam         | 3/3 kullanımda `rel="noopener noreferrer nofollow"`                                                                                |
+| Açık yönlendirme (proxy)           | ✅ Yok         | `//evil.com` → `308 /evil.com`; `%2e%2e%2f` → 404                                                                                  |
+| SQL enjeksiyonu                    | ✅ Yok         | Tüm sorgular parametreli; tablo/kolon adları sabit (kullanıcı girdisi değil)                                                       |
+| Komut enjeksiyonu                  | ✅ Yok         | `child_process`/`exec` hiç yok; dosya yolları sabit                                                                                |
+| GitHub Actions                     | ✅ Yeterli     | `permissions` minimal, `pull_request_target` yok, fork secret'ı yok, `npm ci`                                                      |
+| Next.js dosya sözleşmesi           | ✅ Doğru       | Next 16'da `middleware.ts` → `proxy.ts`; dosya `src/proxy.ts` (docs ile teyit edildi)                                              |
+| `X-Powered-By`                     | ✅ Kapalı      | Canlı yanıtta başlık yok (`poweredByHeader: false`)                                                                                |
+| Feed içeriği şema kontrolü         | ✅ Tam         | 214 bağlantının tamamı http(s)                                                                                                     |
+| TypeScript derlemesi               | ✅ Temiz       | `tsc --noEmit` hatasız                                                                                                             |
 
 **Canlı başlık doğrulaması** (`GET /tr`, `next dev`):
 
@@ -140,15 +140,15 @@ stripHtml("<p>&#99999999999;</p>")→ RangeError
 
 ## 4. Kalan riskler (kabul edilen)
 
-| Risk | Neden kabul edildi | Plan |
-|---|---|---|
-| `style-src 'unsafe-inline'` | Bkz. B-9: nonce + inline style nitelikleri birlikte çalışmaz; script tarafı sertleştirildi | Gerekirse `style-src-attr 'unsafe-inline'` + nonce'lu `style-src-elem` ayrımı |
-| Google Fonts dış kaynak | ✅ **KAPANDI (8 Eki 2026):** yazı tipleri `next/font` ile self-host edildi (`Inter`, `Newsreader`, `JetBrains Mono`); `style-src`/`font-src` artık yalnızca `'self'`. Regresyon kapısı: `security-check` (dış host yasağı) + `ui-check`. | — |
-| COEP yok (`Cross-Origin-Embedder-Policy`) | `require-corp` dış font CDN'i ile uyumsuzdu; **artık dış font yok**, denenebilir | `require-corp` denenip görsel doğrulama yapılacak |
-| Uygulama seviyesinde rate limiting yok | Vercel platform koruması mevcut; site yalnızca okuma yapar; API rotası yok | Gerekirse Vercel WAF / Upstash Ratelimit |
-| Dev-only zafiyetler (B-8) | Üretim bundle'ına girmiyor; düzeltme breaking downgrade | Dependabot + drizzle-kit güncellemesi |
-| `data/feed.json` repo'da commit ediliyor | MVP deposu; içerik yalnızca başlık + kısa alıntı | A adımı: Postgres'e geçiş, `data/` gitignore |
-| `readLimitedText` fazla ayırma | Limiti aşan chunk `total`'a eklenip diziye alınmıyor → chunk başına en fazla ~64 KB fazla bellek | Kozmetik; limit sınırına çekilebilir |
+| Risk                                      | Neden kabul edildi                                                                               | Plan                                                                          |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
+| `style-src 'unsafe-inline'`               | Bkz. B-9: nonce + inline style nitelikleri birlikte çalışmaz; script tarafı sertleştirildi       | Gerekirse `style-src-attr 'unsafe-inline'` + nonce'lu `style-src-elem` ayrımı |
+| Google Fonts dış kaynak                   | ✅ **KAPANDI (8 Eki 2026):** yazı tipleri `next/font` ile self-host edildi (`Inter`, `Newsreader`, `JetBrains Mono`); `style-src`/`font-src` artık yalnızca `'self'`. Regresyon kapısı: `security-check` (dış host yasağı) + `ui-check`. | —                                                                             |
+| COEP yok (`Cross-Origin-Embedder-Policy`) | `require-corp` dış font CDN'i ile uyumsuzdu; **artık dış font yok**, denenebilir                  | `require-corp` denenip görsel doğrulama yapılacak                             |
+| Uygulama seviyesinde rate limiting yok    | Vercel platform koruması mevcut; site yalnızca okuma yapar; API rotası yok                       | Gerekirse Vercel WAF / Upstash Ratelimit                                      |
+| Dev-only zafiyetler (B-8)                 | Üretim bundle'ına girmiyor; düzeltme breaking downgrade                                          | Dependabot + drizzle-kit güncellemesi                                         |
+| `data/feed.json` repo'da commit ediliyor  | MVP deposu; içerik yalnızca başlık + kısa alıntı                                                 | A adımı: Postgres'e geçiş, `data/` gitignore                                  |
+| `readLimitedText` fazla ayırma            | Limiti aşan chunk `total`'a eklenip diziye alınmıyor → chunk başına en fazla ~64 KB fazla bellek | Kozmetik; limit sınırına çekilebilir                                          |
 
 ---
 
@@ -161,15 +161,15 @@ npm run typecheck
 
 `scripts/security-check.ts` şunları doğrular:
 
-| Grup | Kapsam |
-|---|---|
-| ReDoS | `stripHtml` 6 sentetik girdide < 400 ms |
-| İçerik temizliği | script/style içeriği, etiketler, varlıklar |
-| Şema filtresi | `javascript:`, `data:`, `vbscript:`, `file:`, göreli yol, boş, `null`, bozuk URL |
-| Bozuk varlık (B-6) | aşırı büyük/taşan/sınır üstü/vekil/NUL kod noktaları fırlatmaz; geçerli varlıklar çözülür |
-| Log maskeleme (B-7) | `userinfo` + `?password=` + `&pwd=` sızdırmaz |
-| CSP (B-9) | nonce `script-src`'te, `'unsafe-inline'` yok, `style-src` inline'ı korur, `'unsafe-eval'` yalnızca dev, `upgrade-insecure-requests` yalnızca üretim, `next.config.ts`'te statik CSP yok |
-| Feed | `data/feed.json` içindeki tüm bağlantılar http(s) |
+| Grup                | Kapsam                                                                                                                                                                                  |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ReDoS               | `stripHtml` 6 sentetik girdide < 400 ms                                                                                                                                                 |
+| İçerik temizliği    | script/style içeriği, etiketler, varlıklar                                                                                                                                              |
+| Şema filtresi       | `javascript:`, `data:`, `vbscript:`, `file:`, göreli yol, boş, `null`, bozuk URL                                                                                                        |
+| Bozuk varlık (B-6)  | aşırı büyük/taşan/sınır üstü/vekil/NUL kod noktaları fırlatmaz; geçerli varlıklar çözülür                                                                                               |
+| Log maskeleme (B-7) | `userinfo` + `?password=` + `&pwd=` sızdırmaz                                                                                                                                           |
+| CSP (B-9)           | nonce `script-src`'te, `'unsafe-inline'` yok, `style-src` inline'ı korur, `'unsafe-eval'` yalnızca dev, `upgrade-insecure-requests` yalnızca üretim, `next.config.ts`'te statik CSP yok |
+| Feed                | `data/feed.json` içindeki tüm bağlantılar http(s)                                                                                                                                       |
 
 **Yeni bir dış-veri işleme yolu eklendiğinde buraya test eklenmelidir.**
 

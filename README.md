@@ -115,12 +115,15 @@ npm run ingest          # tarar, Postgres'e (yoksa JSON'a) yazar
 |---|---|---|
 | Lokal | `.env.local` (gitignore'da) | `DATABASE_URL` |
 | Cron | GitHub → Settings → Secrets → **`DATABASE_URL`** | yoksa ingest JSON'a düşer, cron yine çalışır |
+| Cron tetikleyici (yalnızca yerel) | `.env.local` → **`GITHUB_TRIGGER_TOKEN`** (fine-grained PAT, Actions: RW), **`CRONJOB_API_KEY`** | cron-job.org'a yüklenen sırlar; `npm run cron:setup` / `npm run ingest:trigger` bunları okur |
 | Site | Vercel → Environment Variables → **`DATABASE_URL`** | Neon pooler bağlantısı |
 | Çeviri (lokal/cron/Vercel) | `DEEPL_API_KEY` **veya** `OPENAI_API_KEY` | Tanımlıysa TR çeviri o sağlayıcıyla yapılır |
 | Çeviri (tercihe bağlı) | `TRANSLATE_PROVIDER` (`auto`/`deepl`/`openai`/`google`/`off`) | Tanımsızsa `auto`: DeepL → OpenAI → anahtarsız Google |
 | Çeviri (opsiyonel) | `TRANSLATE_MAX_MS`, `TRANSLATE_BUDGET_CHARS`, `TRANSLATE_CONCURRENCY` | Cron bütçesi ve kota koruması |
 
-**Cron:** `.github/workflows/ingest.yml` 10 dakikada bir çalışır. İş başarısız olursa `ingest-failure` etiketli bir issue açılır (dead man's switch) ve `data/feed.json` debug artifact'ı yüklenir.
+**Cron:** İki tetikleyici var. **Asıl olan** dış zamanlayıcı: cron-job.org 10 dakikada bir `workflow_dispatch` API'sini çağırır — kurulum `npm run cron:setup` (`docs/dispatch-tetikleme.md`). `.github/workflows/ingest.yml` içindeki `schedule: */10` yalnızca **yedektir**; GitHub ücretsiz katmanda zamanlanmış işleri saatlerce geciktirir veya atlar (ölçüm: 2 günde 3 çalışma). İkisi de `concurrency: ingest` grubunda, üst üste binme olmaz.
+
+İş başarısız olursa `ingest-failure` etiketli bir issue açılır (dead man's switch) ve `data/feed.json` debug artifact'ı yüklenir. Dikkat: bu switch **yalnızca başarısız çalışmada** tetiklenir — hiç tetikleme gelmezse (PAT süresi dolması gibi) veri sessizce bayatlar, bu yüzden cron-job.org'un e-posta bildirimi açık olmalı.
 
 ### Arayüz: sayfalar
 

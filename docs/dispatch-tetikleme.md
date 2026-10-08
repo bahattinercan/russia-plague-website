@@ -103,6 +103,71 @@ Beklenen çıktı:
 
 ### 3. cron-job.org işi oluştur
 
+İki yol var: **API (tercih edilen, tekrarlanabilir)** veya konsoldan elle. İkisi de
+aynı işi kurar; API yolu PAT rotasyonunu tek komuta indirir.
+
+#### 3-A. API ile (önerilen)
+
+```bash
+# 1) console.cron-job.org → Settings → API key → anahtar üret
+# 2) .env.local dosyasına ekle (gitignore'da, repoya girmez):
+#      GITHUB_TRIGGER_TOKEN=github_pat_...
+#      CRONJOB_API_KEY=...
+
+npm run cron:setup -- --dry     # isteği önizle (ağa çıkmaz, sır maskeli)
+npm run cron:setup              # işi oluştur → jobId=#...
+npm run cron:setup -- --list    # kurulu işleri listele
+```
+
+Script, isteği `docs`deki elle kurulumla **aynı** gönderir: `POST` + dört header,
+gövde `{"ref":"main"}`, kadans `0,10,20,30,40,50`. Güvenlik davranışları:
+
+- **Çift iş koruması:** aynı başlıkta iş varsa ikinci kez oluşturmaz (`concurrency`
+  zaten üst üste binmeyi engeller ama iki iş = iki kat tetikleme = boşa CI yükü).
+- **PAT rotasyonu:** `npm run cron:setup -- --update=<jobId>` → işi günceller.
+- **Sır maskeleme:** çıktıda token yalnızca `github_pat_… (25 karakter)` biçiminde.
+- **Sır komut satırına yazılmaz:** token/anahtar `.env.local`dan okunur (`GH_TOKEN`
+  yedeği de destekli; `scripts/trigger-ingest.ts` artık `.env.local`ı yükler).
+
+> cron-job.org kotası: 1 istek/sn, 5 istek/dk. 10 dk kadans bu sınırın çok altında.
+>
+> GitHub dispatch `204 No Content` (gövdesiz) döner. cron-job.org başarı ölçütü
+> 2xx'i kapsar; işi "başarısız" görürsen konsoldaki **Success status code**
+> ayarını `204` yap.
+
+Kurulumu doğrula: `npm run cron:setup -- --list` → iş **aktif** görünmeli, ardından
+`npm run ingest:trigger` (token `.env.local`dan) ile aynı isteği bir kez elle at.
+
+#### Kurulum kaydı — ölçülen gerçekler (2026-10-08)
+
+API ile kuruldu, jobId **#8605239**. Kurulumdan sonra ölçülen davranış:
+
+| Ölçüm | Değer |
+|---|---|
+| Çalıştırma 1 | planlanan `13:30:00Z` → gerçekleşen `13:30:51Z` (jitter 51 sn) |
+| Çalıştırma 2 | planlanan `13:40:00Z` → gerçekleşen `13:40:28Z` (jitter 28 sn) |
+| GitHub'a etki | run `13:30:53Z` ve `13:40:30Z` → dispatch'ten ~2 sn sonra |
+| DB'ye etki | `reports 15 → 16`, `Son ingest 13:36:05Z` (Neon) |
+| HTTP sonucu | **`204 No Content` → `status:1` (başarı)** |
+
+İki pratik sonuç:
+
+- **Başarı ölçütü ayarı gerekmiyor:** cron-job.org `204`ü başarı sayıyor (`statusText:
+  "No Content"`). Konsolda "success status code" değiştirmeye gerek yok.
+- **Gerçek kadans 10 dk ± ~1 dk:** ücretsiz katmanda işler jitter ile atılıyor, yani
+  tetikleme `:00` yerine `:28–:51` arasında düşebilir. 10 dakikalık ortalama korunuyor;
+  "dakikası dakikasına" beklemeyin.
+
+Ek olarak `onFailure` bildirimi **API üzerinden açıldı** (`npm run cron:setup` işi
+kurarken set eder; `--list` çıktısında `hata alarmı: açık` görünür). Bu, aşağıdaki
+"sessiz bayatlama" tuzağını kapatan asıl mekanizma.
+
+> API tuzağı (script'te düzeltildi): `GET /jobs` **liste** yanıtı `notification`
+> alanını içermiyor — yalnızca `GET /jobs/{id}` döndürüyor. Liste çıktısına güvenip
+> "alarm kapalı" sonucuna varmak yanlış alarmdı; script artık detayı ayrıca çekiyor.
+
+#### 3-B. Konsoldan elle
+
 [cron-job.org](https://cron-job.org) → hesap aç → **Create cronjob**:
 
 | Alan | Değer |
@@ -127,6 +192,9 @@ Kaydet → **"Run now"** ile bir kez elle dene. **Beklenen yanıt: `204 No Conte
 
 Hesap ayarlarında **"Notify me when a job fails"** seçeneğini aç.
 
+> Not: hesabı oluşturup API anahtarı almak da yeterli — 3-A yolunda konsolda tek tek
+> alan doldurmak gerekmez. 3-B yalnızca API tercih edilmiyorsa kullanılır.
+
 ### 4. Doğrula
 
 ```bash
@@ -147,7 +215,7 @@ npm run db:check          # "Son ingest: <şimdi>" görünmeli
 | Yanlış `ref` | `422` | Varsayılan dal `main`. |
 | Gövde JSON değil | `422` | Body tam olarak `{"ref":"main"}`. |
 | Aynı anda iki tetikleyici | Gereksiz maliyet | cron-job.org kurulduktan sonra `.github/workflows/ingest.yml` içindeki `schedule`ı kaldır ya da aynı kadansa çek. |
-| **Sessiz bayatlama** | Site eski snapshot'ı gösterir, alarm yok | Dead man's switch yalnızca `if: failure()` — **cron hiç çalışmazsa çalışmaz.** cron-job.org'un failure bildirimi bu boşluğu kısmen kapatır. |
+| **Sessiz bayatlama** | Site eski snapshot'ı gösterir, alarm yok | Dead man's switch yalnızca `if: failure()` — **cron hiç çalışmazsa çalışmaz.** Çözüm: işin `onFailure` bildirimi açık olmalı (API kurulumu açar; `--list` → `hata alarmı: açık` ile doğrula). PAT süresi dolduğunda cron-job.org 401 alır ve e-posta atar. |
 
 ## Public yapmadan önce yapılan denetim
 

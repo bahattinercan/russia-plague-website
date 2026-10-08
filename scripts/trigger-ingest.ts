@@ -1,8 +1,12 @@
 /**
  * Ingest workflow'unu GitHub API üzerinden elle tetikler (workflow_dispatch).
  *
+ *   npm run ingest:trigger                                   (token .env.local'dan)
  *   GITHUB_TRIGGER_TOKEN=github_pat_... npm run ingest:trigger
  *   npm run ingest:trigger -- --repo=owner/name --ref=main --workflow=ingest.yml
+ *
+ * Token sırası: GITHUB_TRIGGER_TOKEN → GH_TOKEN → `.env.local`.
+ * `.env.local` tercih edilir: sır komut satırına/shell geçmişine yazılmaz.
  *
  * Neden var: GitHub'ın kendi `schedule` tetikleyicisi "her 10 dakika" sözünü
  * tutmuyor (ücretsiz katmanda saatlerce gecikebiliyor veya hiç çalışmıyor). Dış bir
@@ -16,6 +20,8 @@
  *
  * Ayrıntılı kurulum: docs/dispatch-tetikleme.md
  */
+
+import { loadLocalEnv } from '@/lib/env';
 
 const DEFAULT_REPO = 'bahattinercan/russia-plague-website';
 const DEFAULT_WORKFLOW = 'ingest.yml';
@@ -46,6 +52,7 @@ function parseArgs(argv: string[]): Options {
  * `gh` OAuth token'ı tüm repolara erişir, ona verilmemeli.
  */
 function readToken(): string {
+  loadLocalEnv();
   const token = process.env.GITHUB_TRIGGER_TOKEN ?? process.env.GH_TOKEN;
   if (!token) {
     console.error(
