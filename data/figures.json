@@ -34,7 +34,12 @@
     "- deaths-meduza ve restricted-meduza KALDIRILDI: Meduza'nın bu iki cümlesi (Darya Shipilova'nın",
     "  ölümü; ~200 kişinin izolasyonu) güncel feed'de YOK — ölçüldü, 314 kaydın hiçbirinde geçmiyor.",
     "  Kural gereği bağlanamayan kayıt gösterilemez; başka bir Meduza cümlesine bağlamak sayıyı",
-    "  söylemediği bir cümleye dayandırırdı."
+    "  söylemediği bir cümleye dayandırırdı.",
+    "",
+    "KALDIRILAN KAYITLAR (8 Eki 2026): deaths-moscowtimes ve restricted-moscowtimes çıkarıldı.",
+    "Gerekçe: bağ cümlesi (\"Nearly 200 People Under Observation After Irkutsk Lab Worker Dies From Plague\")",
+    "canlı feed penceresinden düştü — The Moscow Times makale seti değişti (ölçüm: 4 farklı başlık, o cümle yok).",
+    "Bu, figures.ts başlığında yazılı bilinen kırılganlıktır. Cümle feed’e geri dönerse kayıt yeniden eklenebilir."
   ],
   "generatedAt": "2026-10-08T01:15:00.000Z",
   "figures": [
@@ -46,15 +51,6 @@
       "sourceName": "CIDRAP (University of Minnesota)",
       "eventId": "1rxkf46",
       "phrase": "Suspected plague incident leaves 1 dead, 200 under quarantine in Siberia"
-    },
-    {
-      "id": "deaths-moscowtimes",
-      "metric": "deaths",
-      "value": 1,
-      "qualifier": "exact",
-      "sourceName": "The Moscow Times",
-      "eventId": "p1h78g",
-      "phrase": "Nearly 200 People Under Observation After Irkutsk Lab Worker Dies From Plague"
     },
     {
       "id": "restricted-cidrap",
@@ -88,17 +84,6 @@
       "sourceName": "CNBC",
       "eventId": "15toyxd",
       "phrase": "Russia hospitalizes almost 200 people after researcher's death from plague: Reports"
-    },
-    {
-      "id": "restricted-moscowtimes",
-      "metric": "restricted",
-      "value": 200,
-      "qualifier": "nearly",
-      "measureTr": "gözlem altında tutma",
-      "measureEn": "under observation",
-      "sourceName": "The Moscow Times",
-      "eventId": "p1h78g",
-      "phrase": "Nearly 200 People Under Observation After Irkutsk Lab Worker Dies From Plague"
     }
   ]
 }

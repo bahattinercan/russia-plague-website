@@ -311,3 +311,15 @@ export function aggregateLocations(events: PlagueEvent[]): LocationCoverage {
     matchedIds,
   };
 }
+
+/**
+ * Bir bölgedeki olaylar (bölge sayfası için).
+ *
+ * Konum, olayın metninden çıkarıldığı için burada "iddia" değil "eşleşme"
+ * vardır: sayfa bunu açıkça yazar (yanlış pozitif riski).
+ */
+export function eventsInLocation(events: PlagueEvent[], slug: string): PlagueEvent[] {
+  return events.filter((event) =>
+    extractLocations(event).locations.some((location) => location.slug === slug),
+  );
+}
