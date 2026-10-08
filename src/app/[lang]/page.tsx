@@ -18,7 +18,6 @@ import { FigureCards } from '@/components/FigurePanels';
 import { EventCard } from '@/components/EventCard';
 import { TopEventList } from '@/components/TopEventList';
 import { Disclaimer, Footer } from '@/components/Disclaimer';
-import { Counter } from '@/components/Counter';
 import { TimeAgo } from '@/components/TimeAgo';
 
 /**
@@ -37,40 +36,6 @@ export async function generateMetadata({
   const locale: Locale = isLocale(lang) ? lang : DEFAULT_LOCALE;
   const t = getDict(locale);
   return { title: t.siteName, description: t.tagline };
-}
-
-/** Durum kartı. Sayı = ÖLÇÜM registerı → mono + tabular (docs/arayuz-plani.md §3). */
-function Stat({
-  value,
-  label,
-  tone = 'chalk',
-  delay = 0,
-}: {
-  value: number;
-  label: string;
-  tone?: 'chalk' | 'signal' | 'caution' | 'alarm';
-  delay?: number;
-}) {
-  const toneClass = {
-    chalk: 'text-chalk',
-    signal: 'text-signal',
-    caution: 'text-caution',
-    alarm: 'text-alarm',
-  }[tone];
-
-  return (
-    <div
-      className="surface reveal rounded-lg px-3.5 py-3"
-      style={{ '--reveal-delay': `${delay}ms` } as React.CSSProperties}
-    >
-      <dd className={`tnum font-mono text-[24px] font-medium leading-none ${toneClass}`}>
-        <Counter value={value} />
-      </dd>
-      <dt className="mt-2 font-mono text-[11px] uppercase tracking-wider text-mist-2">
-        {label}
-      </dt>
-    </div>
-  );
 }
 
 const RECENT_COUNT = 3;
@@ -98,7 +63,6 @@ export default async function HomePage({
   const health = healthSummary(feed.report.sources);
   const figures = await buildFigures(feed.events);
   const coverage = aggregateLocations(feed.events);
-  const independentGroups = new Set(feed.events.flatMap((e) => e.groups)).size;
   const corroborated = feed.events.filter((e) => e.label === 'corroborated').length;
   const topRegions = coverage.aggregates.slice(0, 4);
   const coveragePercent = Math.round(coverage.ratio * 100);
@@ -118,24 +82,15 @@ export default async function HomePage({
           </h1>
           <p className="mt-3 max-w-2xl text-[14.5px] leading-relaxed text-mist">{t.tagline}</p>
 
-          <dl className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat value={feed.events.length} label={t.events} delay={0} />
-            <Stat
-              value={health.healthy}
-              label={`${t.sources} ${t.ok}`}
-              tone={health.failed + health.stale > 0 ? 'caution' : 'signal'}
-              delay={55}
-            />
-            <Stat value={independentGroups} label={t.independentGroups} delay={110} />
-            <Stat
-              value={feed.signals.length}
-              label={tr ? 'doğrulanmamış sinyal' : 'unverified signals'}
-              tone="alarm"
-              delay={165}
-            />
-          </dl>
-
-          <div className="mt-3">
+          {/*
+           * Toplam kartları KALDIRILDI (08 Eki 2026). Ölçüm: dört kutunun üçü
+           * "Diğer katmanlar" bölümünde zaten yazılı (sinyal sayısı +
+           * kaynak sağlığı) ve dördüncüsü (olay toplamı) "Tüm olaylar (71)→"
+           * bağlantısında var. Değişimi anlatan `StatusStrip` asıl cevabı
+           * veriyor; kutu şeridi onu ~300 px arayla tekrar ediyordu
+           * (docs/arayuz-plani.md §1.6).
+           */}
+          <div className="mt-6">
             <StatusStrip
               events={feed.events}
               generatedAt={feed.generatedAt}
