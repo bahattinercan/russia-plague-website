@@ -1,7 +1,7 @@
 import type { SourceHealth } from '@/types';
 import { getDict, type Locale } from '@/lib/i18n';
 import { GROUP_LABELS, SOURCE_BY_SLUG } from '@/lib/sources/registry';
-import { formatDate } from '@/lib/data';
+import { formatDate } from '@/lib/format';
 
 function statusOf(h: SourceHealth): { text: string; className: string } {
   if (!h.ok) return { text: 'HATA', className: 'text-critical' };

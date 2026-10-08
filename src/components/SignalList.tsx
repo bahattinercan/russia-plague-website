@@ -1,6 +1,6 @@
 import type { Article } from '@/types';
 import { getDict, type Locale } from '@/lib/i18n';
-import { formatDate } from '@/lib/data';
+import { formatDate } from '@/lib/format';
 import { archiveUrlFor, safeExternalUrl } from '@/lib/sources/text';
 import { localizedTitle } from '@/lib/translate/display';
 

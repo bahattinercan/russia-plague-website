@@ -1,10 +1,11 @@
 import { loadLocalEnv } from '@/lib/env';
 import { loadFeed, type FeedBackend } from '@/lib/storage/store';
 import type { FeedFile } from '@/lib/storage/json';
-import type { PlagueEvent, SourceHealth } from '@/types';
+import type { PlagueEvent } from '@/types';
 
 // Saf biçimleyiciler ayrı modülde: client component'lar pg'yi import etmez.
 export { formatDate, formatRelative } from '@/lib/format';
+export { healthSummary } from '@/lib/health';
 
 /** Veri yoksa gösterilecek iskelet — sayfa asla çökmez, "neden boş" açıklanır. */
 export const EMPTY_FEED: FeedFile = {
@@ -55,15 +56,6 @@ export async function getFeedSnapshot(): Promise<FeedSnapshot> {
 
 export async function getFeed(): Promise<FeedFile> {
   return (await getFeedSnapshot()).feed;
-}
-
-export function healthSummary(sources: SourceHealth[]) {
-  return {
-    total: sources.length,
-    healthy: sources.filter((s) => s.ok && !s.stale).length,
-    stale: sources.filter((s) => s.ok && s.stale).length,
-    failed: sources.filter((s) => !s.ok).length,
-  };
 }
 
 /** Etiket önceliği: çelişki ve çoklu kaynak en üstte. */

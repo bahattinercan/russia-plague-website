@@ -1,7 +1,8 @@
 import type { PlagueEvent, SourceHealth } from '@/types';
 import type { Locale } from '@/lib/i18n';
 import { getDict } from '@/lib/i18n';
-import { formatDate, healthSummary } from '@/lib/data';
+import { formatDate } from '@/lib/format';
+import { healthSummary } from '@/lib/health';
 import { LangSwitch } from './LangSwitch';
 import { Counter } from './Counter';
 import { TimeAgo } from './TimeAgo';
