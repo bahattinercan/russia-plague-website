@@ -41,8 +41,12 @@ export function FilterBar({
 
   return (
     <section aria-label={t.filters} className="surface reveal rounded-xl p-4 sm:p-5">
-      <form method="get" action={`/${locale}/timeline`} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-12">
-        <div className="lg:col-span-3">
+      <form
+        method="get"
+        action={`/${locale}/timeline`}
+        className="grid gap-3 sm:grid-cols-2 lg:flex lg:flex-wrap lg:items-end lg:gap-2.5"
+      >
+        <div className="lg:w-[9.5rem] lg:shrink-0">
           <label className="field-label" htmlFor="f-label">
             {t.filterLabel}
           </label>
@@ -56,7 +60,7 @@ export function FilterBar({
           </select>
         </div>
 
-        <div className="lg:col-span-3">
+        <div className="lg:w-[11rem] lg:shrink-0">
           <label className="field-label" htmlFor="f-group">
             {t.filterGroup}
           </label>
@@ -70,7 +74,7 @@ export function FilterBar({
           </select>
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="lg:w-[5.5rem] lg:shrink-0">
           <label className="field-label" htmlFor="f-tier">
             {t.filterTier}
           </label>
@@ -84,7 +88,7 @@ export function FilterBar({
           </select>
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="lg:w-[9rem] lg:shrink-0">
           <label className="field-label" htmlFor="f-from">
             {t.filterFrom}
           </label>
@@ -97,14 +101,14 @@ export function FilterBar({
           />
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="lg:w-[9rem] lg:shrink-0">
           <label className="field-label" htmlFor="f-to">
             {t.filterTo}
           </label>
           <input id="f-to" type="date" name="to" defaultValue={filters.to} className="field w-full" />
         </div>
 
-        <div className="sm:col-span-2 lg:col-span-8">
+        <div className="sm:col-span-2 lg:min-w-[12rem] lg:flex-1">
           <label className="field-label" htmlFor="f-q">
             {t.search}
           </label>
@@ -118,19 +122,46 @@ export function FilterBar({
           />
         </div>
 
-        <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-4">
+        <div className="flex items-end gap-2 sm:col-span-2 lg:shrink-0">
           <button
             type="submit"
-            className="field cursor-pointer border-official/40 px-3 font-mono text-[11px] uppercase tracking-wider text-official hover:border-official"
+            title={t.apply}
+            aria-label={t.apply}
+            className="field flex h-[34px] w-[38px] cursor-pointer items-center justify-center border-official/40 px-0 text-official hover:border-official"
           >
-            {t.apply}
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              className="h-[15px] w-[15px]"
+            >
+              <circle cx="6.75" cy="6.75" r="4.25" />
+              <path d="M10 10l3.5 3.5" />
+            </svg>
+            <span className="sr-only">{t.apply}</span>
           </button>
           {hasFilters(filters) && (
             <a
               href={`/${locale}/timeline`}
-              className="field inline-flex items-center px-3 font-mono text-[11px] uppercase tracking-wider text-mist-2 hover:text-chalk"
+              title={t.clear}
+              aria-label={t.clear}
+              className="field flex h-[34px] w-[34px] items-center justify-center px-0 text-mist-2 hover:text-chalk"
             >
-              {t.clear}
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                className="h-[13px] w-[13px]"
+              >
+                <path d="M4 4l8 8M12 4l-8 8" />
+              </svg>
+              <span className="sr-only">{t.clear}</span>
             </a>
           )}
         </div>

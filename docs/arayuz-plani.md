@@ -219,6 +219,11 @@ Beklenen etki: pano yüksekliği masaüstünde ~21.400 → **~6.000 px**, mobild
 ### 5.2 Akış (`/timeline`)
 
 - **Yapışkan filtre çubuğu:** etiket (5) · kaynak grubu · tier · tarih aralığı · serbest arama (q)
+- **Filtre çubuğu tek satırda:** masaüstünde (`lg:flex` + `flex-wrap`) alanlar sabit genişlikte, arama alanı esner;
+  sığmadığında kendiliğinden iki satıra iner. Ölçüm (headless Chrome, `main` genişliği 1152 px ile sınırlı):
+  **≤1199 px iki satır** (5 filtre / arama + butonlar), **≥1200 px tek satır**; tarih alanları her iki durumda
+  **144 px** ve metin kırpılmıyor. Gönder düğmesi metin değil **büyük büyüteç ikonu** (`aria-label` + `title` +
+  `sr-only` ile “Uygula” erişilebilir kalır); “temizle” de aynı satırda **✕ ikonu**.
 - **URL durumu:** `?label=corroborated&group=ap&tier=2&from=2026-10-01&q=sibirya`
   → paylaşılabilir; geri/ileri tuşları çalışır; **JS kapalıyken de çalışır** (GET form)
 - Aktif filtre çipleri + "temizle"
