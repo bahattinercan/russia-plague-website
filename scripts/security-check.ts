@@ -178,6 +178,30 @@ check(
   styleSrc(prodCsp).includes('unsafe-inline'),
   styleSrc(prodCsp),
 );
+
+// Yazı tipleri next/font ile kendi sunucumuzdan gelir → dış font CDN'i gerekmez.
+// Bu iki direktife dış host geri gelirse gizlilik notu ve CSP kazancı sessizce bozulur.
+const fontSrc = (csp: string) => csp.split('; ').find((d) => d.startsWith('font-src ')) ?? '';
+check(
+  'style-src dış host içermez (next/font self-host)',
+  !/https?:\/\//.test(styleSrc(prodCsp)),
+  styleSrc(prodCsp),
+);
+check(
+  'font-src dış host içermez (next/font self-host)',
+  !/https?:\/\//.test(fontSrc(prodCsp)),
+  fontSrc(prodCsp),
+);
+try {
+  const { readFileSync } = await import('node:fs');
+  const css = readFileSync('src/app/globals.css', 'utf8');
+  check(
+    'globals.css harici @import ile font çekmez',
+    !/@import\s+url\(['"]?https?:/.test(css),
+  );
+} catch {
+  console.log('SKIP  globals.css okunamadı');
+}
 check('üretimde unsafe-eval yok', !prodCsp.includes('unsafe-eval'));
 check('geliştirmede unsafe-eval var', devCsp.includes("'unsafe-eval'"));
 check(

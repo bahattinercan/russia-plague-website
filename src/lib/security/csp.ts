@@ -17,7 +17,13 @@
  * tarayıcılarda devreye girer (geriye dönük uyumluluk).
  */
 
-/** Google Fonts dış kaynak — gizlilik notu docs/guvenlik-denetimi.md §3'te. */
+/**
+ * Google Fonts dış kaynağı KALDIRILDI (8 Eki 2026): yazı tipleri artık
+ * `next/font` ile kendi sunucumuzdan servis edilir (bkz. `src/app/[lang]/layout.tsx`).
+ * Kazanç: ziyaretçinin IP'si Google'a gitmez (docs/guvenlik-denetimi.md §3) ve
+ * `style-src`/`font-src` yalnızca `'self'` olur — dış kaynak yüzeyi daralır.
+ * `scripts/security-check.ts` bu iki direktifte dış host bulunmadığını doğrular.
+ */
 export function buildCsp(nonce: string, isDev: boolean): string {
   const directives = [
     "default-src 'self'",
@@ -27,8 +33,8 @@ export function buildCsp(nonce: string, isDev: boolean): string {
     "frame-ancestors 'none'",
     "form-action 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${isDev ? " 'unsafe-eval'" : ''}`,
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "font-src 'self' https://fonts.gstatic.com data:",
+    "style-src 'self' 'unsafe-inline'",
+    "font-src 'self' data:",
     "img-src 'self' data:",
     "connect-src 'self'",
   ];

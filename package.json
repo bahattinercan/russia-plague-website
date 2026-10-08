@@ -11,6 +11,8 @@
     "ingest": "tsx scripts/ingest.ts",
     "db:check": "tsx scripts/db-check.ts",
     "typecheck": "tsc --noEmit",
+    "ui-check": "tsx scripts/ui-check.ts",
+    "layout-check": "tsx scripts/layout-check.ts",
     "dev": "next dev",
     "build": "next build",
     "security-check": "tsx scripts/security-check.ts",
@@ -18,7 +20,7 @@
     "geo-check": "tsx scripts/geo-check.ts",
     "summarize-check": "tsx scripts/summarize-check.ts",
     "figures-check": "tsx scripts/figures-check.ts",
-    "check-all": "npm run typecheck && npm run security-check && npm run translation-check && npm run geo-check && npm run summarize-check && npm run figures-check",
+    "check-all": "npm run typecheck && npm run ui-check && npm run security-check && npm run translation-check && npm run geo-check && npm run summarize-check && npm run figures-check",
     "ingest:trigger": "tsx scripts/trigger-ingest.ts"
   },
   "keywords": [],

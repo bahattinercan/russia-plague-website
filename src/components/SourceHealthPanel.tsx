@@ -1,4 +1,5 @@
 import type { SourceHealth } from '@/types';
+import { Time } from './Time';
 import { getDict, type Locale } from '@/lib/i18n';
 import { GROUP_LABELS, SOURCE_BY_SLUG } from '@/lib/sources/registry';
 import { formatDate } from '@/lib/format';
@@ -32,10 +33,10 @@ export function SourceHealthPanel({
   return (
     <section id="kaynaklar" className="reveal">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-[19px] font-semibold tracking-tight text-chalk">
+        <h2 className="narrative text-[21px] font-semibold tracking-tight text-chalk">
           {t.sourceHealth}
         </h2>
-        <p className="font-mono text-[10.5px] uppercase tracking-wider text-mist/70">
+        <p className="font-mono text-[11px] uppercase tracking-wider text-mist-2">
           {sorted.length} {t.sources}
         </p>
       </div>
@@ -44,7 +45,7 @@ export function SourceHealthPanel({
         <div className="overflow-x-auto">
           <table className="w-full min-w-[620px] border-collapse text-left">
             <thead>
-              <tr className="border-b border-edge font-mono text-[10px] uppercase tracking-wider text-mist/70">
+              <tr className="border-b border-edge font-mono text-[11px] uppercase tracking-wider text-mist-2">
                 <th className="px-4 py-2.5 font-normal">{t.sources}</th>
                 <th className="px-3 py-2.5 font-normal">{t.tier}</th>
                 <th className="px-3 py-2.5 font-normal">{locale === 'tr' ? 'Grup' : 'Group'}</th>
@@ -69,39 +70,39 @@ export function SourceHealthPanel({
                   >
                     <td className="px-4 py-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-[12.5px] text-chalk/95">
+                        <span className="text-[12.5px] text-chalk">
                           {def?.name ?? h.sourceSlug}
                         </span>
                         {h.error && (
                           <span
                             title={h.error}
-                            className="font-mono text-[10px] text-critical/80"
+                            className="font-mono text-[11px] text-critical"
                           >
                             ⚠
                           </span>
                         )}
                       </div>
                       {h.stale && (
-                        <p className="mt-0.5 text-[10.5px] text-caution/80">{t.staleHint}</p>
+                        <p className="mt-0.5 text-[11px] text-caution">{t.staleHint}</p>
                       )}
                     </td>
-                    <td className="px-3 py-2 font-mono text-[10.5px] text-official/80">
+                    <td className="px-3 py-2 font-mono text-[11px] text-official">
                       T{def?.tier ?? '—'}
                     </td>
-                    <td className="px-3 py-2 font-mono text-[10.5px] text-mist/75">
+                    <td className="px-3 py-2 font-mono text-[11px] text-mist">
                       {def ? (GROUP_LABELS[def.group] ?? def.group) : '—'}
                     </td>
-                    <td className={`px-3 py-2 font-mono text-[10.5px] uppercase ${status.className}`}>
+                    <td className={`px-3 py-2 font-mono text-[11px] uppercase ${status.className}`}>
                       {status.text}
                     </td>
-                    <td className="tnum px-3 py-2 text-right font-mono text-[10.5px] text-mist">
+                    <td className="tnum px-3 py-2 text-right font-mono text-[11px] text-mist">
                       {h.itemsFound}
                     </td>
-                    <td className="tnum px-3 py-2 text-right font-mono text-[10.5px] text-mist/70">
+                    <td className="tnum px-3 py-2 text-right font-mono text-[11px] text-mist-2">
                       {h.latencyMs}
                     </td>
-                    <td className="px-4 py-2 font-mono text-[10.5px] text-mist/80">
-                      {h.newestItemAt ? formatDate(h.newestItemAt, locale) : t.noDate}
+                    <td className="px-4 py-2 font-mono text-[11px] text-mist">
+                      {h.newestItemAt ? <Time iso={h.newestItemAt} locale={locale} /> : t.noDate}
                     </td>
                   </tr>
                 );

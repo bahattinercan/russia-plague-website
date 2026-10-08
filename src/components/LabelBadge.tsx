@@ -1,5 +1,5 @@
 import type { EventLabel } from '@/types';
-import { LABEL_TEXT_I18N, type Locale } from '@/lib/i18n';
+import { LABEL_SHORT_I18N, LABEL_TEXT_I18N, type Locale } from '@/lib/i18n';
 
 const TONE: Record<string, string> = {
   info: 'text-official border-official/35 bg-official/10',
@@ -20,27 +20,44 @@ const GLYPH: Record<EventLabel, string> = {
 /**
  * Doğruluk etiketi.
  * Sitede "doğrulandı" diye bir etiket YOKTUR ve olmayacaktır.
+ *
+ * DAR EKRAN KURALI (<640 px), `shortOnNarrow` ile:
+ *   Tam metin ("ÇOKLU BAĞIMSIZ KAYNAK BİLDİRİYOR") 390 px'te 242 px yer kaplayıp
+ *   yanındaki başlığa 19 px bırakıyordu (ölçüm: docs/arayuz-plani.md §1.1).
+ *   Dar ekranda kısa metin (`Çoklu kaynak`) gösterilir; tam metin `title`
+ *   niteliğinde kalır. İki metinden yalnızca biri DOM'da görünür olduğu için
+ *   yardımcı teknoloji aynı etiketi iki kez okumaz.
  */
 export function LabelBadge({
   label,
   locale,
   size = 'md',
+  shortOnNarrow = false,
 }: {
   label: EventLabel;
   locale: Locale;
   size?: 'sm' | 'md';
+  shortOnNarrow?: boolean;
 }) {
   const info = LABEL_TEXT_I18N[label];
-  const pad = size === 'sm' ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-[10.5px]';
+  const pad = size === 'sm' ? 'px-2 py-0.5' : 'px-2.5 py-1';
 
   return (
     <span
-      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border font-mono uppercase tracking-wider ${pad} ${TONE[info.tone]}`}
+      title={info[locale]}
+      className={`inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border font-mono text-[11px] uppercase tracking-wider ${pad} ${TONE[info.tone]}`}
     >
       <span aria-hidden className="text-[11px] leading-none">
         {GLYPH[label]}
       </span>
-      {info[locale]}
+      {shortOnNarrow ? (
+        <>
+          <span className="sm:hidden">{LABEL_SHORT_I18N[label][locale]}</span>
+          <span className="hidden sm:inline">{info[locale]}</span>
+        </>
+      ) : (
+        info[locale]
+      )}
     </span>
   );
 }

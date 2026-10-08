@@ -35,18 +35,18 @@ export function ContradictionPanel({
       <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
         {[a, b].filter(Boolean).map((side, i) => (
           <div key={`${side.group}-${i}`} className="surface-soft rounded-md p-3">
-            <p className="font-mono text-[10px] uppercase tracking-wider text-mist">
+            <p className="font-mono text-[11px] uppercase tracking-wider text-mist">
               {side.group}
             </p>
-            <p className="mt-1.5 text-[13px] leading-snug text-chalk/90">
+            <p className="mt-1.5 text-[13px] leading-snug text-chalk">
               “{localizedText(locale, side.statement, side.statementTr).text}”
             </p>
-            <p className="mt-1.5 font-mono text-[10px] text-mist/70">{side.sourceSlug}</p>
+            <p className="mt-1.5 font-mono text-[11px] text-mist-2">{side.sourceSlug}</p>
           </div>
         ))}
       </div>
 
-      <p className="mt-2.5 text-[11px] leading-relaxed text-mist/70">
+      <p className="mt-2.5 text-[11px] leading-relaxed text-mist-2">
         {locale === 'tr'
           ? 'Bu karşılaştırma deneyseldir ve iddia düzeyinde kalibre edilmektedir. Bir taraf diğerini yalanlamıyor olabilir; kaynak bağlantılarına bakın.'
           : 'This comparison is experimental and being calibrated at the claim level. One side may not be refuting the other; check the source links.'}

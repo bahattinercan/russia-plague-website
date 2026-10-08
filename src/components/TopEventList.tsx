@@ -26,25 +26,32 @@ export function TopEventList({
       {events.map((event, i) => (
         <li
           key={event.id}
-          className="surface reveal card-lift flex flex-wrap items-start gap-x-3 gap-y-2 rounded-lg px-4 py-3"
+          data-event-id={event.id}
+          data-summary-row
+          className="surface reveal card-lift flex flex-wrap items-start gap-x-3 gap-y-1.5 rounded-lg px-4 py-3"
           style={{ '--reveal-delay': `${i * 45}ms` } as React.CSSProperties}
           onClick={(e) => {
             if ((e.target as Element).closest?.('a, button, dialog')) return;
             setOpenId(event.id);
           }}
         >
-          <LabelBadge label={event.label} locale={locale} size="sm" />
+          {/* Dar ekranda rozet + grup sayısı tek satırda, başlık TAM genişlik alır.
+              Ölçüm (önce): rozet 242 px · başlığa kalan 19 px, satır 338 px —
+              docs/arayuz-plani.md §1.1 */}
+          <span className="flex w-full items-center justify-between gap-3">
+            <LabelBadge label={event.label} locale={locale} size="sm" shortOnNarrow />
+            <span className="whitespace-nowrap font-mono text-[11px] uppercase tracking-wider text-mist-2">
+              {t.groupCount(event.independentGroupCount)}
+            </span>
+          </span>
           <button
             type="button"
             onClick={() => setOpenId(event.id)}
             aria-haspopup="dialog"
-            className="event-title min-w-0 flex-1 text-left text-[13.5px] leading-snug text-chalk/95"
+            className="event-title narrative min-w-0 flex-1 text-left text-[15px] leading-snug text-chalk"
           >
             {localizedTitle(locale, event).text}
           </button>
-          <span className="font-mono text-[10px] uppercase tracking-wider text-mist/70">
-            {t.groupCount(event.independentGroupCount)}
-          </span>
 
           {openId === event.id && (
             <EventModal event={event} locale={locale} onClose={() => setOpenId(null)} />

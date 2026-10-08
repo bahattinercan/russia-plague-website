@@ -28,11 +28,11 @@ export function Footer({ locale }: { locale: Locale }) {
     <footer className="mt-16 border-t border-edge bg-abyss/60">
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-4 py-8 sm:px-6 md:flex-row md:items-center md:justify-between">
         <div>
-          <p className="text-[13px] font-semibold text-chalk/90">{t.siteName}</p>
-          <p className="mt-0.5 text-[11.5px] text-mist/70">{t.tagline}</p>
+          <p className="text-[13px] font-semibold text-chalk">{t.siteName}</p>
+          <p className="mt-0.5 text-[11.5px] text-mist-2">{t.tagline}</p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 font-mono text-[10.5px] uppercase tracking-wider text-mist/70">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-1 font-mono text-[11px] uppercase tracking-wider text-mist-2">
           <a
             href={`/${locale}/methodology`}
             className="link-underline transition-colors hover:text-chalk"
@@ -47,14 +47,14 @@ export function Footer({ locale }: { locale: Locale }) {
           >
             GitHub ↗
           </a>
-          <span className="text-mist/50">
+          <span className="text-mist-2">
             {locale === 'tr' ? 'Kaynak kod açık, güven puanları şeffaf' : 'Open source, transparent trust scores'}
           </span>
         </div>
       </div>
 
       <div className="border-t border-edge-soft px-4 py-3 sm:px-6">
-        <p className="mx-auto max-w-6xl text-[10.5px] leading-relaxed text-mist/55">
+        <p className="mx-auto max-w-6xl text-[11px] leading-relaxed text-mist-2">
           {t.disclaimerShort}{' '}
           {locale === 'tr'
             ? 'Başlıklar ve kısa alıntılar ilgili yayıncıların telifine tabidir; tam metin kopyalanmaz.'

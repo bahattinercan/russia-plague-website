@@ -1,5 +1,7 @@
 'use client';
 
+import { Time } from './Time';
+
 import { useRef, useState } from 'react';
 import type { PlagueEvent } from '@/types';
 import { getDict, type Locale } from '@/lib/i18n';
@@ -50,20 +52,21 @@ export function EventCard({
   return (
     <article
       className="surface reveal card-lift rounded-xl p-4 sm:p-5"
+      data-event-id={event.id}
       style={{ '--reveal-delay': `${index * 60}ms` } as React.CSSProperties}
       onClick={(e) => {
         if ((e.target as Element).closest?.('a, button, dialog')) return;
         openModal();
       }}
     >
-      <div className="flex flex-wrap items-center gap-2">
-        <LabelBadge label={event.label} locale={locale} />
-        <span className="font-mono text-[10.5px] uppercase tracking-wider text-mist/70">
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+        <LabelBadge label={event.label} locale={locale} shortOnNarrow />
+        <span className="font-mono text-[11px] uppercase tracking-wider text-mist-2">
           {t.reportedBy(event.independentGroupCount)} · {t.claimCount(event.claims.length)}
         </span>
       </div>
 
-      <h3 className="mt-2.5 text-[16px] font-semibold leading-snug text-chalk">
+      <h3 className="mt-2.5 narrative text-[16px] font-semibold leading-snug text-chalk sm:text-[17px]">
         <button
           ref={titleRef}
           type="button"
@@ -76,7 +79,7 @@ export function EventCard({
       </h3>
 
       {title.machine && event.titleOriginal && (
-        <p className="mt-1 font-mono text-[10.5px] text-mist/60">
+        <p className="mt-1 font-mono text-[11px] text-mist-2">
           {t.readOriginal}: {event.titleOriginal}
         </p>
       )}
@@ -85,16 +88,16 @@ export function EventCard({
         {event.groups.map((group) => (
           <span
             key={group}
-            className="rounded border border-edge-soft bg-abyss/60 px-2 py-0.5 font-mono text-[10px] text-mist/85"
+            className="rounded border border-edge-soft bg-abyss/60 px-2 py-0.5 font-mono text-[11px] text-mist"
           >
             {GROUP_LABELS[group] ?? group}
           </span>
         ))}
       </div>
 
-      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10.5px] text-mist/70">
+      <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] text-mist-2">
         <span>
-          {t.publishedAt}: {formatDate(event.firstSeenAt, locale)} UTC
+          {t.seenBySystem}: <Time iso={event.firstSeenAt} locale={locale} />
         </span>
         <span className="flex items-center gap-1.5">
           <span className="h-1 w-1 rounded-full bg-signal" aria-hidden />
@@ -104,7 +107,7 @@ export function EventCard({
           type="button"
           onClick={openModal}
           aria-haspopup="dialog"
-          className="link-underline font-mono text-[10.5px] uppercase tracking-wider text-official/85 transition-colors hover:text-official"
+          className="link-underline font-mono text-[11px] uppercase tracking-wider text-official transition-colors hover:text-official"
         >
           {t.detail}
         </button>
@@ -118,7 +121,7 @@ export function EventCard({
             type="button"
             onClick={() => setSourcesOpen((v) => !v)}
             aria-expanded={sourcesOpen}
-            className="font-mono text-[10.5px] uppercase tracking-wider text-mist/80 transition-colors hover:text-chalk"
+            className="font-mono text-[11px] uppercase tracking-wider text-mist transition-colors hover:text-chalk"
           >
             {sourcesOpen ? t.hideSources : t.showSources(event.articles.length)}
           </button>
@@ -135,23 +138,23 @@ export function EventCard({
                 return (
                   <li key={a.id} className="border-l-2 border-edge pl-3">
                     <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                      <span className="font-mono text-[10px] uppercase tracking-wider text-official/80">
+                      <span className="font-mono text-[11px] uppercase tracking-wider text-official">
                         T{a.tier}
                       </span>
-                      <span className="text-[12.5px] font-medium text-chalk/90">{a.sourceName}</span>
-                      <span className="font-mono text-[10px] text-mist/60">
+                      <span className="text-[12.5px] font-medium text-chalk">{a.sourceName}</span>
+                      <span className="font-mono text-[11px] text-mist-2">
                         {GROUP_LABELS[a.independenceGroup] ?? a.independenceGroup}
                       </span>
-                      <span className="font-mono text-[10px] text-mist/50">
-                        {formatDate(a.publishedAt, locale)}
+                      <span className="font-mono text-[11px] text-mist-2">
+                        <Time iso={a.publishedAt} locale={locale} />
                       </span>
                       {a.viaAggregator && (
-                        <span className="font-mono text-[10px] text-caution">
+                        <span className="font-mono text-[11px] text-caution">
                           via {a.viaAggregator}
                         </span>
                       )}
                       {a.sourceStale && (
-                        <span className="font-mono text-[10px] text-caution">{t.stale}</span>
+                        <span className="font-mono text-[11px] text-caution">{t.stale}</span>
                       )}
                     </div>
                     <a
@@ -159,7 +162,7 @@ export function EventCard({
                       target="_blank"
                       rel="noopener noreferrer nofollow"
                       title={a.titleOriginal}
-                      className="link-underline mt-1 inline-block font-mono text-[10px] text-official/80"
+                      className="link-underline mt-1 inline-block font-mono text-[11px] text-official"
                     >
                       {!aTitle.machine && `${t.readOriginal}: `}
                       {aTitle.machine ? aTitle.text : fold(aTitle.text)}
@@ -169,7 +172,7 @@ export function EventCard({
                         href={archive}
                         target="_blank"
                         rel="noopener noreferrer nofollow"
-                        className="link-underline ml-2 mt-1 inline-block font-mono text-[10px] text-mist/60"
+                        className="link-underline ml-2 mt-1 inline-block font-mono text-[11px] text-mist-2"
                       >
                         {t.archive} ↗
                       </a>

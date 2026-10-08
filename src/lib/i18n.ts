@@ -74,6 +74,38 @@ export interface Dict {
   close: string;
   closeHint: string;
   aboutProject: string;
+  skipToContent: string;
+  /* ── Gezinme (F1) ── */
+  navBoard: string;
+  navTimeline: string;
+  navLocations: string;
+  navFigures: string;
+  navSignals: string;
+  navSources: string;
+  /* ── Akış filtreleri (F1) ── */
+  filterLabel: string;
+  filterGroup: string;
+  filterTier: string;
+  filterFrom: string;
+  filterTo: string;
+  search: string;
+  searchPlaceholder: string;
+  apply: string;
+  clear: string;
+  activeFilters: string;
+  showing: (shown: number, total: number) => string;
+  loadMore: string;
+  noMatch: string;
+  noMatchHint: string;
+  allEvents: string;
+  latest: string;
+  backToBoard: string;
+  permalink: string;
+  notFoundTitle: string;
+  notFoundHint: string;
+  utc: string;
+  localTime: string;
+  timeZoneHint: string;
 }
 
 const tr: Dict = {
@@ -135,6 +167,38 @@ const tr: Dict = {
   close: 'Kapat',
   closeHint: 'Esc veya arka plana tıklayarak kapatın',
   aboutProject: 'Proje hakkında',
+  skipToContent: 'İçeriğe geç',
+  navBoard: 'Pano',
+  navTimeline: 'Akış',
+  navLocations: 'Bölgeler',
+  navFigures: 'Rakamlar',
+  navSignals: 'Sinyaller',
+  navSources: 'Kaynaklar',
+  filterLabel: 'Etiket',
+  filterGroup: 'Kaynak grubu',
+  filterTier: 'Katman',
+  filterFrom: 'Başlangıç',
+  filterTo: 'Bitiş',
+  search: 'Ara',
+  searchPlaceholder: 'başlık, kaynak, yer…',
+  apply: 'Uygula',
+  clear: 'Temizle',
+  activeFilters: 'Etkin filtreler',
+  showing: (shown, total) => `${shown}/${total} gösteriliyor`,
+  loadMore: 'Daha fazla yükle',
+  noMatch: 'Bu filtreye uyan olay yok',
+  noMatchHint:
+    'Filtreyi gevşetmeyi deneyin: etiketi “Tümü” yapın veya tarih aralığını genişletin. Bu, olayın bittiği anlamına gelmez.',
+  allEvents: 'Tüm akış',
+  latest: 'Son gelişmeler',
+  backToBoard: 'Panoya dön',
+  permalink: 'Kalıcı bağlantı',
+  notFoundTitle: 'Bu adres bulunamadı',
+  notFoundHint:
+    'Olay adresleri her taramada yeniden üretilebiliyor: haberler birleşince veya ayrılınca bağlantı değişebilir. Aradığınız gelişme büyük olasılıkla akışta duruyor.',
+  utc: 'UTC',
+  localTime: 'Yerel',
+  timeZoneHint: 'Saatleri kendi saat diliminizde göster',
 };
 
 const en: Dict = {
@@ -196,6 +260,38 @@ const en: Dict = {
   close: 'Close',
   closeHint: 'Press Esc or click outside to close',
   aboutProject: 'About the project',
+  skipToContent: 'Skip to content',
+  navBoard: 'Board',
+  navTimeline: 'Timeline',
+  navLocations: 'Regions',
+  navFigures: 'Figures',
+  navSignals: 'Signals',
+  navSources: 'Sources',
+  filterLabel: 'Label',
+  filterGroup: 'Source group',
+  filterTier: 'Tier',
+  filterFrom: 'From',
+  filterTo: 'To',
+  search: 'Search',
+  searchPlaceholder: 'title, source, place…',
+  apply: 'Apply',
+  clear: 'Clear',
+  activeFilters: 'Active filters',
+  showing: (shown, total) => `showing ${shown}/${total}`,
+  loadMore: 'Load more',
+  noMatch: 'No events match this filter',
+  noMatchHint:
+    'Try loosening the filter: set the label to “All” or widen the date range. This does not mean the event is over.',
+  allEvents: 'All events',
+  latest: 'Latest developments',
+  backToBoard: 'Back to the board',
+  permalink: 'Permalink',
+  notFoundTitle: 'This address was not found',
+  notFoundHint:
+    'Event addresses are regenerated on every scan: when stories merge or split, a link can change. What you are looking for is very likely still in the timeline.',
+  utc: 'UTC',
+  localTime: 'Local',
+  timeZoneHint: 'Show times in your own time zone',
 };
 
 export const DICTS: Record<Locale, Dict> = { tr, en };
@@ -222,4 +318,20 @@ export const LABEL_TEXT_I18N: Record<
   },
   unverified: { tr: 'Doğrulanmamış iddia', en: 'Unverified claim', tone: 'alert' },
   contradicted: { tr: 'Çelişkili bilgi', en: 'Conflicting reports', tone: 'danger' },
+};
+
+/**
+ * KISA etiket metinleri — yalnızca dar ekranlar (<640 px) için.
+ *
+ * Neden: tam metin (`ÇOKLU BAĞIMSIZ KAYNAK BİLDİRİYOR`) 390 px'te 242 px yer
+ * kaplıyor ve yanındaki başlığa 19 px bırakıyordu (ölçüm: docs/arayuz-plani.md §1.1).
+ * Kısaltma, editoryal anlamı KAYBETMEZ: "çoklu" = ≥2 bağımsız grup, "tek" = 1 grup.
+ * Tam metin `title` niteliğinde ve `sr-only` olarak erişilebilir kalır.
+ */
+export const LABEL_SHORT_I18N: Record<EventLabel, { tr: string; en: string }> = {
+  official: { tr: 'Resmî', en: 'Official' },
+  corroborated: { tr: 'Çoklu kaynak', en: 'Multiple sources' },
+  single: { tr: 'Tek kaynak', en: 'Single source' },
+  unverified: { tr: 'Doğrulanmamış', en: 'Unverified' },
+  contradicted: { tr: 'Çelişkili', en: 'Conflicting' },
 };

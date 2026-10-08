@@ -17,7 +17,7 @@ export function MachineTranslatedBadge({
   const t = getDict(locale);
   return (
     <span
-      className="font-mono text-[9px] uppercase tracking-wider text-caution/80"
+      className="font-mono text-[9px] uppercase tracking-wider text-caution"
       title={t.machineTranslated}
     >
       {compact ? 'MT' : t.machineTranslated}
