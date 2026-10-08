@@ -37,8 +37,8 @@
 content-security-policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none';
   frame-ancestors 'none'; form-action 'self';
   script-src 'self' 'nonce-<istek başına>' 'strict-dynamic' 'unsafe-eval';   ← 'unsafe-eval' yalnızca dev
-  style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-  font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data:; connect-src 'self'
+  style-src 'self' 'unsafe-inline';
+  font-src 'self' data:; img-src 'self' data:; connect-src 'self'
 X-Content-Type-Options: nosniff
 X-Frame-Options: DENY
 Referrer-Policy: strict-origin-when-cross-origin
@@ -143,8 +143,8 @@ stripHtml("<p>&#99999999999;</p>")→ RangeError
 | Risk | Neden kabul edildi | Plan |
 |---|---|---|
 | `style-src 'unsafe-inline'` | Bkz. B-9: nonce + inline style nitelikleri birlikte çalışmaz; script tarafı sertleştirildi | Gerekirse `style-src-attr 'unsafe-inline'` + nonce'lu `style-src-elem` ayrımı |
-| Google Fonts dış kaynak | Kullanıcı IP'si Google'a iletilir (gizlilik, KVKK/GDPR notu) | F2: fontları self-host et (`font-src 'self'`) |
-| COEP yok (`Cross-Origin-Embedder-Policy`) | `require-corp` Google Fonts ile uyumsuz olabilir; görsel doğrulama gerektirir | Fontlar self-host edildikten sonra `require-corp` denenebilir |
+| Google Fonts dış kaynak | ✅ **KAPANDI (8 Eki 2026):** yazı tipleri `next/font` ile self-host edildi (`Inter`, `Newsreader`, `JetBrains Mono`); `style-src`/`font-src` artık yalnızca `'self'`. Regresyon kapısı: `security-check` (dış host yasağı) + `ui-check`. | — |
+| COEP yok (`Cross-Origin-Embedder-Policy`) | `require-corp` dış font CDN'i ile uyumsuzdu; **artık dış font yok**, denenebilir | `require-corp` denenip görsel doğrulama yapılacak |
 | Uygulama seviyesinde rate limiting yok | Vercel platform koruması mevcut; site yalnızca okuma yapar; API rotası yok | Gerekirse Vercel WAF / Upstash Ratelimit |
 | Dev-only zafiyetler (B-8) | Üretim bundle'ına girmiyor; düzeltme breaking downgrade | Dependabot + drizzle-kit güncellemesi |
 | `data/feed.json` repo'da commit ediliyor | MVP deposu; içerik yalnızca başlık + kısa alıntı | A adımı: Postgres'e geçiş, `data/` gitignore |

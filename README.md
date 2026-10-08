@@ -35,7 +35,10 @@ npm run ingest          # tüm kaynakları tara, data/feed.json yaz
 npm run ingest -- --dry # yazmadan raporla
 npm run ingest -- --only=tass,meduza,reuters
 npm run typecheck
-npm run security-check   # güvenlik regresyon testleri (53 test: ReDoS, URL şeması, varlık DoS, log maskeleme, nonce CSP)
+npm run ui-check        # arayüz kapıları: kontrast (AA), yüzey ayrışması, opaklık/mikro punto kuralları, sözlük paritesi
+npm run layout-check    # yerleşim kapıları: 360–1440 px yatay taşma, mobil satır düzeni, sayfa bütçesi (Chrome gerekir)
+npm run security-check   # güvenlik regresyon testleri (ReDoS, URL şeması, varlık DoS, log maskeleme, nonce CSP)
+npm run check-all        # typecheck + ui-check + tüm veri kapıları (layout-check hariç: Chrome'a bağlı)
 ```
 
 Örnek çıktı:
@@ -119,9 +122,32 @@ npm run ingest          # tarar, Postgres'e (yoksa JSON'a) yazar
 
 **Cron:** `.github/workflows/ingest.yml` 10 dakikada bir çalışır. İş başarısız olursa `ingest-failure` etiketli bir issue açılır (dead man's switch) ve `data/feed.json` debug artifact'ı yüklenir.
 
+### Arayüz: sayfalar
+
+Bilgi mimarisi ve gerekçeleri: [`docs/arayuz-plani.md`](docs/arayuz-plani.md).
+
+| Rota | Ne işe yarar |
+|---|---|
+| `/[lang]` | **Pano** — 10 saniyelik durum: toplamlar, "son 24 saatte ne değişti", manşet, kaynağa bağlı rakamlar, bölge özeti, "şu an ne biliyoruz?", son gelişmeler |
+| `/[lang]/timeline` | **Akış** — tüm olaylar, filtrelenebilir (etiket · kaynak grubu · katman · tarih aralığı · arama) ve günlere göre gruplu, sayfalı |
+| `/[lang]/event/<slug>` | **Olay** — kalıcı adres; modalın tam sayfa hâli (iddialar, çelişki, arşiv bağlantıları) |
+| `/[lang]/locations` + `/<slug>` | **Bölgeler** — kaynak metninden çıkarılan konum listesi + kapsama oranı |
+| `/[lang]/figures` | **Rakamlar** — küratörlü vaka/ölüm/kısıtlama sayıları, her biri kaynağına ve cümlesine bağlı |
+| `/[lang]/signals` | **Sinyaller** — T5 katmanı (Telegram / kayıt dışı yayıncılar), sayfalı |
+| `/[lang]/sources` | **Kaynaklar** — canlı sağlık tablosu + bağımsızlık grupları |
+| `/[lang]/methodology` | **Metodoloji** — site ne yapar, ne YAPMAZ |
+
+Ek olarak `sitemap.xml` ve `robots.txt` (ikisi de isteğe bağlı üretilir; alan adı istek başlıklarından türetilir, `NEXT_PUBLIC_SITE_URL` ile sabitlenebilir).
+
+**Akış filtreleri JS'siz çalışır:** durum URL'de taşınır (`?label=single&q=sibirya&page=2`), form `GET` ile gönderilir. Sunucuda filtreleme yapıldığı için 450 KB'lık feed tarayıcıya gönderilmez.
+
+**"Son ziyaretinizden beri yeni":** ziyaret damgası yalnızca `localStorage`'da tutulur (çerez yok, sunucuya gönderim yok); yeni/güncellenen olaylar kartın sol kenarında işaretlenir. İşaretler istemcide konur, sayfa JS'siz de normal çalışır.
+
+**Saatler:** sunucu çıktısı her zaman UTC ve "UTC" etiketi görünür; üst bardaki **UTC/Yerel** düğmesi tüm zaman damgalarını ziyaretçinin saat dilimine çevirir (tercih yine yalnızca `localStorage`'da).
+
 ### Arayüz: olay detay modalı
 
-Zaman çizelgesinde **kartın herhangi bir yerine**, başlığa veya **Detay** butonuna tıklamak olayın tüm iddialarını, bağımsızlık gruplarını ve kaynak bağlantılarını açar. "Şu an ne biliyoruz?" listesi de aynı modalı kullanır. Kapanma üç yoldan: **Esc**, **arka plana tıklama**, **Kapat ×**. Native `<dialog>` + `showModal()` kullanılıyor (top-layer) — kartların `transform`/`backdrop-filter` taşımaları `position: fixed` modalını hapsetmesin diye. Odak, kapanınca tetikleyiciye geri döner.
+Zaman çizelgesinde **kartın herhangi bir yerine**, başlığa veya **Detay** butonuna tıklamak olayın tüm iddialarını, bağımsızlık gruplarını ve kaynak bağlantılarını açar. "Şu an ne biliyoruz?" listesi de aynı modalı kullanır. Kapanma üç yoldan: **Esc**, **arka plana tıklama**, **Kapat ×**. Native `<dialog>` + `showModal()` kullanılıyor (top-layer) — kartların `transform`/`backdrop-filter` taşımaları `position: fixed` modalını hapsetmesin diye. Odak, kapanınca tetikleyiciye geri döner. Modalın alt satırında olayın **kalıcı bağlantısı** bulunur.
 
 ### Ölçülen kaynak gerçekleri
 
