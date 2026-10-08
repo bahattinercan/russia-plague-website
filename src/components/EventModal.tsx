@@ -1,11 +1,14 @@
 'use client';
 
+import { Time } from './Time';
+
 import { useEffect, useRef } from 'react';
-import type { Article, PlagueEvent } from '@/types';
+import type { PlagueEvent } from '@/types';
 import { getDict, type Locale } from '@/lib/i18n';
 import { GROUP_LABELS } from '@/lib/sources/registry';
-import { archiveUrlFor, safeExternalUrl, fold } from '@/lib/sources/text';
-import { firstSentences, formatDate } from '@/lib/format';
+import { formatDate } from '@/lib/format';
+import { shouldShowSummary } from '@/lib/event-detail';
+import { ClaimList } from './ClaimList';
 import { LabelBadge } from './LabelBadge';
 import { ContradictionPanel } from './ContradictionPanel';
 import { MachineTranslatedBadge } from './MachineTranslatedBadge';
@@ -39,21 +42,10 @@ export function EventModal({
   const closeRef = useRef<HTMLButtonElement>(null);
 
   /*
-   * İddia → makale eşlemesi: kaynağın KENDİ özeti iddia listesinde gösterilir.
-   *
-   * Neden gerekli: iddia kaydı yalnızca BAŞLIĞI taşıyor; kaynağın 1-2 cümlelik
-   * özeti `articles[].excerpt` içinde. Bu yüzden detay, haberin ne dediğini
-   * gösterebilmek için makale kaydına bakar.
-   *
-   * Telif kuralı: `firstSentences(..., 2)` ile en fazla 2 cümle (PLAN.md §329).
-   * Google News üzerinden gelen eski öğelerde özet başlığın kopyasıydı; onları
-   * basmıyoruz (başlık hemen üstünde zaten var).
+   * İddia satırları `ClaimList` bileşeninde hazırlanır (kaynağın KENDİ 1-2
+   * cümlelik özeti, başlık kopyası ayıklaması, arşiv bağlantısı). Aynı bileşen
+   * `/event/<slug>` kalıcı sayfasında da kullanılır: tek davranış, iki görünüm.
    */
-  const articleByUrl = new Map<string, Article>();
-  for (const article of event.articles) {
-    articleByUrl.set(article.url, article);
-    if (article.canonicalUrl) articleByUrl.set(article.canonicalUrl, article);
-  }
 
   useEffect(() => {
     dialogRef.current?.showModal();
@@ -76,7 +68,7 @@ export function EventModal({
       <div className="modal-card surface rounded-xl p-5 sm:p-6">
         <div className="flex flex-wrap items-center gap-2">
           <LabelBadge label={event.label} locale={locale} />
-          <span className="font-mono text-[10.5px] uppercase tracking-wider text-mist/75">
+          <span className="font-mono text-[11px] uppercase tracking-wider text-mist">
             {t.reportedBy(event.independentGroupCount)} · {t.claimCount(event.claims.length)}
           </span>
           <button
@@ -85,13 +77,13 @@ export function EventModal({
             data-close
             onClick={onClose}
             aria-label={t.close}
-            className="ml-auto rounded border border-edge bg-abyss/60 px-2.5 py-1 font-mono text-[10.5px] uppercase tracking-wider text-mist transition-colors hover:border-official/40 hover:text-chalk"
+            className="ml-auto rounded border border-edge bg-abyss/60 px-2.5 py-1 font-mono text-[11px] uppercase tracking-wider text-mist transition-colors hover:border-official/40 hover:text-chalk"
           >
             {t.close} ×
           </button>
         </div>
 
-        <h2 id="event-detail-title" className="mt-3 text-[20px] font-semibold leading-snug text-chalk">
+        <h2 id="event-detail-title" className="narrative mt-3 text-[20px] font-semibold leading-snug text-chalk sm:text-[22px]">
           {title.text}
         </h2>
 
@@ -103,7 +95,7 @@ export function EventModal({
          * devam ediyor.
          */}
         {title.machine && (
-          <p className="mt-1.5 font-mono text-[10.5px] text-mist/70">
+          <p className="mt-1.5 font-mono text-[11px] text-mist-2">
             <MachineTranslatedBadge locale={locale} />
             {event.titleOriginal && <> · {t.readOriginal}: {event.titleOriginal}</>}
           </p>
@@ -111,7 +103,7 @@ export function EventModal({
 
         {/* Bazı feed'lerin excerpt'i başlığın aynısı (Google News: "başlık - Yayıncı").
            Yineleme göstermek yerine atlıyoruz. */}
-        {event.summary && !fold(event.summary).startsWith(fold(event.title)) && (
+        {shouldShowSummary(event, summary.text) && (
           <p className="mt-3 text-[14px] leading-relaxed text-mist">
             {summary.text}
           </p>
@@ -123,90 +115,32 @@ export function EventModal({
           {event.groups.map((group) => (
             <span
               key={group}
-              className="rounded border border-edge-soft bg-abyss/60 px-2 py-0.5 font-mono text-[10px] text-mist/85"
+              className="rounded border border-edge-soft bg-abyss/60 px-2 py-0.5 font-mono text-[11px] text-mist"
             >
               {GROUP_LABELS[group] ?? group}
             </span>
           ))}
         </div>
 
-        <ul className="mt-4 space-y-3">
-          {event.claims.map((claim) => {
-            const href = safeExternalUrl(claim.url);
-            const cTitle = localizedTitle(locale, claim);
-            const linked = articleByUrl.get(claim.url);
-            const rawSummary = linked
-              ? localizedText(locale, linked.excerpt, linked.excerptTr).text
-              : '';
-            const isTitleCopy =
-              rawSummary.length > 0 &&
-              // Özet Google News kalıntısı olabilir ("başlık + yayıncı adı").
-              // Hem ÇEVRİLMİŞ hem ORİJİNAL başlıkla karşılaştır: TR görünümde özet
-              // İngilizce kalırken başlık çevrildiği için tek karşılaştırma yetmiyor.
-              [cTitle.text, claim.title].some((t) =>
-                fold(rawSummary).startsWith(fold(t).slice(0, 30)),
-              );
-            const sourceSummary = isTitleCopy ? '' : firstSentences(rawSummary);
-            // §13.2: her kayıtta arşiv bağlantısı erişilebilir olmalı.
-            const archiveHref = safeExternalUrl(linked?.archiveUrl ?? archiveUrlFor(claim.url));
-            return (
-              <li key={`${claim.sourceSlug}-${claim.url}`} className="border-l-2 border-edge pl-3">
-                <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-                  <span className="font-mono text-[10px] uppercase tracking-wider text-official/80">
-                    T{claim.tier}
-                  </span>
-                  <span className="text-[13px] font-medium text-chalk/95">{claim.sourceName}</span>
-                  <span className="font-mono text-[10px] text-mist/70">
-                    {GROUP_LABELS[claim.independenceGroup] ?? claim.independenceGroup}
-                  </span>
-                  <span className="font-mono text-[10px] text-mist/55">
-                    {formatDate(claim.publishedAt, locale)} UTC
-                  </span>
-                </div>
-                <p className="mt-1 text-[12.5px] leading-snug text-mist">
-                  {cTitle.text}
-                </p>
-                {sourceSummary && (
-                  <p className="mt-1.5 border-l-2 border-edge-soft pl-2.5 text-[12px] leading-relaxed text-mist/85">
-                    <span className="label">{t.sourceSummary}: </span>
-                    {sourceSummary}
-                  </p>
-                )}
-                {href && (
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer nofollow"
-                    className="link-underline mt-1 inline-block font-mono text-[10px] text-official/80"
-                  >
-                    {t.readAtSource} ↗
-                  </a>
-                )}
-                {archiveHref && (
-                  <a
-                    href={archiveHref}
-                    target="_blank"
-                    rel="noopener noreferrer nofollow"
-                    className="link-underline ml-2 mt-1 inline-block font-mono text-[10px] text-mist/60"
-                  >
-                    {t.archive} ↗
-                  </a>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+        <ClaimList event={event} locale={locale} />
 
-        <footer className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-edge-soft pt-3 font-mono text-[10.5px] text-mist/70">
+        <footer className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 border-t border-edge-soft pt-3 font-mono text-[11px] text-mist-2">
           <span>
-            {t.publishedAt}: {formatDate(event.firstSeenAt, locale)} UTC
+            {t.seenBySystem}: <Time iso={event.firstSeenAt} locale={locale} />
           </span>
           <span>
-            {t.updated}: {formatDate(event.lastUpdateAt, locale)} UTC
+            {t.updated}: <Time iso={event.lastUpdateAt} locale={locale} />
           </span>
+          {/* Kalıcı bağlantı: modal kapanınca olay kaybolmasın (F3). */}
+          <a
+            href={`/${locale}/event/${encodeURIComponent(event.slug)}`}
+            className="link-underline text-official"
+          >
+            {t.permalink} →
+          </a>
         </footer>
 
-        <p className="mt-2 font-mono text-[10px] uppercase tracking-wider text-mist/50">
+        <p className="mt-2 font-mono text-[11px] uppercase tracking-wider text-mist-2">
           {t.closeHint}
         </p>
       </div>

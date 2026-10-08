@@ -2,6 +2,9 @@ import { loadLocalEnv } from '@/lib/env';
 import { loadFeed, type FeedBackend } from '@/lib/storage/store';
 import type { FeedFile } from '@/lib/storage/json';
 import type { PlagueEvent } from '@/types';
+// Benzerlik ölçüsü paylaşılan modülde: `/event/<slug>` çözümlemesi de aynı
+// ölçüyü kullanır (tek kopya, tek davranış).
+import { titleSimilarity } from '@/lib/text-match';
 
 // Saf biçimleyiciler ayrı modülde: client component'lar pg'yi import etmez.
 export { formatDate, formatRelative } from '@/lib/format';
@@ -73,25 +76,6 @@ export function rankEvents(events: PlagueEvent[]): PlagueEvent[] {
     if (rank !== 0) return rank;
     return new Date(b.lastUpdateAt).getTime() - new Date(a.lastUpdateAt).getTime();
   });
-}
-
-function normTitle(input: string): Set<string> {
-  return new Set(
-    input
-      .toLowerCase()
-      .replace(/[^a-z0-9\s]/g, ' ')
-      .split(/\s+/)
-      .filter((w) => w.length >= 4),
-  );
-}
-
-function titleSimilarity(a: string, b: string): number {
-  const A = normTitle(a);
-  const B = normTitle(b);
-  if (A.size === 0 || B.size === 0) return 0;
-  let inter = 0;
-  for (const t of A) if (B.has(t)) inter++;
-  return inter / (A.size + B.size - inter);
 }
 
 /**
