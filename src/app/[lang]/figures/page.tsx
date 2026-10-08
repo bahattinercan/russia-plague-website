@@ -68,8 +68,8 @@ export default async function FiguresPage({
           </p>
           <p>
             {tr
-              ? 'Neden metinden otomatik çıkarım yapılmıyor: naif çıkarım ölçüldü ve yanlış sonuç verdi — “28 yaşındaki araştırmacı öldü” cümlesinden “28 ölü”, “200 kişiyi karantinaya aldı” cümlesinden “200 ölü” üretiliyordu. Yanlış sayı göstermek, hiç sayı göstermemekten kötüdür.'
-              : 'Why figures are not extracted automatically: naive extraction was measured and failed — “a 28-year-old researcher died” produced “28 deaths”, and “quarantines 200 people” produced “200 deaths”. Showing a wrong number is worse than showing none.'}
+              ? 'Tabloyu okurken: her satır tek bir kaynağın kendi cümlesidir ve o cümleye “Olayı aç” bağlantısından ulaşılır. Satırlar toplanmaz; aynı ölçüt için iki kaynak farklı sayı veriyorsa ikisi de görünür, aradaki fark gizlenmez. Kaynağın kendi ihtiyat ifadesi (“yaklaşık”, “en az”, “fazla”) sayının yanında korunur — “200” ile “neredeyse 200” aynı şey değildir.'
+              : 'How to read the table: each row is one source’s own sentence, reachable through the “Open the event” link. Rows are not summed; if two sources give different numbers for the same metric, both stay visible and the gap is not hidden. Each source’s own hedging (“about”, “at least”, “more than”) is kept beside the number — “200” and “nearly 200” are not the same thing.'}
           </p>
           <p className="font-mono text-[11px] uppercase tracking-wider text-mist-2">
             {tr ? 'Semboller' : 'Symbols'}: ≈ {tr ? 'yaklaşık / neredeyse' : 'about / nearly'} · ≥{' '}

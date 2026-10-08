@@ -39,10 +39,52 @@
     "KALDIRILAN KAYITLAR (8 Eki 2026): deaths-moscowtimes ve restricted-moscowtimes çıkarıldı.",
     "Gerekçe: bağ cümlesi (\"Nearly 200 People Under Observation After Irkutsk Lab Worker Dies From Plague\")",
     "canlı feed penceresinden düştü — The Moscow Times makale seti değişti (ölçüm: 4 farklı başlık, o cümle yok).",
-    "Bu, figures.ts başlığında yazılı bilinen kırılganlıktır. Cümle feed’e geri dönerse kayıt yeniden eklenebilir."
+    "Bu, figures.ts başlığında yazılı bilinen kırılganlıktır. Cümle feed’e geri dönerse kayıt yeniden eklenebilir.",
+    "",
+    "EKLEME (08 Eki 2026) — `cases` ölçütü AÇILDI (R2 kararı, docs/harita-plani.md §4):",
+    "Ölçüm: 71 olayın hiçbiri vaka sayısını RAKAM olarak bildirmiyordu; yalnızca iki tutum vardı —",
+    "resmî ağız 'vaka yok' diyor, basın 'ikinci vaka' raporlarından söz ediyor. İkisi de kaynağın KENDİ",
+    "cümlesi olduğu için küratörlü kayıt olarak eklenebilir hâle geldi ve `disagreement` bayrağı bu",
+    "çelişkiyi arayüzde otomatik işaretliyor. Sistem yine HİÇBİR sayıyı toplamaz/üretmez.",
+    "",
+    "DİKKAT — `cases-second-independent` içindeki `value: 2` bir TOPLAM DEĞİLDİR: kaynağın cümlesindeki",
+    "sıra sayısıdır ('second plague case' → 2.). Sistem vaka saymıyor; kaynağın söylediği sayıyı",
+    "taşıyor ve cümleyi panelin altında birebir gösteriyor. Bu kayıt kaldırılmak istenirse panel",
+    "vaka için yine 'bildirilen rakam yok' boş durumuna döner (R1).",
+    "",
+    "NEDEN `value: 0` GEÇERLİ: `figures-check` kuralı ölüm/kısıtlama için `> 0` kalır; `cases` için",
+    "0'a izin verilir çünkü salgın raporlamasında 'vaka tespit edilmedi' GERÇEK ve yaygın bir bulgudur.",
+    "0'ı yasaklamak, resmî reddi ya gizlemeyi ya da olumlu bir sayıymış gibi göstermeyi zorlardı."
   ],
-  "generatedAt": "2026-10-08T01:15:00.000Z",
+  "generatedAt": "2026-10-08T18:09:00.000Z",
   "figures": [
+    {
+      "id": "cases-none-reuters",
+      "metric": "cases",
+      "value": 0,
+      "qualifier": "exact",
+      "sourceName": "Reuters",
+      "eventId": "ubuk4j",
+      "phrase": "Russia tells WHO there are no plague cases in Siberian city"
+    },
+    {
+      "id": "cases-none-tass",
+      "metric": "cases",
+      "value": 0,
+      "qualifier": "exact",
+      "sourceName": "TASS",
+      "eventId": "qgn8g",
+      "phrase": "WHO confirms no new plague cases reported in Siberian region"
+    },
+    {
+      "id": "cases-second-independent",
+      "metric": "cases",
+      "value": 2,
+      "qualifier": "exact",
+      "sourceName": "The Independent",
+      "eventId": "1wxm0ke",
+      "phrase": "WHO to investigate reports of second plague case after death of Russian lab worker"
+    },
     {
       "id": "deaths-cidrap",
       "metric": "deaths",

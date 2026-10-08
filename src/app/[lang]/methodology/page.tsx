@@ -242,6 +242,7 @@ const LIMITS_TR = [
   'Yalnızca Türkçe dışı kaynaklar (İngilizce/Rusça) TR görünümünde çevrilir; çeviri makine çevirisidir ve bu, olay detayında belirtilir. Orijinal başlık her zaman görünür kalır (kartta "Orijinali oku" satırı, detayda başlığın altında); doğrulama kapılarından geçmeyen çeviri gösterilmez, yerine orijinal başlık gelir.',
   'Bazı kaynaklar (Rospotrebnadzor, Novaya Gazeta Europe) doğrudan erişilemediği için toplayıcı üzerinden alınır.',
   'Kaynak güven puanları editoryal kararlardır; sürüm değişiklikleri şeffaf biçimde kaydedilir.',
+  'Rakamlar metinden otomatik ÇIKARILMAZ. Naif çıkarım ölçüldü ve yanlış sonuç verdi: “28 yaşındaki araştırmacı öldü” cümlesinden “28 ölü”, “200 kişiyi karantinaya aldı” cümlesinden “200 ölü” üretiliyordu. Yanlış sayı göstermek, hiç sayı göstermemekten kötüdür. Bu yüzden yalnızca kaynağın kendi cümlesinde geçen ve elle doğrulanan sayılar gösterilir; bağı kurulamayan kayıt hiç görünmez.',
   'Sistem yalnızca İngilizce, Türkçe ve Rusça metinlerde anahtar kelime taraması yapar; diğer dillerdeki içerik kaçabilir.',
 ];
 
@@ -251,5 +252,6 @@ const LIMITS_EN = [
   'Only non-Turkish sources (English/Russian) are translated in the TR view; translation is machine translation and this is noted in the event detail. The original headline always remains visible (a "read original" line on the card, and below the title in the detail view); a translation that fails validation is never shown — the original headline is shown instead.',
   'Some sources (Rospotrebnadzor, Novaya Gazeta Europe) are unreachable directly and are fetched via an aggregator.',
   'Source trust scores are editorial decisions; version changes are recorded transparently.',
+  'Figures are NOT extracted from text automatically. Naive extraction was measured and failed: “a 28-year-old researcher died” produced “28 deaths”, and “quarantines 200 people” produced “200 deaths”. Showing a wrong number is worse than showing none. So only figures that appear in the source’s own sentence and are manually verified are shown; a record that cannot be linked is never displayed.',
   'Keyword scanning covers English, Turkish and Russian only; content in other languages may be missed.',
 ];

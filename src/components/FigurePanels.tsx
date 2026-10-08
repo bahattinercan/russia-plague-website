@@ -101,7 +101,11 @@ export function FigureCards({ snapshot, locale }: { snapshot: FiguresSnapshot; l
               </span>
             ) : (
               <>
-                <span className="flex flex-wrap items-baseline gap-x-2">
+                {/*
+                 * Farklı değerler arasında GENİŞ boşluk: "0" ile "2" bitişik
+                 * dururken "02" diye okunuyordu (ölçüm: .shots/map2-figures-crop.png).
+                 */}
+                <span className="flex flex-wrap items-baseline gap-x-4">
                   {group.distinctValues.map((value) => {
                     const figure = group.figures.find((f) => f.value === value);
                     return (
@@ -118,6 +122,17 @@ export function FigureCards({ snapshot, locale }: { snapshot: FiguresSnapshot; l
                   {group.figures.length} {tr ? 'kaynak bildirdi' : 'sources reported'} ·{' '}
                   {group.independentGroups} {tr ? 'bağımsız grup' : 'independent groups'}
                 </span>
+                {/*
+                 * Uyuşmazlık işareti — `/figures` sayfasındaki tam uyarının ÖZETİ.
+                 * Neden panoda da gerekli: kaynaklar 0 ile 2 gibi zıt değerler
+                 * verdiğinde, sayılar yan yana durup hiçbir açıklama olmadan
+                 * “iki farklı vaka sayısı” gibi okunabilir. (docs/harita-plani.md §4)
+                 */}
+                {group.disagreement && (
+                  <span className="mt-1 block font-mono text-[11px] uppercase tracking-wider text-caution">
+                    {tr ? 'kaynaklar farklı değer veriyor' : 'sources give different values'}
+                  </span>
+                )}
               </>
             )}
           </dd>

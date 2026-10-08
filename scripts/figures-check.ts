@@ -59,9 +59,18 @@ for (const figure of file.figures) {
 
   check(`[${id}] metrik geçerli`, METRICS.includes(figure.metric), figure.metric);
   check(`[${id}] belirsizlik katsayısı geçerli`, QUALIFIERS.includes(figure.qualifier), figure.qualifier);
+  /*
+   * `cases` için 0 GEÇERLİ — gerekçe `data/figures.json` _readme ve
+   * docs/harita-plani.md §4: salgın raporlamasında “vaka tespit edilmedi”
+   * gerçek bir BULGUDUR (08 Eki 2026: Reuters + TASS). 0'ı yasaklamak resmî
+   * reddi ya gizlemeyi ya da olmayan bir sayıyı varmış gibi göstermeyi
+   * zorlardı. Ölüm ve kısıtlama için eşik `> 0` KALIR: orada 0 kayıt,
+   * bağlanmamış/boş bir satır anlamına gelirdi.
+   */
+  const minValue = figure.metric === 'cases' ? 0 : 1;
   check(
-    `[${id}] değer pozitif tam sayı`,
-    Number.isInteger(figure.value) && figure.value > 0,
+    `[${id}] değer tam sayı ve ${minValue === 0 ? 'negatif değil' : 'pozitif'}`,
+    Number.isInteger(figure.value) && figure.value >= minValue,
     String(figure.value),
   );
   check(`[${id}] kaynak adı dolu`, figure.sourceName.trim().length > 0);
