@@ -54,9 +54,20 @@
     "",
     "NEDEN `value: 0` GEÇERLİ: `figures-check` kuralı ölüm/kısıtlama için `> 0` kalır; `cases` için",
     "0'a izin verilir çünkü salgın raporlamasında 'vaka tespit edilmedi' GERÇEK ve yaygın bir bulgudur.",
-    "0'ı yasaklamak, resmî reddi ya gizlemeyi ya da olumlu bir sayıymış gibi göstermeyi zorlardı."
+    "0'ı yasaklamak, resmî reddi ya gizlemeyi ya da olumlu bir sayıymış gibi göstermeyi zorlardı.",
+    "",
+    "KALDIRILAN KAYIT (08 Eki 2026, 22:59): `cases-none-tass` çıkarıldı. `cases` ölçütü artık",
+    "2 kayıt: Reuters 0 · The Independent 2 (çelişki işareti korunuyor).",
+    "Gerekçe: bağ cümlesi (\"WHO confirms no new plague cases reported in Siberian region\") canlı feed",
+    "penceresinden düştü. Ölçüm (08 Eki 2026 22:41, Postgres, 72 olay): `qgn8g` feed'de yok ve o cümle",
+    "72 kaydın hiçbirinde geçmiyor; TASS'ın feed'de kalan tek kaydı (\"No accidents involving pathogen",
+    "handling detected at Irkutsk anti-plague institute\") BAŞKA bir iddiadır — kaza, vaka değil, dolayısıyla",
+    "oraya bağlamak sayıyı söylemediği bir cümleye dayandırırdı. Bu, `figures.ts` başlığında ve yukarıda",
+    "yazılı bilinen kırılganlıktır (aynı sınıf: deaths-moscowtimes). Cümle feed'e geri dönerse kayıt",
+    "yeniden eklenebilir — kayıt nesnesi tek satır: id/metric/value/qualifier/sourceName/eventId/phrase.",
+    "Not: kayıt silinince `figures-check` B bölümü (kaynağa bağlılık) yeniden GEÇTİ."
   ],
-  "generatedAt": "2026-10-08T18:09:00.000Z",
+  "generatedAt": "2026-10-08T22:59:00.000Z",
   "figures": [
     {
       "id": "cases-none-reuters",
@@ -66,15 +77,6 @@
       "sourceName": "Reuters",
       "eventId": "ubuk4j",
       "phrase": "Russia tells WHO there are no plague cases in Siberian city"
-    },
-    {
-      "id": "cases-none-tass",
-      "metric": "cases",
-      "value": 0,
-      "qualifier": "exact",
-      "sourceName": "TASS",
-      "eventId": "qgn8g",
-      "phrase": "WHO confirms no new plague cases reported in Siberian region"
     },
     {
       "id": "cases-second-independent",
