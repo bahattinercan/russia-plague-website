@@ -26,9 +26,11 @@
     "",
     "KAYIT GEÇMİŞİ:",
     "- 08 Eki 2026: bağ anahtarı `eventId`ten `phrase`e taşındı (yukarıya bakın).",
-    "- restricted-euronews: eventId 15fzwi9 → 16bcz27; restricted-nbc: 17175zz → 1gih1bg. Olaylar",
-    "  feed'den düştü; kaynakların AYNI cümleleri yeni olaylarda duruyor. Rakam/ölçü değişmedi,",
-    "  yalnızca bağ yenilendi.",
+    "- restricted-euronews KALDIRILDI: kayıt 'quarantines 200' cümlesine bağlıydı; Euronews",
+    "  başlığını 'quarantines hundreds' olarak değiştirdi ve 'yüzlerce'yi 200'e çevirmek yorum",
+    "  olurdu (kural: `value` kaynağın söylediği sayıdır). Ölçüm: güncel feed'de Euronews'in",
+    "  200 dediği bir cümle yok.",
+    "- restricted-nbc: eventId 17175zz → 1gih1bg (olay feed'den düştü, cümle aynı kaldı).",
     "- deaths-meduza ve restricted-meduza KALDIRILDI: Meduza'nın bu iki cümlesi (Darya Shipilova'nın",
     "  ölümü; ~200 kişinin izolasyonu) güncel feed'de YOK — ölçüldü, 314 kaydın hiçbirinde geçmiyor.",
     "  Kural gereği bağlanamayan kayıt gösterilemez; başka bir Meduza cümlesine bağlamak sayıyı",
@@ -75,17 +77,6 @@
       "sourceName": "NBC News",
       "eventId": "1gih1bg",
       "phrase": "Russian lab worker dies of suspected plague as 200 enter medical observation"
-    },
-    {
-      "id": "restricted-euronews",
-      "metric": "restricted",
-      "value": 200,
-      "qualifier": "exact",
-      "measureTr": "karantina",
-      "measureEn": "quarantine",
-      "sourceName": "Euronews",
-      "eventId": "16bcz27",
-      "phrase": "Russia denies plague death but quarantines 200 without explanation"
     },
     {
       "id": "restricted-cnbc",
