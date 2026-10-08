@@ -37,6 +37,7 @@ npm run ingest -- --only=tass,meduza,reuters
 npm run typecheck
 npm run ui-check        # arayüz kapıları: kontrast (AA), yüzey ayrışması, opaklık/mikro punto kuralları, sözlük paritesi
 npm run layout-check    # yerleşim kapıları: 360–1440 px yatay taşma, mobil satır düzeni, sayfa bütçesi (Chrome gerekir)
+npm run build:world-map # dünya haritası varlıklarını yeniden üret (Natural Earth 110m → public/world-map*.svg; internet gerekir)
 npm run security-check   # güvenlik regresyon testleri (ReDoS, URL şeması, varlık DoS, log maskeleme, nonce CSP)
 npm run check-all        # typecheck + ui-check + tüm veri kapıları (layout-check hariç: Chrome'a bağlı)
 ```

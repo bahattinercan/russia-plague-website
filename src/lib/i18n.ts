@@ -79,6 +79,15 @@ export interface Dict {
   navBoard: string;
   navTimeline: string;
   navLocations: string;
+  /**
+   * Harita erişilebilirlik metni ve işaretçi anlamı.
+   *
+   * `mapMarkerNote` KRİTİK: haritadaki sayı olay sayısıdır, VAKA sayısı değil.
+   * Aradaki farkı yazmamak, "bildirilen olayı vaka gibi göstermek" olurdu —
+   * `data/figures.json` tam olarak bu karışıklığı önlemek için küratörlü.
+   */
+  mapAlt: string;
+  mapMarkerNote: string;
   navFigures: string;
   navSignals: string;
   navSources: string;
@@ -171,6 +180,10 @@ const tr: Dict = {
   navBoard: 'Pano',
   navTimeline: 'Akış',
   navLocations: 'Bölgeler',
+  mapAlt:
+    'Dünya haritası: Rusya vurgulanmış; olay bildirilen bölgeler işaretlenmiş',
+  mapMarkerNote:
+    'İşaretçideki sayı bildirilen OLAY sayısıdır, vaka sayısı değildir. Vaka rakamı yalnızca kaynağın kendi cümlesine bağlanabildiğinde gösterilir.',
   navFigures: 'Rakamlar',
   navSignals: 'Sinyaller',
   navSources: 'Kaynaklar',
@@ -264,6 +277,9 @@ const en: Dict = {
   navBoard: 'Board',
   navTimeline: 'Timeline',
   navLocations: 'Regions',
+  mapAlt: 'World map: Russia highlighted; regions with reported events are marked',
+  mapMarkerNote:
+    'The number on a marker is the count of reported EVENTS, not cases. A case figure is shown only when it can be bound to the source’s own sentence.',
   navFigures: 'Figures',
   navSignals: 'Signals',
   navSources: 'Sources',

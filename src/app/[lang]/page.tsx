@@ -13,6 +13,7 @@ import { DEFAULT_LOCALE, getDict, isLocale, type Locale } from '@/lib/i18n';
 import { StatusBar } from '@/components/StatusBar';
 import { StatusStrip } from '@/components/StatusStrip';
 import { LeadStory } from '@/components/LeadStory';
+import { WorldMap } from '@/components/WorldMap';
 import { FigureCards } from '@/components/FigurePanels';
 import { EventCard } from '@/components/EventCard';
 import { TopEventList } from '@/components/TopEventList';
@@ -193,6 +194,18 @@ export default async function HomePage({
                 {tr ? 'Tüm bölgeler' : 'All regions'} →
               </a>
             </div>
+            {/*
+             * Harita bağlam katmanı: "nerede" sorusunu dünya ölçeğinde cevaplar.
+             * Ülke boyaması YOK — ölçüm koropleti desteklemiyor (docs/harita-plani.md §2.1).
+             */}
+            <div className="mt-4">
+              <WorldMap
+                regions={coverage.aggregates}
+                locale={locale}
+                hrefFor={(slug) => `/${locale}/locations/${encodeURIComponent(slug)}`}
+              />
+            </div>
+
             <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
               {topRegions.map((region, i) => (
                 <li key={region.slug}>
@@ -213,8 +226,8 @@ export default async function HomePage({
             </ul>
             <p className="reveal mt-3 font-mono text-[11px] uppercase tracking-wider text-mist-2">
               {tr
-                ? `${coverage.total} olayın ${coverage.matched}’inde konum belirlenebildi (%${coveragePercent}) — bu yüzden harita değil liste gösteriyoruz`
-                : `a location was determined for ${coverage.matched} of ${coverage.total} events (${coveragePercent}%) — hence a list, not a map`}
+                ? `${coverage.total} olayın ${coverage.matched}’inde konum belirlenebildi (%${coveragePercent}) — harita yalnızca bunları gösterir; kalanı “atanmamış”, “başka yerde” değil`
+                : `a location was determined for ${coverage.matched} of ${coverage.total} events (${coveragePercent}%) — the map shows only those; the rest are unassigned, not “elsewhere”`}
             </p>
           </section>
         )}
