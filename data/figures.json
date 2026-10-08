@@ -1,0 +1,113 @@
+{
+  "_readme": [
+    "Sayısal durum — KÜRATÖRLÜ ve KAYNAĞA BAĞLI rakamlar. PLAN.md §9.5.",
+    "",
+    "NEDEN OTOMATİK ÇIKARIM DEĞİL: ölçüldü (7 Eki 2026, 60 olay). Metinden naif rakam",
+    "çıkarımı yanlış sayı üretiyor: 'A 28-year-old plague researcher died' → deaths=28",
+    "(28 yaştır), 'denies plague death but quarantines 200' → deaths=200 (200 karantinadır).",
+    "Kapsam da %8'in altında. Böyle bir panel '28 ölü' yazarak sitenin tüm güvenilirliğini",
+    "bitirirdi.",
+    "",
+    "KURAL (08 Eki 2026): her kayıt `phrase` + `sourceName` ile GERÇEK feed kaydına bağlanmak",
+    "zorundadır. `phrase` zaten kaynağın KENDİ cümlesi olmak zorunda olduğu için bağ anahtarıdır:",
+    "cümle korpusta varsa rakam gösterilir, yoksa gösterilmez (kendi kendini doğrular).",
+    "Bağlanamayan kayıt ekranda GÖSTERİLMEZ ve `npm run figures-check` hata verir. Bu yüzden",
+    "burada URL veya tarih tutulmaz: ikisi de feed'den çözülür, bayatlayamaz.",
+    "",
+    "`eventId` artık ZORUNLU DEĞİL, yalnızca ipucu: aynı cümle birden çok olayda geçiyorsa doğru",
+    "olayı seçmek için kullanılır, bayatlamışsa sessizce yok sayılır. Neden değişti: olay kimlikleri",
+    "her ingest'te yeniden üretilebiliyordu — ölçüm: 3 saatte 9 kaydın 4'ü koptu.",
+    "Bağlanamayan kayıt ekranda GÖSTERİLMEZ ve `npm run figures-check` hata verir. Bu yüzden",
+    "burada URL veya tarih tutulmaz: ikisi de feed'den çözülür, bayatlayamaz.",
+    "",
+    "Yeni kayıt eklerken: yalnızca kaynağın KENDİ cümlesini `phrase` alanına yaz (başlık veya",
+    "kısa alıntı, telif kuralı). Sayıyı sen yorumlama; `value` kaynağın söylediği sayıdır,",
+    "'about/nearly' gibi belirsizlik `qualifier` ile korunur.",
+    "",
+    "KAYIT GEÇMİŞİ:",
+    "- 08 Eki 2026: bağ anahtarı `eventId`ten `phrase`e taşındı (yukarıya bakın).",
+    "- restricted-euronews: eventId 15fzwi9 → 16bcz27; restricted-nbc: 17175zz → 1gih1bg. Olaylar",
+    "  feed'den düştü; kaynakların AYNI cümleleri yeni olaylarda duruyor. Rakam/ölçü değişmedi,",
+    "  yalnızca bağ yenilendi.",
+    "- deaths-meduza ve restricted-meduza KALDIRILDI: Meduza'nın bu iki cümlesi (Darya Shipilova'nın",
+    "  ölümü; ~200 kişinin izolasyonu) güncel feed'de YOK — ölçüldü, 314 kaydın hiçbirinde geçmiyor.",
+    "  Kural gereği bağlanamayan kayıt gösterilemez; başka bir Meduza cümlesine bağlamak sayıyı",
+    "  söylemediği bir cümleye dayandırırdı."
+  ],
+  "generatedAt": "2026-10-08T01:15:00.000Z",
+  "figures": [
+    {
+      "id": "deaths-cidrap",
+      "metric": "deaths",
+      "value": 1,
+      "qualifier": "exact",
+      "sourceName": "CIDRAP (University of Minnesota)",
+      "eventId": "1rxkf46",
+      "phrase": "Suspected plague incident leaves 1 dead, 200 under quarantine in Siberia"
+    },
+    {
+      "id": "deaths-moscowtimes",
+      "metric": "deaths",
+      "value": 1,
+      "qualifier": "exact",
+      "sourceName": "The Moscow Times",
+      "eventId": "p1h78g",
+      "phrase": "Nearly 200 People Under Observation After Irkutsk Lab Worker Dies From Plague"
+    },
+    {
+      "id": "restricted-cidrap",
+      "metric": "restricted",
+      "value": 200,
+      "qualifier": "exact",
+      "measureTr": "karantina",
+      "measureEn": "quarantine",
+      "sourceName": "CIDRAP (University of Minnesota)",
+      "eventId": "1rxkf46",
+      "phrase": "Suspected plague incident leaves 1 dead, 200 under quarantine in Siberia"
+    },
+    {
+      "id": "restricted-nbc",
+      "metric": "restricted",
+      "value": 200,
+      "qualifier": "exact",
+      "measureTr": "tıbbi gözlem",
+      "measureEn": "medical observation",
+      "sourceName": "NBC News",
+      "eventId": "1gih1bg",
+      "phrase": "Russian lab worker dies of suspected plague as 200 enter medical observation"
+    },
+    {
+      "id": "restricted-euronews",
+      "metric": "restricted",
+      "value": 200,
+      "qualifier": "exact",
+      "measureTr": "karantina",
+      "measureEn": "quarantine",
+      "sourceName": "Euronews",
+      "eventId": "16bcz27",
+      "phrase": "Russia denies plague death but quarantines 200 without explanation"
+    },
+    {
+      "id": "restricted-cnbc",
+      "metric": "restricted",
+      "value": 200,
+      "qualifier": "nearly",
+      "measureTr": "hastaneye kaldırma",
+      "measureEn": "hospitalisation",
+      "sourceName": "CNBC",
+      "eventId": "15toyxd",
+      "phrase": "Russia hospitalizes almost 200 people after researcher's death from plague: Reports"
+    },
+    {
+      "id": "restricted-moscowtimes",
+      "metric": "restricted",
+      "value": 200,
+      "qualifier": "nearly",
+      "measureTr": "gözlem altında tutma",
+      "measureEn": "under observation",
+      "sourceName": "The Moscow Times",
+      "eventId": "p1h78g",
+      "phrase": "Nearly 200 People Under Observation After Irkutsk Lab Worker Dies From Plague"
+    }
+  ]
+}
