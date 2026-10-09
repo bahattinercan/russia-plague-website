@@ -1,0 +1,44 @@
+name: ci
+
+# PR kapısı: `main` korumalı (PR zorunlu, admin dahil) ama korumanın bir
+# status check'e bağlanması gerekiyordu — bu workflow o check'i üretir.
+#
+# Tasarım kararları:
+#  - Kapılar SIRSIZ ve DB'SİZ koşar. `npm run check-all` (typecheck + ui +
+#    security + translation + geo + summarize + figures) yerel olarak
+#    `DATABASE_URL` yokken de geçer: figures-check `data/feed.json` yedeğine
+#    düşer. Böylece fork PR'larında da (secret verilmez) aynı sonuç çıkar ve
+#    kapı "sır yok" diye kırmızıya dönmez.
+#  - `layout-check` YOK: Chrome ister, PR'ı yavaşlatır/kırılganlaştırır;
+#    yerelde `npm run build && npx next start -p 3211` sonrası koşulur.
+#  - `ingest.yml` ayrı kalır (veri toplama, 10 dk kadans); bu workflow
+#    yalnızca kod kapılarını koşar ve production'a hiçbir şey yazmaz.
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Bağımlılıklar
+        run: npm ci
+
+      - name: Kapılar (typecheck + ui + security + translation + geo + summarize + figures)
+        run: npm run check-all

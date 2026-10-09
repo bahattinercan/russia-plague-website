@@ -26,7 +26,7 @@
 | Açık yönlendirme (proxy)           | ✅ Yok         | `//evil.com` → `308 /evil.com`; `%2e%2e%2f` → 404                                                                                  |
 | SQL enjeksiyonu                    | ✅ Yok         | Tüm sorgular parametreli; tablo/kolon adları sabit (kullanıcı girdisi değil)                                                       |
 | Komut enjeksiyonu                  | ✅ Yok         | `child_process`/`exec` hiç yok; dosya yolları sabit                                                                                |
-| GitHub Actions                     | ✅ Yeterli     | `permissions` minimal, `pull_request_target` yok, fork secret'ı yok, `npm ci`. **Not:** depoda tek workflow var — `ingest.yml`; ayrı bir CI workflow'u (`ci.yml`) **yok**                                    |
+| GitHub Actions                     | ✅ Yeterli     | `permissions` minimal, `pull_request_target` yok, fork secret'ı yok, `npm ci`. **9 Eki 2026:** PR kapısı eklendi — `.github/workflows/ci.yml` (`npm ci` + `npm run check-all`, `permissions: contents: read`, sırsız/DB'siz) ve `main` korumasında **zorunlu status check** olarak tanımlandı. Veri toplama workflow'u (`ingest.yml`) ayrı kalır                                    |
 | Dal koruması (`main`)              | ✅ Açık (B-11) | PR zorunlu, force-push ve dal silme kapalı, `enforce_admins: true`; `gh api …/branches/main/protection` ile doğrulandı                                                  |
 | En az yetkili DB rolü              | ✅ Açık (B-12) | Uygulama/CI/Vercel `plague_app` (`NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSRLS`); `neondb_owner` yalnızca yönetim için ve şifresi rotate edildi                     |
 | Next.js dosya sözleşmesi           | ✅ Doğru       | Next 16'da `middleware.ts` → `proxy.ts`; dosya `src/proxy.ts` (docs ile teyit edildi)                                              |
@@ -154,7 +154,7 @@ stripHtml("<p>&#99999999999;</p>")→ RangeError
 ### B-11 — `main` dalı korumasızdı (Orta · tedarik zinciri)
 
 **Sorun:** Repo public ve `main`'e push otomatik production deploy tetikliyor; dal koruması yoktu. Yazma yetkisi olan biri (veya sızmış bir token) doğrudan canlıya çıkabilir, force-push ile geçmiş yeniden yazılabilirdi.
-**Düzeltme:** Branch protection — PR zorunlu, force-push ve dal silme kapalı, doğrusal geçmiş, admin dahil (`enforce_admins: true`).
+**Düzeltme:** Branch protection — PR zorunlu, force-push ve dal silme kapalı, doğrusal geçmiş, admin dahil (`enforce_admins: true`). Ayrıca PR'da koşan `.github/workflows/ci.yml` (`npm ci` + `npm run check-all`) **zorunlu status check** olarak bağlandı; böylece "PR zorunlu" kuralı gerçek bir kapıya dayanıyor.
 **Doğrulama:** `gh api repos/…/branches/main/protection` → `required_pull_request_reviews` dolu, `enforce_admins.enabled = true`, `allow_force_pushes = false`; doğrudan `main` güncellemesi API üzerinden reddedildi.
 **Ek:** cron-job.org'daki tetikleyici token **fine-grained PAT** (`GET /user` yanıtında `x-oauth-scopes` yok). GitHub UI'dan yalnızca `Actions: read/write` ve tek repo olduğu teyit edilmeli.
 
@@ -215,5 +215,6 @@ npm run typecheck
 - [x] Deploy sonrası başlıklar **ve nonce'lu CSP** yeniden doğrulanır; tarayıcı konsolunda CSP ihlali olmamalı *(9 Eki 2026: alias üzerinden doğrulandı — CSP nonce'lu, 14/14 `<script>` nonce taşıyor, `X-Powered-By` yok; Vercel bot challenge bazı curl isteklerini 403 ile kesiyor)*
 - [x] Nonce'lu CSP üretimde test edilir (`'unsafe-eval'` görünmemeli, `upgrade-insecure-requests` görünmeli) *(9 Eki 2026: ikisi de doğrulandı)*
 - [x] `main` dalı korumalı: PR zorunlu, force-push/dal silme kapalı, `enforce_admins: true` (B-11)
+- [x] PR kapısı: `.github/workflows/ci.yml` → `npm ci` + `npm run check-all`, `main`'de zorunlu status check (sırsız ve DB'siz koşar)
 - [x] `npm audit --omit=dev` temiz *(9 Eki 2026: 0 — drizzle-kit `devDependencies`'e taşındı, `c87361b`. Tam `npm audit` hâlâ 4 moderate, dev-only)*
 - [x] Cron başarısızlığında bildirim (Actions hata kodu 2 → dead man's switch) + cron-job.org başarısızlık alarmı
