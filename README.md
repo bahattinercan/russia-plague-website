@@ -49,6 +49,8 @@ npm run check-all        # typecheck + ui-check + security-check + translation-c
 
 `check-all` `layout-check`'i **içermaz** (Chrome gerektirir); `ui-check` 19, `security-check` 58, `translation-check` 30, `geo-check` 24, `figures-check` 59, `summarize-check` 22 kapı koşar.
 
+`main` dalı korumalıdır (PR zorunlu, admin dahil, force-push ve dal silme kapalı). PR'larda `.github/workflows/ci.yml` `npm ci` + `npm run check-all` koşar ve bu check korumada **zorunludur**. Kapılar **sırsız ve DB'siz** çalışır (`figures-check` `data/feed.json` yedeğine düşer), bu yüzden fork PR'larında da aynı sonucu verir.
+
 Örnek çıktı (7 Eki 2026 koşusu, `data/feed.json`):
 
 ```
