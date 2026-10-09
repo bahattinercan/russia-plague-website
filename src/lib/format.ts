@@ -9,9 +9,9 @@ import { DEFAULT_LOCALE, type Locale } from './i18n';
  */
 
 export function formatDate(iso: string | null, locale: Locale = DEFAULT_LOCALE): string {
-  if (!iso) return '—';
+  if (!iso) return '-';
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '—';
+  if (Number.isNaN(d.getTime())) return '-';
   return new Intl.DateTimeFormat(locale === 'tr' ? 'tr-TR' : 'en-GB', {
     day: '2-digit',
     month: 'short',
@@ -43,7 +43,7 @@ export function formatRelative(iso: string | null, locale: Locale): string {  if
  */
 export function formatDay(iso: string, locale: Locale = DEFAULT_LOCALE): string {
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '—';
+  if (Number.isNaN(d.getTime())) return '-';
   return new Intl.DateTimeFormat(locale === 'tr' ? 'tr-TR' : 'en-GB', {
     day: 'numeric',
     month: 'long',

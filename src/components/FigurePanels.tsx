@@ -170,8 +170,8 @@ export function FigureTable({ snapshot, locale }: { snapshot: FiguresSnapshot; l
           {group.figures.length === 0 ? (
             <p className="mt-3 text-[13px] text-mist-2">
               {tr
-                ? 'Bu ölçüt için kaynaklarda bildirilen bir rakam yok. Küratörlü listede kayıt yoksa burada sayı gösterilmez — tahmin üretilmez.'
-                : 'No figure reported by sources for this metric. If the curated list has no entry, no number is shown here — no estimates are produced.'}
+                ? 'Bu ölçüt için kaynaklarda bildirilen bir rakam yok. Küratörlü listede kayıt yoksa burada sayı gösterilmez; tahmin üretilmez.'
+                : 'No figure reported by sources for this metric. If the curated list has no entry, no number is shown here; no estimates are produced.'}
             </p>
           ) : (
             <ul className="mt-3 space-y-4">

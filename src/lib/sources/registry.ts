@@ -106,7 +106,7 @@ export const SOURCES: SourceDef[] = [
   // TIER 1 — küresel otorite
   {
     slug: 'who-don',
-    name: 'WHO — Disease Outbreak News',
+    name: 'WHO · Disease Outbreak News',
     aliases: ['WHO', 'World Health Organization'],
     homepage: 'https://www.who.int/emergencies/disease-outbreak-news',
     tier: 1,
@@ -130,7 +130,7 @@ export const SOURCES: SourceDef[] = [
   },
   {
     slug: 'ecdc',
-    name: 'ECDC — Avrupa Hastalık Önleme ve Kontrol Merkezi',
+    name: 'ECDC · Avrupa Hastalık Önleme ve Kontrol Merkezi',
     aliases: ['European Centre for Disease Prevention and Control'],
     homepage: 'https://www.ecdc.europa.eu',
     tier: 1,
@@ -142,7 +142,7 @@ export const SOURCES: SourceDef[] = [
   },
   {
     slug: 'cdc-plague',
-    name: 'US CDC — Plague',
+    name: 'US CDC · Plague',
     aliases: ['CDC', 'Centers for Disease Control and Prevention'],
     homepage: 'https://www.cdc.gov/plague',
     tier: 1,
@@ -329,7 +329,7 @@ export const SOURCES: SourceDef[] = [
     trustBase: 90,
     lang: 'en',
     adapter: gn('site:bmj.com plague russia'),
-    notes: 'Hakemli dergi — bilimsel yorum katmanı.',
+    notes: 'Hakemli dergi; bilimsel yorum katmanı.',
   },
 
   // TIER 3 — resmi Rusya / devlet medyası
@@ -418,7 +418,7 @@ export const SOURCES: SourceDef[] = [
     lang: 'en',
     adapter: { kind: 'rss', url: 'https://www.rferl.org/api/' },
     notes:
-      'ÖLÇÜLDÜ: /api/zrqiteuuir ve /api/zmgqimmitm 0 öğe döndürüyor; /api/ 20 öğe ile çalışıyor. Bölgesel muhabir ağı güçlü — Irkutsk olayını ilk bildiren kaynaklardan.',
+      'ÖLÇÜLDÜ: /api/zrqiteuuir ve /api/zmgqimmitm 0 öğe döndürüyor; /api/ 20 öğe ile çalışıyor. Bölgesel muhabir ağı güçlü; Irkutsk olayını ilk bildiren kaynaklardan.',
   },
   {
     slug: 'moscowtimes',
@@ -460,7 +460,7 @@ export const SOURCES: SourceDef[] = [
   },
   {
     slug: 'discovery-tr',
-    name: 'Keşif — Türkçe',
+    name: 'Keşif · Türkçe',
     homepage: 'https://news.google.com',
     tier: 5,
     group: 'aggregator',
@@ -470,7 +470,7 @@ export const SOURCES: SourceDef[] = [
   },
   {
     slug: 'tg-astrapress',
-    name: 'Telegram — Astra',
+    name: 'Telegram · Astra',
     homepage: 'https://t.me/astrapress',
     tier: 5,
     group: 'social-signal',
@@ -481,7 +481,7 @@ export const SOURCES: SourceDef[] = [
   },
   {
     slug: 'tg-shot_shot',
-    name: 'Telegram — Shot',
+    name: 'Telegram · Shot',
     homepage: 'https://t.me/shot_shot',
     tier: 5,
     group: 'social-signal',

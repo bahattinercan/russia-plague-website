@@ -64,7 +64,7 @@ export default async function MethodologyPage({
         <p className="reveal mt-3 text-[14.5px] leading-relaxed text-mist">
           {tr
             ? 'Bu sayfa, sitenin ne yaptığını ve daha önemlisi ne YAPMADIĞINI açıklar. Güven, iddiadan değil şeffaflıktan gelir.'
-            : 'This page explains what the site does — and more importantly, what it does NOT do. Trust comes from transparency, not claims.'}
+            : 'This page explains what the site does, and more importantly, what it does NOT do. Trust comes from transparency, not claims.'}
         </p>
 
         {/* ── 1. Temel kural ─────────────────────────────────────────── */}
@@ -99,7 +99,7 @@ export default async function MethodologyPage({
         {/* ── 3. Bağımsızlık grupları ────────────────────────────────── */}
         <section className="reveal mt-10">
           <h2 className="narrative text-[21px] font-semibold tracking-tight text-chalk">
-            3. {tr ? 'Bağımsızlık grupları — en kritik kural' : 'Independence groups — the most important rule'}
+            3. {tr ? 'Bağımsızlık grupları: en kritik kural' : 'Independence groups: the most important rule'}
           </h2>
           <p className="mt-3 text-[13.5px] leading-relaxed text-mist">
             {tr
@@ -135,8 +135,8 @@ export default async function MethodologyPage({
           </pre>
           <p className="mt-3 text-[13px] leading-relaxed text-mist">
             {tr
-              ? 'Puanlar ELLE belirlenir ve sürümlenir; otomatik öğrenilmez. Puan UI’da rakam olarak gösterilmez (yanlış kesinlik hissi vermemek için) — katman (T1–T5) ve kaynak adı gösterilir.'
-              : 'Scores are set MANUALLY and versioned; nothing is learned automatically. Scores are not shown as numbers in the UI (to avoid a false sense of precision) — tier (T1–T5) and source name are shown instead.'}
+              ? 'Puanlar ELLE belirlenir ve sürümlenir; otomatik öğrenilmez. Puan UI’da rakam olarak gösterilmez (yanlış kesinlik hissi vermemek için); bunun yerine katman (T1–T5) ve kaynak adı gösterilir.'
+              : 'Scores are set MANUALLY and versioned; nothing is learned automatically. Scores are not shown as numbers in the UI (to avoid a false sense of precision); tier (T1–T5) and source name are shown instead.'}
           </p>
         </section>
 
@@ -149,7 +149,7 @@ export default async function MethodologyPage({
             {(tr ? LIMITS_TR : LIMITS_EN).map((line) => (
               <li key={line} className="flex gap-2.5">
                 <span aria-hidden className="text-mist-2">
-                  —
+                  ·
                 </span>
                 <span>{line}</span>
               </li>
@@ -214,7 +214,7 @@ export default async function MethodologyPage({
 
 const LABEL_DESC_TR: Record<string, string> = {
   official:
-    'WHO, CDC, ECDC veya bir devlet kurumu tarafından yapılan resmî açıklama. Araştırma merkezleri (CIDRAP, ProMED) bu kategoriye girmez — onlar bağımsız kuruluşlardır.',
+    'WHO, CDC, ECDC veya bir devlet kurumu tarafından yapılan resmî açıklama. Araştırma merkezleri (CIDRAP, ProMED) bu kategoriye girmez; onlar bağımsız kuruluşlardır.',
   corroborated:
     'Aynı olayı 2 veya daha fazla BAĞIMSIZ kaynak grubu bildirdi. “Doğrulandı” demek değildir; “birçok bağımsız kaynak aynı şeyi bildiriyor” demektir.',
   single: 'Yalnızca tek bir bağımsızlık grubu bildirdi. Doğru olabilir ama henüz bağımsız teyit yok.',
@@ -226,7 +226,7 @@ const LABEL_DESC_TR: Record<string, string> = {
 
 const LABEL_DESC_EN: Record<string, string> = {
   official:
-    'A formal statement by WHO, CDC, ECDC or a government body. Research centres (CIDRAP, ProMED) do not qualify — they are independent organisations.',
+    'A formal statement by WHO, CDC, ECDC or a government body. Research centres (CIDRAP, ProMED) do not qualify; they are independent organisations.',
   corroborated:
     'Two or more INDEPENDENT source groups reported the same event. This does not mean “confirmed”; it means “many independent sources report the same thing”.',
   single: 'Only one independence group reported it. It may be true, but there is no independent corroboration yet.',
@@ -249,7 +249,7 @@ const LIMITS_TR = [
 const LIMITS_EN = [
   'Event clustering relies on headline and summary similarity; the same event in different languages may sometimes cluster separately.',
   'Contradiction detection is experimental and being calibrated at the claim level; it is currently conservative and stays silent rather than risk false positives.',
-  'Only non-Turkish sources (English/Russian) are translated in the TR view; translation is machine translation and this is noted in the event detail. The original headline always remains visible (a "read original" line on the card, and below the title in the detail view); a translation that fails validation is never shown — the original headline is shown instead.',
+  'Only non-Turkish sources (English/Russian) are translated in the TR view; translation is machine translation and this is noted in the event detail. The original headline always remains visible (a "read original" line on the card, and below the title in the detail view); a translation that fails validation is never shown; the original headline is shown instead.',
   'Some sources (Rospotrebnadzor, Novaya Gazeta Europe) are unreachable directly and are fetched via an aggregator.',
   'Source trust scores are editorial decisions; version changes are recorded transparently.',
   'Figures are NOT extracted from text automatically. Naive extraction was measured and failed: “a 28-year-old researcher died” produced “28 deaths”, and “quarantines 200 people” produced “200 deaths”. Showing a wrong number is worse than showing none. So only figures that appear in the source’s own sentence and are manually verified are shown; a record that cannot be linked is never displayed.',

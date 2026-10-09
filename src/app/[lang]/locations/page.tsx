@@ -107,8 +107,8 @@ export default async function LocationsPage({
           </p>
           <p>
             {tr
-              ? `Harita yerine liste gösteriyoruz: kapsama %60’ın altında olduğu için harita, olayların çoğunu sessizce dışarıda bırakır ve yanlış bir yoğunluk izlenimi verir. ${unnamed} olay hiçbir bölgeye atanmadı — atanmadı, “başka yerde” demek değil.`
-              : `We show a list instead of a map: coverage is below 60%, so a map would silently drop most events and give a false impression of density. ${unnamed} events are assigned to no region — unassigned, not “elsewhere”.`}
+              ? `Harita yerine liste gösteriyoruz: kapsama %60’ın altında olduğu için harita, olayların çoğunu sessizce dışarıda bırakır ve yanlış bir yoğunluk izlenimi verir. ${unnamed} olay hiçbir bölgeye atanmadı; atanmadı, “başka yerde” demek değil.`
+              : `We show a list instead of a map: coverage is below 60%, so a map would silently drop most events and give a false impression of density. ${unnamed} events are assigned to no region; unassigned, not “elsewhere”.`}
           </p>
           <p>
             {tr

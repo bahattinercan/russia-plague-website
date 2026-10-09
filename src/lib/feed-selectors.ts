@@ -134,7 +134,7 @@ export interface DayGroup {
 export function groupByDay(events: PlagueEvent[]): DayGroup[] {
   const groups: DayGroup[] = [];
   for (const event of events) {
-    const day = (event.lastUpdateAt || event.firstSeenAt || '').slice(0, 10) || '—';
+    const day = (event.lastUpdateAt || event.firstSeenAt || '').slice(0, 10) || '-';
     const last = groups[groups.length - 1];
     if (last && last.day === day) last.events.push(event);
     else groups.push({ day, events: [event] });

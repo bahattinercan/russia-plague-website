@@ -6,6 +6,8 @@
  * Böylece "Veba", "VEBA", "hıyarcıklı" ve "hiyarcikli" aynı şekilde eşleşir.
  */
 
+import { stripEmDashes } from '@/lib/text-normalize';
+
 export function fold(input: string): string {
   return input
     .toLowerCase()
@@ -31,7 +33,7 @@ const ENTITIES: Record<string, string> = {
   '&apos;': "'",
   '&nbsp;': ' ',
   '&hellip;': '…',
-  '&mdash;': '—',
+  '&mdash;': '-',
   '&ndash;': '–',
   '&rsquo;': '’',
   '&lsquo;': '‘',
@@ -65,12 +67,18 @@ export function decodeEntities(input: string): string {
     .replace(/&#(\d+);/g, decodeNumericEntity);
 }
 
+/**
+ * Em dash (—) normalizasyonu paylaşılan modülde: feed, küratörlü kayıtlar ve
+ * görünüm katmanı AYNI fonksiyondan geçsin diye tek kopya tutulur.
+ */
 export function cleanTitle(input: string): string {
-  return decodeEntities(
-    input
-      .replace(/<!\[CDATA\[|\]\]>/g, '')
-      .replace(/\s+/g, ' ')
-      .trim(),
+  return stripEmDashes(
+    decodeEntities(
+      input
+        .replace(/<!\[CDATA\[|\]\]>/g, '')
+        .replace(/\s+/g, ' ')
+        .trim(),
+    ),
   );
 }
 
@@ -127,12 +135,14 @@ function stripBlocks(input: string): string {
 
 export function stripHtml(input: string): string {
   const bounded = input.length > MAX_TEXT_INPUT ? input.slice(0, MAX_TEXT_INPUT) : input;
-  return decodeEntities(
-    stripBlocks(bounded)
-      // Nitelik uzunluğu sınırlı: iç içe niceleyici yok, geri izleme (backtracking) olmaz.
-      .replace(/<[^>]{0,4000}>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim(),
+  return stripEmDashes(
+    decodeEntities(
+      stripBlocks(bounded)
+        // Nitelik uzunluğu sınırlı: iç içe niceleyici yok, geri izleme (backtracking) olmaz.
+        .replace(/<[^>]{0,4000}>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim(),
+    ),
   );
 }
 

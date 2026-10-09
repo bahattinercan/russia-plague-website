@@ -34,6 +34,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import type { PlagueEvent } from '@/types';
 import { safeExternalUrl } from '@/lib/sources/text';
+import { stripEmDashes } from '@/lib/text-normalize';
 
 export type FigureMetric = 'cases' | 'deaths' | 'restricted';
 
@@ -110,9 +111,11 @@ export async function loadFigureDefs(): Promise<FiguresFile> {
   return cache;
 }
 
-/** Boşluk/ölçek farklarını yok say (feed'de çift boşluk, NBSP vb. olabiliyor). */
+/** Boşluk/ölçek farklarını yok say (feed'de çift boşluk, NBSP vb. olabiliyor).
+ * Em dash de burada temizlenir: görünüm katmanı (data.ts) feed metinlerinden
+ * em dash'i kaldırdığı için cümlenin İKİ tarafı da aynı kuraldan geçmeli. */
 function normalize(value: string): string {
-  return value.replace(/\s+/g, ' ').trim().toLocaleLowerCase('en');
+  return stripEmDashes(value).replace(/\s+/g, ' ').trim().toLocaleLowerCase('en');
 }
 
 /**

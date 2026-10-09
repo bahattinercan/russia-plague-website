@@ -25,7 +25,7 @@ export function Time({
   mode?: 'datetime' | 'day';
   className?: string;
 }) {
-  if (!iso) return <span className={className}>—</span>;
+  if (!iso) return <span className={className}>-</span>;
 
   return (
     <time dateTime={iso} data-time-mode={mode} className={className} title={iso}>

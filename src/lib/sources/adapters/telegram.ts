@@ -24,7 +24,7 @@ export async function fetchTelegram(source: SourceDef, channel: string): Promise
     },
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status} — ${url}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${url}`);
 
   const $ = cheerio.load(await readLimitedText(res));
   const items: RawItem[] = [];

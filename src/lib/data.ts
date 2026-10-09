@@ -1,4 +1,5 @@
 import { loadLocalEnv } from '@/lib/env';
+import { stripEmDashes } from '@/lib/text-normalize';
 import { loadFeed, type FeedBackend } from '@/lib/storage/store';
 import type { FeedFile } from '@/lib/storage/json';
 import type { PlagueEvent } from '@/types';
@@ -47,12 +48,31 @@ export interface FeedSnapshot {
 const CACHE_TTL_MS = 60_000;
 let cache: { snapshot: FeedSnapshot; at: number } | null = null;
 
+/**
+ * Feed'deki TÜM metinlerden em dash (—) temizlenir.
+ *
+ * Neden görünüm katmanında: veri Postgres'te (Neon) duruyor ve ingest'ten
+ * önce yazılmış eski kayıtlar em dash içerebiliyor. Derin geçiş yapılır çünkü
+ * em dash başlık, özet, excerpt, iddia ve sinyal metinlerinin herhangi birinde
+ * olabiliyor; alan listesi tutmak yerine tek kural uygulanır.
+ */
+function stripDashesDeep<T>(value: T): T {
+  if (typeof value === 'string') return stripEmDashes(value) as unknown as T;
+  if (Array.isArray(value)) return value.map((item) => stripDashesDeep(item)) as unknown as T;
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, item]) => [key, stripDashesDeep(item)]),
+    ) as T;
+  }
+  return value;
+}
+
 export async function getFeedSnapshot(): Promise<FeedSnapshot> {
   loadLocalEnv();
   if (cache && Date.now() - cache.at < CACHE_TTL_MS) return cache.snapshot;
 
   const { feed, backend } = await loadFeed();
-  const snapshot: FeedSnapshot = { feed: feed ?? EMPTY_FEED, backend };
+  const snapshot: FeedSnapshot = { feed: stripDashesDeep(feed ?? EMPTY_FEED), backend };
   cache = { snapshot, at: Date.now() };
   return snapshot;
 }

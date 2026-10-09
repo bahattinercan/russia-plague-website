@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import type { Locale } from '@/lib/i18n';
 
 function absolute(iso: string | null, locale: Locale): string {
-  if (!iso) return '—';
+  if (!iso) return '-';
   return new Intl.DateTimeFormat(locale === 'tr' ? 'tr-TR' : 'en-GB', {
     day: '2-digit',
     month: 'short',

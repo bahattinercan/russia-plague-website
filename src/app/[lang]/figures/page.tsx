@@ -21,8 +21,8 @@ export async function generateMetadata({
     title: t.navFigures,
     description:
       locale === 'tr'
-        ? 'Kaynakların bildirdiği vaka, ölüm ve kısıtlama sayıları — her biri kaynağına ve zamanına bağlı.'
-        : 'Case, death and restriction figures reported by sources — each bound to its source and timestamp.',
+        ? 'Kaynakların bildirdiği vaka, ölüm ve kısıtlama sayıları. Her biri kaynağına ve zamanına bağlı.'
+        : 'Case, death and restriction figures reported by sources, each bound to its source and timestamp.',
   };
 }
 
@@ -68,8 +68,8 @@ export default async function FiguresPage({
           </p>
           <p>
             {tr
-              ? 'Tabloyu okurken: her satır tek bir kaynağın kendi cümlesidir ve o cümleye “Olayı aç” bağlantısından ulaşılır. Satırlar toplanmaz; aynı ölçüt için iki kaynak farklı sayı veriyorsa ikisi de görünür, aradaki fark gizlenmez. Kaynağın kendi ihtiyat ifadesi (“yaklaşık”, “en az”, “fazla”) sayının yanında korunur — “200” ile “neredeyse 200” aynı şey değildir.'
-              : 'How to read the table: each row is one source’s own sentence, reachable through the “Open the event” link. Rows are not summed; if two sources give different numbers for the same metric, both stay visible and the gap is not hidden. Each source’s own hedging (“about”, “at least”, “more than”) is kept beside the number — “200” and “nearly 200” are not the same thing.'}
+              ? 'Tabloyu okurken: her satır tek bir kaynağın kendi cümlesidir ve o cümleye “Olayı aç” bağlantısından ulaşılır. Satırlar toplanmaz; aynı ölçüt için iki kaynak farklı sayı veriyorsa ikisi de görünür, aradaki fark gizlenmez. Kaynağın kendi ihtiyat ifadesi (“yaklaşık”, “en az”, “fazla”) sayının yanında korunur; “200” ile “neredeyse 200” aynı şey değildir.'
+              : 'How to read the table: each row is one source’s own sentence, reachable through the “Open the event” link. Rows are not summed; if two sources give different numbers for the same metric, both stay visible and the gap is not hidden. Each source’s own hedging (“about”, “at least”, “more than”) is kept beside the number; “200” and “nearly 200” are not the same thing.'}
           </p>
           <p className="font-mono text-[11px] uppercase tracking-wider text-mist-2">
             {tr ? 'Semboller' : 'Symbols'}: ≈ {tr ? 'yaklaşık / neredeyse' : 'about / nearly'} · ≥{' '}
@@ -77,7 +77,7 @@ export default async function FiguresPage({
             {tr ? 'sembolsüz' : 'no symbol'} = {tr ? 'kaynağın verdiği tam sayı' : 'exact number as given'}
           </p>
           <p className="font-mono text-[11px] uppercase tracking-wider text-mist-2">
-            {t.lastScan}: {tr ? 'en yeni olay' : 'newest event'} {dated ? dated.slice(0, 16) : '—'} UTC
+            {t.lastScan}: {tr ? 'en yeni olay' : 'newest event'} {dated ? dated.slice(0, 16) : '-'} UTC
           </p>
         </div>
 

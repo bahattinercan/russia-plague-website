@@ -120,7 +120,7 @@ export interface Dict {
 const tr: Dict = {
   siteName: 'Plague Tracker',
   tagline: 'Rusya’daki veba olayları için kaynak izleme ve şeffaflık panosu',
-  disclaimerShort: 'Haber izleme aracıdır — tıbbi tavsiye değildir.',
+  disclaimerShort: 'Haber izleme aracıdır, tıbbi tavsiye değildir.',
   disclaimerLong:
     'Bu site bir haber izleme aracıdır, tıbbi tavsiye veya resmî bilgi kaynağı değildir. Resmî kurum açıklamalarını (WHO, ECDC, Sağlık Bakanlıkları) esas alın. Sistem hiçbir bilgi için “doğrulandı” iddiasında bulunmaz; yalnızca hangi kaynağın ne bildirdiğini gösterir.',
   lastScan: 'Son tarama',
@@ -217,7 +217,7 @@ const tr: Dict = {
 const en: Dict = {
   siteName: 'Plague Tracker',
   tagline: 'Source monitoring and transparency board for plague events in Russia',
-  disclaimerShort: 'A news monitoring tool — not medical advice.',
+  disclaimerShort: 'A news monitoring tool, not medical advice.',
   disclaimerLong:
     'This site is a news monitoring tool, not medical advice or an official information source. Rely on official statements (WHO, ECDC, health ministries). The system never claims anything is "confirmed"; it only shows which source reported what.',
   lastScan: 'Last scan',

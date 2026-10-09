@@ -92,7 +92,7 @@ function Markers({
           <a
             key={marker.slug}
             href={hrefFor(marker.slug)}
-            aria-label={`${tr ? marker.nameTr : marker.nameEn} — ${marker.eventCount} ${t.events}`}
+            aria-label={`${tr ? marker.nameTr : marker.nameEn} · ${marker.eventCount} ${t.events}`}
             className="group absolute -translate-x-1/2 -translate-y-1/2"
             style={{ left: `${position.left}%`, top: `${position.top}%` }}
           >

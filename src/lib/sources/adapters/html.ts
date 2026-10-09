@@ -72,7 +72,7 @@ export async function fetchHtml(
     signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
     redirect: 'follow',
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status} — ${cfg.url}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}: ${cfg.url}`);
 
   const $ = cheerio.load(await readLimitedText(res));
   const pattern = cfg.linkPattern ? new RegExp(cfg.linkPattern) : null;

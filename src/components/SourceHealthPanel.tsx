@@ -87,10 +87,10 @@ export function SourceHealthPanel({
                       )}
                     </td>
                     <td className="px-3 py-2 font-mono text-[11px] text-official">
-                      T{def?.tier ?? '—'}
+                      T{def?.tier ?? '-'}
                     </td>
                     <td className="px-3 py-2 font-mono text-[11px] text-mist">
-                      {def ? (GROUP_LABELS[def.group] ?? def.group) : '—'}
+                      {def ? (GROUP_LABELS[def.group] ?? def.group) : '-'}
                     </td>
                     <td className={`px-3 py-2 font-mono text-[11px] uppercase ${status.className}`}>
                       {status.text}
