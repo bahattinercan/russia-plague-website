@@ -7,6 +7,7 @@
  * geri gelmemesini sağlar. Yeni bir dış-veri işleme yolu eklendiğinde
  * buraya test eklenmelidir.
  */
+import { readFileSync } from 'node:fs';
 import { decodeEntities, safeExternalUrl, stripHtml, cleanTitle } from '../src/lib/sources/text';
 import { maskedDbUrl } from '../src/lib/env';
 import { buildCsp, generateNonce } from '../src/lib/security/csp';
@@ -238,7 +239,6 @@ console.log('\n── Dış veri akışı: mevcut feed ────────�
 // feed.json içindeki tüm URL'lerin şema doğrulamasından geçtiğini doğrular.
 // (Bu kontrol ingest sonrası çalıştırıldığında anlamlıdır.)
 try {
-  const { readFileSync } = await import('node:fs');
   const raw = readFileSync('data/feed.json', 'utf8');
   const feed = JSON.parse(raw) as {
     events: { claims: { url: string }[] }[];
@@ -256,6 +256,28 @@ try {
   );
 } catch {
   console.log('SKIP  feed.json okunamadı (ingest henüz çalışmamış olabilir)');
+}
+
+console.log('\n── Bağımlılık hijyeni: prod ağacı ─────────────────────────────');
+// B-10: `drizzle-kit` yalnızca migration CLI'ıdır; çalışma zamanında import
+// edilmez (drizzle.config yok, şema `SCHEMA_SQL` ile kurulur). `dependencies`
+// içinde durursa prod kurulumuna esbuild zincirini taşır ve
+// `npm audit --omit=dev` zafiyet gösterir.
+try {
+  const pkg = JSON.parse(readFileSync('package.json', 'utf8')) as {
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+  };
+  const prod = Object.keys(pkg.dependencies ?? {});
+  const dev = Object.keys(pkg.devDependencies ?? {});
+  check(
+    'drizzle-kit prod bağımlılığı DEĞİL (yalnızca migration CLI)',
+    !prod.includes('drizzle-kit'),
+    prod.includes('drizzle-kit') ? 'dependencies içinde' : `devDependencies: ${dev.includes('drizzle-kit')}`,
+  );
+  check('drizzle-orm prod bağımlılığı (çalışma zamanı sürücüsü)', prod.includes('drizzle-orm'));
+} catch (e) {
+  check('package.json okunabildi', false, e instanceof Error ? e.message : String(e));
 }
 
 console.log(
