@@ -1,8 +1,9 @@
 # Plague Tracker — Rusya'daki Veba Olayları için Kaynak İzleme ve Şeffaflık Panosu
 
-**Plan sürümü:** 1.0
-**Tarih:** 6 Ekim 2026
-**Durum:** Onaylandı — kararlar §15'te kayıtlı (6 Eki 2026)
+**Plan sürümü:** 1.1
+**Tarih:** 6 Ekim 2026 (plan) · **güncellendi:** 9 Ekim 2026, ölçülmüş uygulamaya göre
+**Durum:** Kararlar §15'te kayıtlı. F0–F5 uygulandı (8 Eki 2026, `docs/arayuz-plani.md §16`).
+Bu dosyada **uygulanmamış** olanlar açıkça işaretlidir: §5.6 (düzeltme günlüğü), §9.7 (söylenti kontrolü), §9.12 (bildirim), `refuted` etiketi, `metrics`/`corrections` tabloları.
 
 ---
 
@@ -58,14 +59,15 @@ Projenin ayırt edici özelliği hız değil, **güvenilirlik ve şeffaflıktır
 
 | Katman | Seçim | Gerekçe |
 |---|---|---|
-| Frontend | **Next.js 15 (App Router) + TypeScript** | Vercel alışkanlığı, ISR ile taze veri, SSR/SEO |
+| Frontend | **Next.js 16.4 (App Router) + TypeScript 7** | Vercel alışkanlığı, SSR/SEO. `params`/`searchParams` Promise; `middleware.ts` yerine `src/proxy.ts` |
 | Stil | **Tailwind v4** + `@theme` token katmanı | Kullanıcının mevcut konvansiyonu |
 | UI davranışı | Canlı ticker, scroll-reveal, sayaçlar, `prefers-reduced-motion` | Kullanıcı tercihi: "etkileyici/modern" |
-| Veritabanı | **Postgres (Neon free tier)** + Drizzle ORM | Vercel'de kalıcı dosya yok; full-text arama gerekli |
-| Zamanlanmış iş | **GitHub Actions cron (10 dk)** | Vercel Hobby cron'u **günde 1 kez** ile sınırlı — yetersiz |
-| Ingest | Node 24 + `rss-parser` + `cheerio` + `undici` | Tek dil, tek repo, kolay bakım |
-| Cache | Next.js `revalidate` + Upstash Redis (opsiyonel) | Aynı içeriği tekrar işlememek için |
+| Veritabanı | **Postgres (Neon, eu-central-1)** + Drizzle ORM | Vercel'de kalıcı dosya yok; full-text arama gerekli |
+| Zamanlanmış iş | **GitHub Actions cron (10 dk)** + cron-job.org `workflow_dispatch` | Vercel Hobby cron'u **günde 1 kez** ile sınırlı — yetersiz. GitHub'ın kendi `schedule`ı ücretsiz katmanda sözünü tutmuyor: `docs/dispatch-tetikleme.md` |
+| Ingest | Node 24 + `rss-parser` + `cheerio` + `undici` + `tsx` | Tek dil, tek repo, kolay bakım |
+| Cache | Bellek içi 60 sn önbellek (`src/lib/data.ts`) + `force-dynamic` | Upstash **kullanılmıyor**. `data/feed.json` izlendiği için ISR/derleme anı kabul edilemez |
 | LLM (çeviri/özet) | Sağlayıcıdan bağımsız adaptör; extractive mod zorunlu | Halüsinasyon riski → üretken özet değil, kaynak-cümle seçimi |
+| Harita | **Satır içi SVG + kendi varlığımız** (`scripts/build-world-map.ts`) | CSP `img-src 'self' data:` + `connect-src 'self'` dış karo servislerini bloklar → **MapLibre kullanılamaz** (`docs/harita-plani.md §2.4`) |
 | Deploy | Vercel (web) + Neon (DB) | Kullanıcının mevcut akışı |
 
 > **Alternatif değerlendirildi:** Astro + statik build. Reddedildi çünkü 10 dakikalık tazelik ve çelişki kümeleri için sunucu tarafı veri katmanı gerekiyor.
@@ -77,23 +79,39 @@ Projenin ayırt edici özelliği hız değil, **güvenilirlik ve şeffaflıktır
 ```
 russia-plague-website/
 ├─ src/
-│  ├─ app/                    # Next.js 15 App Router
-│  │  ├─ (tr)/                # /tr (varsayılan dil)
-│  │  └─ en/
-│  ├─ components/
+│  ├─ app/
+│  │  ├─ [lang]/              # tr + en (dil yönlendirmesi `src/proxy.ts`) — TR varsayılan DEĞİL
+│  │  │  ├─ page.tsx          # Pano
+│  │  │  ├─ timeline/ · event/[slug]/ · locations/[slug]/ · figures/ · signals/ · sources/ · methodology/
+│  │  │  ├─ not-found.tsx · [...rest]/page.tsx
+│  │  │  └─ layout.tsx        # next/font (self-host): Inter + Newsreader + JetBrains Mono
+│  │  ├─ robots.ts · sitemap.ts · apple-icon.tsx · icon.svg · favicon.ico
+│  │  └─ globals.css          # `@theme` token'ları + kontrast + prefers-reduced-motion
+│  ├─ components/             # StatusBar, StatusStrip, LeadStory, EventCard, EventModal, ClaimList,
+│  │                          # FilterBar, FigurePanels, WorldMap, SignalList, SourceHealthPanel, Nav…
 │  ├─ lib/
 │  │  ├─ sources/
-│  │  │  ├─ registry.ts       # kaynak envanteri: tier, grup, trust, dil
+│  │  │  ├─ registry.ts       # 45 taranan kaynak + 59 tanınan yayıncı: tier, grup, trust, dil
 │  │  │  └─ adapters/         # rss.ts, google-news.ts, html.ts, telegram.ts
-│  │  ├─ ingest/              # normalize → dedupe → cluster → label
-│  │  ├─ trust.ts             # güven skoru + bağımsızlık grupları
-│  │  ├─ i18n.ts              # TR/EN sözlükleri
-│  │  └─ storage/             # json.ts (MVP) → postgres.ts (Neon)
+│  │  ├─ ingest/pipeline.ts   # normalize → relevance → dedupe → cluster
+│  │  ├─ trust.ts             # güven skoru + etiket mantığı
+│  │  ├─ geo/                 # gazetteer, location (kapsama), map-frame
+│  │  ├─ figures.ts · summarize.ts · text-match.ts · format.ts · data.ts · env.ts · health.ts
+│  │  ├─ translate/           # glossary, detect, validate, provider, deepl, google, openai, cache, display
+│  │  ├─ security/csp.ts      # nonce'lu CSP
+│  │  ├─ i18n.ts              # TR/EN sözlükleri (87 anahtar, parite kapısı `ui-check`)
+│  │  └─ storage/             # store.ts (fail-safe) → postgres.ts + json.ts + schema.ts
+│  ├─ proxy.ts                # dil yönlendirmesi + nonce'lu CSP
 │  └─ types.ts
-├─ scripts/ingest.ts          # cron giriş noktası
-├─ data/                      # MVP: feed.json + arşiv
-├─ docs/                      # PLAN.md, kaynak-envanteri.md, metodoloji.md
-└─ .github/workflows/ingest.yml
+├─ scripts/                   # ingest.ts, db-check.ts, cron-setup.ts, trigger-ingest.ts,
+│                             # ui-check.ts, layout-check.ts, security-check.ts, translate-check.ts,
+│                             # geo-check.ts, figures-check.ts, summarize-check.ts, build-world-map.ts
+├─ data/                      # feed.json (MVP deposu, izleniyor) + figures.json + history/*.jsonl
+├─ docs/                      # PLAN.md, arayuz-plani.md, harita-plani.md, ceviri-plani.md,
+│                             # kaynak-envanteri.md, guvenlik-denetimi.md, dispatch-tetikleme.md
+├─ public/                    # world-map.svg, world-map-focus.svg
+├─ LICENSE · CONTRIBUTING.md · SECURITY.md · README.md · AGENTS.md
+├─ .github/workflows/ingest.yml   # tek workflow (CI workflow'u YOK)
 ```
 
 ### 4.3 Veri Akışı
@@ -157,30 +175,33 @@ russia-plague-website/
 
 ### 5.2 Bağımsızlık Grupları — En Kritik Kural
 
-Aynı sahiplik/editoryal hattaki kaynaklar **tek kaynak** sayılır:
+Aynı sahiplik/editoryal hattaki kaynaklar **tek kaynak** sayılır. Depoda fiilen kullanılan grup adları (`registry.ts → GROUP_LABELS`):
 
 | Grup | Kaynaklar |
 |---|---|
-| `ru-state` | TASS, RIA Novosti, RT, Sputnik, Zvezda, İzvestia |
+| `kremlin` | TASS, RIA Novosti, RT, Sputnik, Zvezda, İzvestia *(devlet medyası — `official` sayılmaz)* |
 | `ru-gov` | Rospotrebnadzor, Sağlık Bakanlığı, valilikler |
-| `ru-independent` | Meduza, Novaya, The Insider, Moscow Times, Astra |
-| `intl-agency` | Reuters (kendi grubu) |
-| `intl-agency-2` | AP (kendi grubu) |
 | `who-family` | WHO, PAHO, WHO Euro (aynı kurum ailesi) |
-| `research` | BMJ, Lancet, NEJM, CIDRAP (akademik/yorum) |
+| `us-cdc` / `eu-ecdc` / `un-agency` | US CDC / ECDC / ReliefWeb |
+| `ru-independent` | Meduza, Novaya Gazeta Europe, The Insider, Moscow Times, Astra |
+| `aggregator` | Google News, GDELT |
+| `social-signal` | Telegram kanalları (Baza, Shot, Astra) |
+| tek kaynaklı gruplar | Reuters, AP, BBC, Guardian, NBC, NPR, PBS, Le Monde, Al Jazeera, Euronews, BMJ, Lancet, Science… (her biri kendi grubu) |
 
-**Kural:** `doğrulanmış` etiketi için **≥2 farklı bağımsızlık grubu** gerekir. TASS + RIA + Sputnik aynı haberi yazsa corroboration = 1'dir.
+> İlk taslakta `intl-agency`, `intl-agency-2`, `research` gibi toplu gruplar vardı; uygulamada her yayıncı **kendi grubudur** ve yalnızca gerçekten aynı çatıdaki kaynaklar (`kremlin`, `who-family`, `ru-gov`) gruplanır.
+
+**Kural:** `corroborated` etiketi için **≥2 farklı bağımsızlık grubu** gerekir. TASS + RIA + Sputnik aynı haberi yazsa corroboration = 1'dir.
 
 ### 5.3 Doğruluk Etiketleri (UI'da görünür)
 
-| Etiket | Koşul | Görsel |
-|---|---|---|
-| ✅ **Resmi açıklama** | T1/T3 resmi kurum açıklaması | Mavi |
-| 🟢 **Çoklu bağımsız kaynak bildiriyor** | ≥2 farklı bağımsızlık grubu aynı olayı bildirdi | Yeşil |
-| 🟡 **Tek kaynak bildiriyor** | Sadece 1 grup bildirdi | Sarı |
-| 🟠 **Doğrulanmamış iddia** | T5 / Telegram / "kaynaklara göre" | Turuncu |
-| 🔴 **Çelişkili** | Aynı olay için zıt iddialar var | Kırmızı |
-| ⚪ **Çürütüldü** | Resmi/bilimsel kanıtla yanlışlandı | Gri + üstü çizili |
+| Etiket | Koşul | Görsel | Durum |
+|---|---|---|---|
+| ✅ **Resmi açıklama** (`official`) | Gerçek resmi kurum açıklaması (`who-family`, `us-cdc`, `eu-ecdc`, `ru-gov`) | Mavi | uygulandı |
+| 🟢 **Çoklu bağımsız kaynak bildiriyor** (`corroborated`) | ≥2 farklı bağımsızlık grubu aynı olayı bildirdi | Yeşil | uygulandı |
+| 🟡 **Tek kaynak bildiriyor** (`single`) | Sadece 1 grup bildirdi | Sarı | uygulandı |
+| 🟠 **Doğrulanmamış iddia** (`unverified`) | T5 / Telegram / "kaynaklara göre" | Turuncu | uygulandı |
+| 🔴 **Çelişkili** (`contradicted`) | Aynı olay için zıt iddialar var | Kırmızı | uygulandı |
+| ⚪ **Çürütüldü** (`refuted`) | Resmi/bilimsel kanıtla yanlışlandı | Gri + üstü çizili | **uygulanmadı** — otomatik sistem çürütme iddia edemez |
 
 > **Dil kuralı (editoryal karar):** Sitenin hiçbir yerinde "doğrulandı", "confirmed", "teyit edildi" ifadesi kullanılmaz. Bunun yerine "N bağımsız kaynak grubu bildiriyor" denir. Sistem doğrulama yapmaz; **kaynak durumunu raporlar**. Bu kural metodoloji sayfasında da açıkça yazılır ve UI testi ile korunur.
 
@@ -199,9 +220,11 @@ Her `Event` altında `claims` tutulur. Aynı event'te karşıt yönlü claim'ler
 └──────────────────────────┴───────────────────────────────────┘
 ```
 
-Bu panel **elle yazılmaz**, claim çıkarımı + sınıflandırmadan otomatik üretilir. Yanlış pozitif olursa editör 1 tıkla kapatabilir.
+Bu panel **elle yazılmaz**, claim çıkarımı + sınıflandırmadan otomatik üretilir (`src/components/ContradictionPanel.tsx`). Yanlış pozitif olursa editör 1 tıkla kapatabilir — **bu editör arayüzü henüz yok** (kapalı sistem, §15 karar 3).
 
 ### 5.5 Trust Score Formülü
+
+Planlanan formül:
 
 ```
 trust = tier_base
@@ -212,14 +235,22 @@ trust = tier_base
       - (devlet kontrolü cezası: rus-state -8, rus-gov -5)
 ```
 
-Skor kartta **rakam olarak değil, etiket olarak** gösterilir (kullanıcıyı yanlış kesinlik hissine sokmamak için). Rakam metodoloji sayfasında açıklanır.
+**Uygulanan hâli** (`src/lib/trust.ts`):
+
+```
+trust = clamp(trustBase + min(max(grup - 1, 0), 4) × 6 + stateControlPenalty, 0, 100)
+```
+
+`trustBase` elle belirlenir ve otomatik öğrenilmez. `peer-reviewed`, `birincil belge` ve `geçmiş düzeltme oranı` terimleri **uygulanmadı** — düzeltme günlüğü (§5.6) kapsam dışı olduğu için ölçülecek bir geçmiş yok. Devlet kontrolü cezası `registry.ts`'teki `stateControlPenalty` ile verilir.
+
+Skor kartta **rakam olarak değil, etiket olarak** gösterilir (kullanıcıyı yanlış kesinlik hissine sokmamak için). Rakam metodoloji sayfasında formülüyle açıklanır.
 
 ### 5.6 Düzeltme ve Şeffaflık Mekanizması
 
-- Her haber ve event için **değişiklik geçmişi** (kim/ne zaman/ne değişti).
-- Bir kaynak yanlış çıktıysa: ilgili makale "düzeltildi" olarak işaretlenir, **silinmez**.
-- **Düzeltmeler günlüğü** sayfası: `Tarih · Ne düzeltildi · Neden · Kaynak`.
-- Her makale için **arşiv anlık görüntüsü**: `archive.org` linki + kendi `content_hash`'i (metin değişirse uyarı).
+- Her haber ve event için **değişiklik geçmişi** (kim/ne zaman/ne değişti). → **uygulanmadı** (kapalı sistemde editör yok; `docs/arayuz-plani.md §0.1` kapsam dışı kararı).
+- Bir kaynak yanlış çıktıysa: ilgili makale "düzeltildi" olarak işaretlenir, **silinmez**. → uygulanmadı.
+- **Düzeltmeler günlüğü** sayfası: `Tarih · Ne düzeltildi · Neden · Kaynak`. → uygulanmadı (kapsam dışı).
+- Her makale için **arşiv anlık görüntüsü**: `archive.org` linki + kendi `content_hash`'i (metin değişirse uyarı). → **kısmen uygulandı**: `archiveUrlFor()` ile arşiv linki her kayıtta var (`EventCard`, `ClaimList`); `content_hash` üretilir ve çeviri önbelleği için kullanılır, ama "metin değişti" uyarısı yok. Google News toplayıcı linkleri arşivlenemez → `archiveUrlFor` null döner.
 
 ---
 
@@ -235,19 +266,23 @@ Skor kartta **rakam olarak değil, etiket olarak** gösterilir (kullanıcıyı y
 ### 6.1 Tazelik göstergeleri (UI)
 
 - Kartlarda: "yayınlandı: 3 sa önce" **ve** "sistemimiz gördü: 4 dk önce" — ikisi ayrı.
-- Üst barda: `CANLI ● Son tarama 2 dk önce · 47 kaynak sağlıklı · 1 kaynak hatalı`.
-- **Sakinlik modu:** Son 2 saatte yeni gelişme yoksa: "Son gelişme 3 saat önce — durum stabil" (boş ekran panik hissi vermez).
-- **Dead man's switch:** ingest 60 dk çalışmazsa GitHub Actions issue açar + alarm.
+- Üst barda (`StatusBar`): `CANLI ● Son tarama …` — sayı taşımaz, kaynak sağlığı nokta renginde. Sayılar panonun durum şeridinde (`StatusStrip`: son 24 saat, en son gelişme, veri tazeliği, son ziyaretten beri) ve `/sources` sayfasındadır.
+- **Sakinlik modu:** Son 2 saatte yeni gelişme yoksa: "Son gelişme 3 saat önce — durum stabil" (boş ekran panik hissi vermez). → **uygulanmadı** (karar duruyor, kodda karşılığı yok).
+- **Dead man's switch:** ingest 60 dk çalışmazsa GitHub Actions issue açar + alarm. → **kısmen uygulandı**: issue yalnızca bir koşu **başarısız olduğunda** açılıyor; "hiç koşmadı" durumu GitHub'ın kendi `if` koşuluyla ölçülemez. 60 dk eşiği pratikte cron-job.org alarmı + `schedule` yedeği ile kapatılıyor (`docs/dispatch-tetikleme.md §5`).
 
 ### 6.2 Kaynak Sağlık Paneli
 
-Her kaynak için: son başarı zamanı, ardışık hata sayısı, ortalama gecikme. Bozuk feed **kullanıcıya görünür** (güvenin parçası: "şu an şu kaynağı çekemiyoruz" demek, sessizce eksik göstermekten iyidir).
+Her kaynak için: son başarı zamanı, HTTP kodu, gecikme, dönen öğe sayısı, en yeni öğe tarihi, bayatlık ve hata (`/sources` sayfası + durum şeridi). Bozuk feed **kullanıcıya görünür**: "şu an şu kaynağı çekemiyoruz" demek, sessizce eksik göstermekten iyidir.
+
+> "Ardışık hata sayısı" uygulanmadı — `source_health` tablosunda sayaç yok, her çalıştırma ayrı satır. Bayatlık eşiği 30 gün (`STALE_DAYS`).
 
 ---
 
 ## 7. Kaynak Envanteri
 
 Ayrıntılı liste, erişim testi sonuçları ve yedek stratejiler: **`docs/kaynak-envanteri.md`**
+
+Depoda fiilen taranan: **45 kaynak** (`SOURCES`) · yalnızca kimlik ataması için tanınan yayıncı: **59** (`KNOWN_PUBLISHERS`). Tarananların katman dağılımı: T1 7 · T2 25 · T3 5 · T4 4 · T5 4.
 
 **Test sonucu özeti (6 Eki 2026, TR'den):**
 
@@ -266,57 +301,69 @@ Ayrıntılı liste, erişim testi sonuçları ve yedek stratejiler: **`docs/kayn
 | **ECDC** | RSS **404** | ⚠️ HTML parse |
 | **Rospotrebnadzor** | Erişilemedi (000) | ⚠️ proxy/VPN gerekli, alternatif: TASS üzerinden aktarım |
 
+> **GDELT satırı bir erişim testidir, tarama değildir:** `SOURCES`'ta GDELT adaptörü yok; yalnızca `aggregator` grubu etiketi var. X/Twitter API'si ücretli olduğu için kapsam dışı.
+
 > **Kural:** Her T1 kaynağının **en az iki erişim yolu** olmalı (birincil + yedek). Tek yola bağlı kaynak "tek nokta arıza" sayılır.
 
 ---
 
 ## 8. Veri Modeli
 
+### 8.1 Uygulanan şema (`src/lib/storage/schema.ts`)
+
 ```
-sources        (id, slug, name, homepage, feed_url, tier, independence_group,
-                trust_base, roles[], status, last_ok_at, last_error, consecutive_failures)
+articles        (id, source_slug, source_name, url, canonical_url, title_original,
+                 title_tr, lang, published_at, fetched_at, excerpt_original, excerpt_tr,
+                 content_hash, archive_url, via_aggregator, original_publisher_slug,
+                 translation_status)
 
-articles       (id, source_id, url, canonical_url, title_original, lang,
-                published_at, fetched_at, excerpt_original, content_hash,
-                archive_url, image_url, is_machine_translated)
+events          (id, slug, title, title_original, title_tr, summary, summary_tr,
+                 label, first_seen_at, last_update_at, translation_status)
 
-events         (id, slug, title_tr, title_en, summary_tr, first_seen_at,
-                last_update_at, status [active/monitoring/resolved],
-                severity, location, confidence_score)
+event_claims    (event_id, source_slug, source_name, tier, independence_group,
+                 title, title_tr, url, published_at)
 
-event_articles (event_id, article_id, relation [primary/corroborating/contradicting])
+event_articles  (event_id, article_id)
 
-claims         (id, event_id, text_tr, claim_type, status [official/confirmed/
-                reported/unverified/refuted], asserted_by_source_id,
-                independence_groups[], checked_at, notes)
+source_health   (source_slug, checked_at, ok, http_status, latency_ms, items_found,
+                 newest_item_at, stale, error)
 
-metrics        (id, event_id, metric [cases/deaths/quarantined/tested],
-                value, unit, as_of, source_id, is_official)
-
-corrections    (id, entity_type, entity_id, field, old_value, new_value,
-                reason, created_by, created_at)
-
-health_checks  (id, source_id, checked_at, http_status, latency_ms, items_found)
+ingest_reports (id, started_at, finished_at, duration_ms, sources, articles_fetched,
+                 articles_new, articles_relevant, events, label_counts,
+                 ingest_healthy, dead_man_message)
 ```
 
-Tüm tablolarda `created_at` / `updated_at`; `claims` ve `metrics` **kaynak zorunlu** (FK NOT NULL).
+Bağlantı ilk bağlantıda `CREATE TABLE IF NOT EXISTS` ile kurulur; `ensureSchema` yalnızca var olmayan tabloları koşar, mevcut tabloyu değiştirmez. Bu yüzden şema değişikliğinde üç yer birlikte güncellenmeli: Drizzle tablosu, `SCHEMA_SQL` ve `ALTER TABLE` (`docs/ceviri-plani.md §11`).
+
+Retention: `source_health` 90 gün, `articles` 180 gün (`src/lib/storage/schema.ts` → `HEALTH_RETENTION_DAYS` / `ARTICLE_RETENTION_DAYS`).
+
+### 8.2 Planda olan, uygulanmayan
+
+- `sources` tablosu → yerine `registry.ts` (kod, veri değil).
+- `claims.status` / `claim_type` / `independence_groups[]` → uygulanan claim satırında **durum yok**; etiket olay düzeyinde hesaplanıyor (`src/lib/trust.ts`). `status` değerleri arasında `confirmed` geçiyordu — editoryal kural gereği UI'da "doğrulandı" denmez, bu yüzden claim düzeyinde durum tutulmuyor.
+- `metrics` tablosu → yerine `data/figures.json` + `src/lib/figures.ts` (küratörlü rakamlar, her kayıt bir kaynak cümlesine bağlı).
+- `corrections` tablosu → kapsam dışı (§5.6).
+- `events.status` / `severity` / `location` / `confidence_score` → uygulanmadı; konum `src/lib/geo/` ile çıkarım, güven puanı hesap anında.
+- `roles[]`, `consecutive_failures`, `image_url` → uygulanmadı.
 
 ---
 
 ## 9. Arayüz Bölümleri
 
-1. **Durum Bandı (üst, sabit)** — canlı tarama göstergesi · olay/kaynak sağlığı · doğrulanmamış sinyal sayısı · **son güncelleme** · "metodoloji" linki. (Haber şeridi ve veri kaynağı göstergesi kaldırıldı.)
-2. **"Şu an ne biliyoruz?"** — en fazla 6 madde, her madde kaynak rozetli ve doğruluk etiketli.
-3. **Taraflar ne diyor?** — çelişki paneli (otomatik).
-4. **Zaman Çizelgesi** — kronolojik akış; her kart: TR başlık (varsa orijinali yanında), kaynak badge'i, tier, doğruluk etiketi, bağımsız kaynak sayısı ("4 farklı kaynak grubu bildirdi"), yayın/sistem zamanları, arşiv linki.
-5. **Sayısal Durum** — vaka / ölüm / karantina / test sayıları; her sayının yanında kaynağı ve `as_of` tarihi. Resmi ve bağımsız veriler çelişiyorsa ikisi de gösterilir.
-6. **Harita** — İrkutsk + komşu bölgeler, olay yoğunluğu (MapLibre).
-7. **Söylenti Kontrolü** — dolaşımdaki iddialar: Doğru / Yanlış / Kanıtlanmamış, gerekçesiyle.
-8. **Kaynak Güven Panosu** — tier tablosu, sağlık durumu, bağımsızlık grupları, trust formülü.
-9. **Düzeltmeler Günlüğü**.
-10. **Metodoloji / Bu site nasıl çalışır?** — toplama, etiketleme, çelişki, sınırlar (kendi zayıflıklarını yazar).
-11. **Arşiv & Arama** — tarih aralığı, kaynak, etiket filtresi.
-12. **Bildirim (opsiyonel, Faz 4)** — Telegram bot (varsayılan sessiz; sadece "doğrulanmış + kritik" seviye).
+1. **Durum Bandı (üst, sabit)** — canlı tarama göstergesi · son güncelleme · "metodoloji" linki. Sayılar ve veri kaynağı göstergesi kaldırıldı; sağlık nokta renginde. *(uygulandı)*
+2. **"Şu an ne biliyoruz?"** — en fazla 6 madde, her madde kaynak rozetli ve doğruluk etiketli. *(uygulandı — `TopEventList`)*
+3. **Taraflar ne diyor?** — çelişki paneli (otomatik). *(uygulandı — `ContradictionPanel`)*
+4. **Zaman Çizelgesi** — kronolojik akış; her kart: TR başlık (varsa orijinali yanında), kaynak badge'i, tier, doğruluk etiketi, bağımsız kaynak sayısı, yayın/sistem zamanları, arşiv linki. *(uygulandı — `/timeline`, sayfalı + filtreli)*
+5. **Sayısal Durum** — vaka / ölüm / karantina sayıları; her sayının yanında kaynağı ve `as_of` tarihi. Resmi ve bağımsız veriler çelişiyorsa ikisi de gösterilir. *(uygulandı — `/figures`; `test` metrik henüz yok)*
+6. **Harita** — İrkutsk + komşu bölgeler, olay yoğunluğu. *(uygulandı — satır içi SVG bağlam haritası; **MapLibre kullanılamaz**, CSP dış karo servislerini bloklar: `docs/harita-plani.md §2.4`)*
+7. **Söylenti Kontrolü** — dolaşımdaki iddialar: Doğru / Yanlış / Kanıtlanmamış, gerekçesiyle. *(uygulanmadı — "Doğru/Yanlış" yargısı §5.3 dil kuralıyla çelişiyor)*
+8. **Kaynak Güven Panosu** — tier tablosu, sağlık durumu, bağımsızlık grupları, trust formülü. *(uygulandı — `/sources` + metodoloji sayfası)*
+9. **Düzeltmeler Günlüğü**. *(kapsam dışı — §5.6)*
+10. **Metodoloji / Bu site nasıl çalışır?** *(uygulandı)*
+11. **Arşiv & Arama** — tarih aralığı, kaynak, etiket filtresi. *(uygulandı — `/timeline` filtreleri, JS'siz form)*
+12. **Bildirim (opsiyonel, Faz 4)** — Telegram bot (varsayılan sessiz; sadece "çoklu bağımsız kaynak + kritik" seviye). *(uygulanmadı)*
+
+Ek olarak uygulanan ama planda olmayanlar: `Bölgeler` (`/locations`), `Sinyaller` (`/signals`), kalıcı olay sayfaları (`/event/<slug>`), "son ziyaretten beri yeni" katmanı, saat dilimi düğmesi (UTC varsayılan), `sitemap`/`robots`, dil duyarlı 404. Ayrıntı: `docs/arayuz-plani.md`.
 
 **Etkileşim dili:** scroll-reveal, sayaçlar, hover mikro-etkileşimleri — ancak **`prefers-reduced-motion` tamamen desteklenir**. Acil sağlık durumunda süsün bilgiyi gölgelemesi yasak: doğruluk etiketi ve kaynak her zaman en yüksek görsel öncelik.
 
@@ -327,6 +374,7 @@ Tüm tablolarda `created_at` / `updated_at`; `claims` ve `metrics` **kaynak zoru
 | Konu | Karar |
 |---|---|
 | Telif | Başlık + ≤2 cümle alıntı + kaynak linki + arşiv linki. **Tam metin asla kopyalanmaz.** |
+| Lisans | Kod ve dokümantasyon **MIT** (9 Eki 2026, açık kaynak kararı): `LICENSE` depoda, `package.json` `MIT`. Lisans yalnızca kodu kapsar; toplanan içerik yayıncıların telifine tabidir. |
 | Çeviri | LLM kullanılırsa her TR metin makine çevirisidir; beyan olay detayında verilir, orijinal başlık her zaman görünür. |
 | Özet | **Üretken değil, çıkarımsal (extractive):** kaynak metinden cümle seçilir, yeniden yazılmaz. Halüsinasyon yüzeyi sıfırlanır. |
 | Tıbbi tavsiye | Sitede açık uyarı: "Bu site haber izleme aracıdır, tıbbi tavsiye değildir. Resmi kurum açıklamalarını esas alın." |
@@ -350,6 +398,8 @@ Tüm tablolarda `created_at` / `updated_at`; `claims` ve `metrics` **kaynak zoru
 
 **Toplam tahmini:** ~8–13 iş günü (F0–F4).
 
+**Durum (9 Eki 2026):** F0–F4 uygulandı, F5 sürüyor. Faz faz uygulama günlüğü ve ölçümler: `docs/arayuz-plani.md §16`, `docs/harita-plani.md §5`. F4'te planlanan düzeltme günlüğü kapsam dışına alındı; harita MapLibre yerine satır içi SVG olarak yapıldı (CSP kısıtı).
+
 ---
 
 ## 12. Riskler ve Önlemler
@@ -371,17 +421,17 @@ Tüm tablolarda `created_at` / `updated_at`; `claims` ve `metrics` **kaynak zoru
 
 ## 13. Kabul Kriterleri (Definition of Done)
 
-1. Yeni bir haber, kaynağı yayınladıktan sonra **≤15 dakika** içinde sitede görünür.
-2. Her kartta **kaynak adı + tier + yayın zamanı + orijinal link + arşiv linki** bulunur.
-3. "Çoklu bağımsız kaynak bildiriyor" etiketi, 20 örnek vaka denetiminde **yanlış pozitif üretmez**.
-4. TASS + RIA + Sputnik aynı haberi yazdığında bağımsız kaynak sayısı **1** olarak hesaplanır.
-5. Sitede "doğrulandı/confirmed/teyit edildi" ifadesi **hiçbir yerde geçmez** (otomatik test ile kontrol edilir).
-5. Kaynak bozulduğunda sağlık panelinde **≤1 saat** içinde görünür.
-6. Metodoloji sayfası yayında ve trust formülü açıkça yazılı.
-7. Her düzeltme kaydı zaman damgalı ve geriye dönük görülebilir.
-8. Mobil dahil Lighthouse performans ≥ 90; `prefers-reduced-motion` çalışıyor.
-9. Sitede tıbbi tavsiye olmadığına dair uyarı her sayfada erişilebilir.
-10. Sayfa hatası veya boş veri durumunda kullanıcı "neden boş" sorusunun cevabını görür.
+1. Yeni bir haber, kaynağı yayınladıktan sonra **≤15 dakika** içinde sitede görünür. *(cron-job.org ile 10 dk kadans — `docs/dispatch-tetikleme.md`)*
+2. Her kartta **kaynak adı + tier + yayın zamanı + orijinal link + arşiv linki** bulunur. *(uygulandı)*
+3. "Çoklu bağımsız kaynak bildiriyor" etiketi, 20 örnek vaka denetiminde **yanlış pozitif üretmez**. *(denetim yapıldı; aynı haberi iki olay sayma hatası 2c10892 ile kapatıldı)*
+4. TASS + RIA + Sputnik aynı haberi yazdığında bağımsız kaynak sayısı **1** olarak hesaplanır. *(uygulandı — `kremlin` grubu)*
+5. Sitede "doğrulandı/confirmed/teyit edildi" ifadesi **hiçbir yerde geçmez** — `ui-check` + `summarize-check` ile kapı altında.
+6. Kaynak bozulduğunda sağlık panelinde **≤1 saat** içinde görünür. *(uygulandı — `/sources`)*
+7. Metodoloji sayfası yayında ve trust formülü açıkça yazılı. *(uygulandı)*
+8. Her düzeltme kaydı zaman damgalı ve geriye dönük görülebilir. *(kapsam dışı — §5.6)*
+9. Mobil dahil Lighthouse performans ≥ 90; `prefers-reduced-motion` çalışıyor. *(reduced-motion uygulandı; Lighthouse skoru henüz ölçülmedi)*
+10. Sitede tıbbi tavsiye olmadığına dair uyarı her sayfada erişilebilir. *(uygulandı — `Disclaimer`)*
+11. Sayfa hatası veya boş veri durumunda kullanıcı "neden boş" sorusunun cevabını görür. *(uygulandı — `not-found.tsx` + boş durum metinleri)*
 
 ---
 
@@ -397,17 +447,18 @@ Tüm tablolarda `created_at` / `updated_at`; `claims` ve `metrics` **kaynak zoru
 
 | # | Karar | Sonuç |
 |---|---|---|
-| 1 | **Dil:** TR + EN | Rotalar `/(tr)` ve `/en`; içerik TR çeviri + orijinal başlık |
+| 1 | **Dil:** TR + EN | Rotalar `[lang]` (tr + en); içerik TR çeviri + orijinal başlık. Varsayılan dil `en` (`DEFAULT_LOCALE`); tarayıcı dili TR ise `/tr`, `lang` çerezi geçersiz kılar (`src/proxy.ts`) |
 | 2 | **Otomasyon:** Tam otomatik, **"doğrulanmış" etiketi yok** | İnsan onayı yok → sistem doğrulama iddia etmez; en yüksek etiket "çoklu bağımsız kaynak bildiriyor". Ayrıca bkz. §5.3 dil kuralı |
 | 3 | **Telegram/X katmanı:** Dahil | T5, sadece "doğrulanmamış iddia" olarak; ana akışta tek başına haber sayılmaz |
-| 4 | **Repo:** Public | GitHub Actions cron sınırsız dakika; kaynak kod ve güven puanları şeffaf |
+| 4 | **Repo:** Public — proje **açık kaynak**, lisans **MIT** (9 Eki 2026) | GitHub Actions cron sınırsız dakika; kaynak kod ve güven puanları şeffaf. `LICENSE` depoda, `package.json` `MIT`; katkı kuralları `CONTRIBUTING.md`, bildirme yolu `SECURITY.md`. Doğrulama: `gh repo view` → PUBLIC. Kota matematiği ve geri dönüş riski: `docs/dispatch-tetikleme.md` |
 | 5 | **TR çeviri:** Sağlayıcıdan bağımsız ingest-time çeviri + önbellek (7 Eki 2026) | `auto`: DeepL → OpenAI → anahtarsız Google; makine çevirisi beyanı olay detayında, orijinal başlık her zaman görünür; doğrulama kapıları editoryal kuralı korur. Ayrıntı: `docs/ceviri-plani.md` |
 | 6 | **Marka adı:** `Plague Tracker` (7 Eki 2026) | Wordmark boşluklu yazılır (`Plague Tracker`); crawler User-Agent teknik kimlik olarak boşluksuz kalır (`PlagueTrackerBot`, bkz. `sources/registry.ts`). UI `siteName` artık README ile aynı; eski "What is new about plague" başlığı ve ilk çalışma adı `VebaTakip` kaldırıldı. Alan adı seçimi hâlâ açık. |
 
 ### Kalan açık sorular
 
-1. **Alan adı:** Marka adı `Plague Tracker` olarak kararlaştırıldı (7 Eki 2026, §15 karar 6). Özel alan adı seçimi açık — Vercel proje adı/URL buna bağlı.
+1. **Alan adı:** Marka adı `Plague Tracker` olarak kararlaştırıldı (7 Eki 2026, §15 karar 6). Özel alan adı seçimi hâlâ açık — Vercel proje adı `plague-tracker`, canlı adres `https://plague-tracker.vercel.app` (`vercel domains ls` boş).
 2. **LLM bütçesi:** Karar (7 Eki 2026): sağlayıcıdan bağımsız adaptör; `DEEPL_API_KEY`/`OPENAI_API_KEY` varsa o kullanılır, yoksa anahtarsız Google. Bkz. `docs/ceviri-plani.md` §15.
-3. **Neon hesabı:** Postgres connection string kime ait olacak (F1 sonunda gerekli)?
+3. **Neon hesabı:** Kapandı — Postgres fiilen kullanılıyor (Neon eu-central-1). Connection string `.env.local`'da ve GitHub Secret olarak; Vercel'de Production/Preview ayrımı `docs/guvenlik-denetimi.md §6`.
 4. **Bildirim:** Telegram bot / e-posta uyarısı isteniyor mu (F4)?
-5. **Hedef kitle ağırlığı:** Türkiye kamuoyu mu, küresel takipçi mi? (UI vurgusunu etkiler)
+5. **Hedef kitle ağırlığı:** Kapandı (8 Eki 2026): birincil kitle **ilk kez gelen kamuoyu** ("10 saniyede durum ne"). Bkz. `docs/arayuz-plani.md §1`.
+6. **Lisans:** Kapandı (9 Eki 2026): proje açık kaynak, **MIT**. `LICENSE` eklendi, `package.json` `ISC` → `MIT`. Toplanan içerik yayıncıların telifine tabidir (§10 Telif satırı).

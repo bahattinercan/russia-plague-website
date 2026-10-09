@@ -21,8 +21,8 @@ const securityHeaders = [
   },
   { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
   // Kaynaklarımızın başka origin'ler tarafından gömülmesini engeller.
-  // (Biz Google Fonts yüklüyoruz; CORP kaynağın kendi yanıtında gelir,
-  // bu yüzden burada ayarlanması fontları etkilemez.)
+  // (Yazı tipleri `next/font` ile kendi sunucumuzdan servis ediliyor; CORP kaynağın
+  // kendi yanıtında gelir, bu yüzden burada ayarlanması yazı tiplerini etkilemez.)
   { key: 'Cross-Origin-Resource-Policy', value: 'same-origin' },
 ];
 

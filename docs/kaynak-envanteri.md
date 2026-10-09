@@ -3,6 +3,8 @@
 **Son test:** 6 Ekim 2026 · Türkiye'den (curl 8.17, Windows)
 **Kural:** Hiçbir kaynak tek erişim yoluna bağlı kalmayacak. Her T1 kaynağı için ≥2 yol zorunlu.
 
+> **Bu tablo aday envanteridir.** Aşağıdaki satırların bir kısmı taranmıyor (yalnızca erişim testi yapıldı ya da yayıncı kimliği olarak tanınıyor). Depoda fiilen taranan set ve ad farkları: **§7.1** ve **§7.2**. Erişim testleri `npm run ingest` sağlık raporu ve `npm run db:check` ile yeniden üretilebilir; tabloda anılan `scripts/verify-sources.ts` depoda **yok**.
+
 Erişim testi komutu (yeniden çalıştırılabilir):
 
 ```bash
@@ -48,7 +50,7 @@ curl -s -o /dev/null -w "%{http_code}" -L -m 15 -A "Mozilla/5.0" "<URL>"
 | Interfax                | `interfax.ru` / `interfax.com` | RSS                            | test edilecek            | `ru-state` grubunda sayılır                  |
 | RIA Novosti             | `ria.ru`                       | RSS                            | test edilecek            | `ru-state` grubunda sayılır                  |
 
-> **Bağımsızlık notu:** Rospotrebnadzor + Sağlık Bakanlığı + TASS + RIA + RT → UI'da **tek kaynak** olarak sayılır (`ru-state` / `ru-gov` grupları). Bkz. PLAN.md §5.2.
+> **Bağımsızlık notu:** Rospotrebnadzor + Sağlık Bakanlığı + TASS + RIA + RT → UI'da **tek kaynak** olarak sayılır (`kremlin` / `ru-gov` grupları). Bkz. PLAN.md §5.2.
 
 ## 4. Tier 4 — Bağımsız Rus / Sürgün Medya
 
@@ -81,15 +83,45 @@ curl -s -o /dev/null -w "%{http_code}" -L -m 15 -A "Mozilla/5.0" "<URL>"
 
 ## 7. Kaynak Skorlama Girdileri
 
-Trust puanı `packages/shared/trust.ts` içinde **elle ve sürümlenir**. Girdiler:
+Trust puanı `src/lib/sources/registry.ts` içinde **elle ve sürümlenir** (`packages/shared/trust.ts` yok — monorepo değil, tek Next.js uygulaması); hesap `src/lib/trust.ts` içinde yapılır.
 
-1. `tier_base` — yukarıdaki tablolar
+Uygulanan girdiler:
+
+1. `trustBase` — yukarıdaki tablolar
 2. `independence_group` — bağımsızlık grupları (PLAN.md §5.2)
-3. `correction_history` — kaynağın geçmişte yayınlanan yanlış bilgi oranı
-4. `primary_document` — birincil belge/veri sunup sunmadığı
-5. `state_control_penalty` — `ru-state` −8, `ru-gov` −5
+3. `state_control_penalty` — `kremlin` ve `ru-gov` için negatif (plandaki −8/−5 sabitleri yerine kaynak bazında `stateControlPenalty`)
+
+Uygulanmayan girdiler: `correction_history` (düzeltme günlüğü kapsam dışı) ve `primary_document`.
 
 Skorların gerekçesi metodoloji sayfasında yayınlanır. **Otomatik öğrenme yoktur** — güven puanı bir editoryal karardır, şeffaf biçimde versiyonlanır.
+
+### 7.1 Depoda fiilen taranan set (`SOURCES`, 45 kaynak)
+
+| Tier | Sayı | Slugs |
+|---|---|---|
+| T1 | 7 | `who-don`, `who-euro`, `ecdc`, `cdc-plague`, `cidrap`, `promed`, `reliefweb` |
+| T2 | 25 | `reuters`, `ap`, `bbc`, `aljazeera`, `euronews`, `guardian`, `nbc`, `axios`, `nytimes`, `wapo`, `npr`, `pbs`, `lemonde`, `abc`, `cnbc`, `atlantic`, `skynews`, `globalnews`, `thehill`, `vox`, `newsweek`, `nypost`, `foxnews`, `science`, `bmj` |
+| T3 | 5 | `rospotrebnadzor`, `minzdrav`, `tass`, `ria`, `interfax` |
+| T4 | 4 | `meduza`, `rferl`, `moscowtimes`, `novaya` |
+| T5 | 4 | `discovery` (çok dilli Google News), `discovery-tr` (Türkçe), `tg-astrapress`, `tg-shot_shot` |
+
+Bunlara ek olarak **59 yayıncı yalnızca kimlik ataması** için tanınır (`KNOWN_PUBLISHERS`): Google News'ten gelen bir haberin gerçek yayıncısı tanınmazsa T5'e düşüp ana akıştan kopuyordu. Yukarıdaki tablolarda **kimlik-only** olan satırlar: `wsj`, `politico`, `dw`, `spiegel`, `cbc`, `rnz`, `straitstimes`, `bellingcat`, `thebell`, `cbs`, `cnn`, `bloomberg`, `dailymail`, `latimes`, `usatoday`, `independent`, `telegraph`, `nature`, `sciam`, `lancet`, `nejm`, `statnews`.
+
+Son ölçüm (9 Eki 2026, canlı feed): 45 kaynak taranıyor — 41 sağlıklı, 3 bayat, 1 hatalı.
+
+### 7.2 Tablo ile registry arasındaki ad farkları
+
+| Tabloda | Registry'de | Durum |
+|---|---|---|
+| `us-cdc` | `cdc-plague` | taranan slug |
+| `google-news` | `discovery`, `discovery-tr` | |
+| `yandex` | `yandex-news` | |
+| `commersant` | `kommersant` | yazım |
+| `the-insider` | `insider` | |
+| `x` | `x-russia` | **taranmıyor** (API ücretli) |
+| `telegram-baza` | `tg-baza` | **taranmıyor** — yalnızca `tg-astrapress` ve `tg-shot_shot` aktif |
+| `gdelt` | — | erişim testi geçti, `SOURCES`'ta adaptör yok |
+| `rt`, `sputnik`, `izvestia`, `zvezda`, `rbc` | — | envanterde; `kremlin` grubu etiketi var, tek tek taranmıyor |
 
 ## 8. Erişim Engeli Notları
 
