@@ -117,6 +117,10 @@ Yani iki veri katmanı, testleri yeşil şekilde bekliyor.
 > arayüzde işaretli) — gerekçe `data/figures.json` `_readme` ve
 > **`docs/harita-plani.md`** §4. Harita kararının ölçümü ve kapıları da o dosyada.
 > Kapsama ölçümü son durumda **29/70 (%41)**.
+>
+> **Yeniden ölçüm (09 Eki 2026, `npm run figures-check` / `geo-check`):** ölüm 1 (1 bağımsız grup —
+> `deaths-moscowtimes` kaydı kaldırıldı) · kısıtlama 200 (4 grup) · vaka 0/2 (2 kaynak, **6** grup) ·
+> kapsama 26/67 (%38.8). Bu sayılar feed penceresiyle birlikte değişir; tablodaki değer 08 Eki 2026 anıdır.
 
 ### 1.6 🟡 Diğer sürtünmeler
 
@@ -126,6 +130,8 @@ Yani iki veri katmanı, testleri yeşil şekilde bekliyor.
   toplamı artık panoda yok; kavram `Rakamlar` kartlarında ölçüt bazında duruyor.)
 - **Karışık saat dili:** nav `08 Eki 14:20 UTC` · kart `Yayın: 08 Eki 10:00 UTC` + `Güncellendi: 17 dakika önce`.
 - **Sinyaller düz metin duvarı:** 121 sinyal, 24'ü gösteriliyor, arama/gezinme yok.
+  → **kısmen çözüldü:** `/signals` sayfalı (`?page=`, sayfa başına 24, "daha fazla" bağlantısı).
+  Arama ve kaynak filtresi hâlâ yok.
 - **Sakin durum yok:** hiçbir şey olmadığında ekran "74 olay" diyor; "şu an durum nedir?" cevabı vermiyor.
 - **Olayın kalıcı adresi yok:** her şey modal içinde; paylaşılabilir link üretilemiyor.
 

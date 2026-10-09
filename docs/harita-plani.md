@@ -81,6 +81,10 @@ kapsama: 28/71 olay (%39.4) · 3 konum
 `scripts/geo-check.ts` içindeki kapı **%60**; ölçülen **%39.4** → kapı geçmiyor.
 Bu yüzden `/locations` sayfası bugün harita değil liste gösteriyor ve bunu açıkça yazıyor.
 
+> **Ölçüm 8 Eki 2026 canlı beslemesidir.** 9 Eki 2026'da aynı kapı `26/67 olay (%38.8) · 3 konum`
+> verdi (siberian 21 · irkutsk 6 · moscow 4). Bu sayılar feed penceresiyle birlikte değişir;
+> kapı hiçbir ölçümde geçmedi. Güncel değer için `npm run geo-check`.
+
 ### 2.3 "Vaka sayısı" hiç yok — sıfır
 
 `data/figures.json` ölçümü: **`cases` = 0 kayıt**, `deaths` = 1, `restricted` = 3.
@@ -113,7 +117,7 @@ img-src 'self' data: ;
 connect-src 'self'
 ```
 
-MapLibre + OSM/Mapbox karoları bu politikada **çalışmaz**; açmak `docs/guvenlik-denetimi.md §3`'te
+MapLibre + OSM/Mapbox karoları bu politikada **çalışmaz**; açmak `docs/guvenlik-denetimi.md §4`'te
 bilinçli olarak daraltılmış dış kaynak yüzeyini geri genişletir (ziyaretçi IP'si karo
 sunucusuna gider). Ayrıca `package.json`'da harita bağımlılığı yok.
 
@@ -139,6 +143,9 @@ cevaplar ve bilmediğini açıkça yazar.
 │  70 olayın 29'unda konum belirlenebildi (%41) — harita     │
 │  yalnızca bunları gösterir; kalanı "atanmamış".             │
 └────────────────────────────────────────────────────────────┘
+
+> Bu blok 8 Eki 2026 ölçümüdür (§2.2'de 28/71 = %39.4 olarak kayıtlı); iki ölçüm aynı
+> günün farklı anlarıdır ve feed penceresiyle değişir. 9 Eki 2026: 26/67 (%38.8).
 
 Rakamlar ayrı bölümde (mevcut `Rakamlar` kartları) ve R2 ile artık vaka da var:
   vaka  0 · 2 (2 kaynak, 6 bağımsız grup) ⚑ kaynaklar farklı değer veriyor

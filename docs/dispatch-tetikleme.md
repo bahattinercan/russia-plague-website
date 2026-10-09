@@ -26,21 +26,23 @@ API'sini çağırmak. `cron-job.org` bunu ücretsiz yapar (dakikada 1'e kadar).
 
 ## ⚠️ Önce kota matematiği: 10 dakika bu repoda PARA YAKAR
 
-Repo **private**. GitHub Free private repo için **2.000 Actions dakikası/ay**
+Repo o dönemde **private** idi; aşağıdaki karar A ile **public** yapıldı ve 9 Eki 2026'da `gh repo view` ile doğrulandı. Kota matematiği yalnızca repo tekrar private yapılırsa geçerlidir. GitHub Free private repo için **2.000 Actions dakikası/ay**
 verir; public repoda Actions dakikaları **sınırsızdır**.
 
-Ölçülen ingest süresi (son 5 başarılı çalışma): `103s, 98s, 104s, 90s, 133s`
-→ **ortalama 105 sn = 1.76 dk**.
+Ölçülen ingest süresi (son 5 başarılı çalışma, 7 Eki 2026): `103s, 98s, 104s, 90s, 133s`
+→ **ortalama 105 sn = 1,76 dk**.
+
+> 9 Eki 2026 ölçümü: son 8 koşu **11–13 sn**. GitHub süreyi tam dakikaya yuvarladığı için her koşu kota açısından hâlâ ~1 dk sayılır; 10 dk kadansı private kotayı (~4.300 dk/ay) yine ~14 günde bitirir. Sonuç değişmedi, sayı değişti.
 
 | Kadans | Çalışma/gün | Dk/gün | **Dk/ay** | Free private (2.000) |
 |---|---|---|---|---|
 | 10 dk | 144 | 253 | **7.600** | ❌ %380 — ~8. günde biter |
 | 20 dk | 72 | 127 | **3.800** | ❌ |
 | 30 dk | 48 | 84 | **2.530** | ❌ |
-| 45 dk | 32 | 56 | **1.690** | ✅ ama CI'a yer kalmaz |
+| 45 dk | 32 | 56 | **1.690** | ✅ ama başka Actions işlerine yer kalmaz (bugün CI işi yok) |
 | 60 dk | 24 | 42 | **1.270** | ✅ rahat |
 
-Kota dolunca **sadece ingest değil, `ci.yml` dahil tüm Actions durur.** Fazla
+Kota dolunca **sadece ingest değil, depodaki tüm Actions işleri durur** (bugün tek iş var: `ingest.yml`; ayrı bir CI workflow'u yok). Fazla
 kullanım $0.008/dk → 10 dk kadansında ~**$45/ay**.
 
 ### Karar: **A — repo public**
@@ -48,8 +50,8 @@ kullanım $0.008/dk → 10 dk kadansında ~**$45/ay**.
 Repo public yapıldı. Public repolarda Actions dakikaları **sınırsızdır**, yani
 10 dakikalık kadans bedava. Yukarıdaki kota tablosu artık yalnızca repo **tekrar
 private yapılırsa** geçerli — o durumda kadansı **45–60 dakikaya** çekin, aksi
-halde Free planın 2.000 dk/ay kotası ~8 günde biter ve **`ci.yml` dahil tüm
-Actions durur** (fazlası ~$0.008/dk ≈ ~$45/ay).
+halde Free planın 2.000 dk/ay kotası ~8 günde biter ve **depodaki tüm Actions işleri durur**
+(bugün tek iş `ingest.yml`; fazlası ~$0.008/dk ≈ ~$45/ay).
 
 Public olduğu için `.github/workflows/ingest.yml` içindeki `schedule` **yedek
 olarak bırakıldı**: bedava, ve `concurrency: ingest` çift çalışmayı zaten engeller.
@@ -214,12 +216,12 @@ npm run db:check          # "Son ingest: <şimdi>" görünmeli
 | Workflow `main`'de yok | `404`/`422` | `workflow_dispatch` yalnızca varsayılan daldaki sürümü tetikler. Dal'ı merge et. |
 | Yanlış `ref` | `422` | Varsayılan dal `main`. |
 | Gövde JSON değil | `422` | Body tam olarak `{"ref":"main"}`. |
-| Aynı anda iki tetikleyici | Gereksiz maliyet | cron-job.org kurulduktan sonra `.github/workflows/ingest.yml` içindeki `schedule`ı kaldır ya da aynı kadansa çek. |
+| Aynı anda iki tetikleyici | Gereksiz maliyet | Public repoda maliyet yok, bu yüzden `schedule` **yedek olarak bırakıldı** (karar A, yukarıdaki bölüm); `concurrency: ingest` çift çalışmayı engeller (1 koşar + 1 kuyrukta bekler). Repo private'a alınırsa `schedule` kaldırılmalı ya da kadans 45–60 dk'ya çekilmeli. |
 | **Sessiz bayatlama** | Site eski snapshot'ı gösterir, alarm yok | Dead man's switch yalnızca `if: failure()` — **cron hiç çalışmazsa çalışmaz.** Çözüm: işin `onFailure` bildirimi açık olmalı (API kurulumu açar; `--list` → `hata alarmı: açık` ile doğrula). PAT süresi dolduğunda cron-job.org 401 alır ve e-posta atar. |
 
 ## Public yapmadan önce yapılan denetim
 
-Tüm geçmiş tarandı (`git rev-list --all` → 32 commit): `neon.tech`,
+Tüm geçmiş tarandı (`git rev-list --all` → 57 commit, 9 Eki 2026): `neon.tech`,
 `postgresql://kullanıcı:şifre@`, `sk-…`, `ghp_…`, `github_pat_…`, `AIza…`
 kalıpları arandı. **Gerçek sır bulunamadı.** Eşleşen tek iki dosya kasıtlı
 sahte/maskeli dize içeriyor:
