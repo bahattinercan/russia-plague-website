@@ -52,6 +52,15 @@ export async function loadFeed(): Promise<{ feed: FeedFile | null; backend: Feed
   return { feed, backend: 'json' };
 }
 
-export function backendLabel(): string {
-  return hasDatabase() ? 'Neon Postgres' : 'JSON (data/feed.json)';
+/**
+ * Log/gösterim etiketi. `saveFeed`in DÖNÜŞ değeri verilir.
+ *
+ * Neden parametre: yalnızca ortam değişkenine bakmak yanıltıcı satır
+ * üretiyordu. ÖLÇÜM (12 Eki 2026): Neon yazımı 23505 ile düşüp JSON'a
+ * düşerken CI logu "✔ Feed yazıldı → Neon Postgres (json)" yazdığı için
+ * 38 saatlik veri donması fark edilmedi. Etiket artık gerçek backend'i
+ * söyler.
+ */
+export function backendLabel(backend: FeedBackend): string {
+  return backend === 'postgres' ? 'Neon Postgres' : 'JSON (data/feed.json) — Postgres\'e YAZILAMADI';
 }

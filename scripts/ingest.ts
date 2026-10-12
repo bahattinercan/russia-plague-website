@@ -263,7 +263,7 @@ async function main(): Promise<void> {
       events,
       signals,
     });
-    console.log(`✔ Feed yazıldı → ${backendLabel()} (${backend})`);
+    console.log(`✔ Feed yazıldı → ${backendLabel(backend)}`);
   } else {
     console.log('(dry run — dosya yazılmadı)');
   }
