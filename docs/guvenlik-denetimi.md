@@ -8,6 +8,7 @@
 | 1   | 7 Ekim 2026 | İlk denetim — B-1…B-5 bulundu ve düzeltildi                |
 | 2   | 7 Ekim 2026 | Bağımsız yeniden doğrulama — B-6…B-9 bulundu ve düzeltildi |
 | 3   | 9 Ekim 2026 | Bağımsız denetim — B-10…B-12 bulundu ve düzeltildi          |
+| 4   | 12 Ekim 2026 | Kalan iki risk kapatıldı — COEP `require-corp` + `style-src` elem/attr ayrımı (B-13) |
 
 ---
 
@@ -19,7 +20,7 @@
 | `.env` dosyalarının git durumu     | ⚠️ Ayrıntı B-7 | `.env.local` **çalışma dizininde var** (canlı Neon + Vercel OIDC) ama `.gitignore` kapsamında ve geçmişte **hiç commit edilmemiş** |
 | `.gitignore` kapsamı               | ✅ Yeterli     | `.env*`, `.next/`, `node_modules/`, `*.tsbuildinfo`, `.shots/`, `.vercel`                                                          |
 | Bağımlılık zafiyetleri             | ✅ Çözüldü (9 Eki 2026) | `npm audit` → 4 moderate (drizzle-kit → esbuild). **Düzeltme:** drizzle-kit `dependencies`'teydi, `devDependencies`'te değil — bu yüzden `npm audit --omit=dev` de 4 moderate veriyordu. Paket `devDependencies`'e taşındı (çalışma ağacında, henüz commit edilmemiş); artık `npm audit --omit=dev` → **0**, tam `npm audit` → 4 moderate. Uygulama çalışma anında drizzle-kit kullanmıyor (yalnızca `drizzle-orm`); artık `security-check`'te **B-10** kapısı var: drizzle-kit'in `dependencies`'te olmaması doğrulanıyor |
-| Lisans uyumu                       | ✅ Temiz       | next/react/react-dom/cheerio/rss-parser/zod MIT, drizzle-orm Apache-2.0. **Kapandı (9 Eki 2026):** proje açık kaynak — `LICENSE` (MIT) depoda, `package.json` `ISC` → `MIT`. Eski çelişki: README MIT diyordu ama LICENSE dosyası yoktu. **Not:** `LICENSE`, `CONTRIBUTING.md` ve `SECURITY.md` açık kaynak hazırlığı commit'inde yer alıyor; bu satır o dosyaların içeriğini değil, kararı kaydeder |
+| Lisans uyumu                       | ✅ Temiz       | next/react/react-dom/cheerio/rss-parser/zod MIT, drizzle-orm Apache-2.0. **Kapandı (9 Eki 2026):** proje açık kaynak — `LICENSE` (MIT) depoda, `package.json` `ISC` → `MIT`. Eski çelişki: README MIT diyordu ama LICENSE dosyası yoktu. **Not:** `LICENSE`, `CONTRIBUTING.md` ve `SECURITY.md` açık kaynak hazırlığı commit'inde yer alıyor; bu satır o dosyaların içeriğini değil, kararı kaydeder. `SECURITY.md` **12 Eki 2026'da kaldırıldı** — bildirim yolu artık README §Güvenlik ve bu dosya |
 | XSS yüzeyi (kod)                   | ✅ Yok         | `dangerouslySetInnerHTML`, `innerHTML`, `eval`, `new Function`, `document.write` hiç kullanılmıyor                                 |
 | Dış link şema filtresi             | ✅ Tam         | Tüm dinamik `href` değerleri `safeExternalUrl()`'den geçer                                                                         |
 | `target="_blank"` güvenliği        | ✅ Tam         | 7/7 kullanımda `rel="noopener noreferrer nofollow"` (ClaimList, EventCard, SignalList, Disclaimer)                                        |
@@ -42,7 +43,8 @@
 content-security-policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none';
   frame-ancestors 'none'; form-action 'self';
   script-src 'self' 'nonce-<istek başına>' 'strict-dynamic' 'unsafe-eval';   ← 'unsafe-eval' yalnızca dev
-  style-src 'self' 'unsafe-inline';
+  style-src 'self';                        ← üretimde 'unsafe-inline' YOK (Tur 4, B-13)
+  style-src-elem 'self' 'nonce-<istek başına>'; style-src-attr 'unsafe-inline';
   font-src 'self' data:; img-src 'self' data:; connect-src 'self'
 X-Content-Type-Options: nosniff
 X-Frame-Options: DENY
@@ -50,10 +52,11 @@ Referrer-Policy: strict-origin-when-cross-origin
 Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
 Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
 Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp    ← Tur 4, B-13
 Cross-Origin-Resource-Policy: same-origin
 ```
 
-Nonce akışı uçtan uca doğrulandı: HTML'deki **20 `<script>` etiketinin tamamı** başlıktaki nonce'u taşıyor (nonce'suz tek bir script yok).
+Nonce akışı uçtan uca doğrulandı: HTML'deki **20 `<script>` etiketinin tamamı** başlıktaki nonce'u taşıyor (nonce'suz tek bir script yok). *(Dev sunucusu, 9 Eki 2026.)* Tur 4 ölçümünde bu kontrol 12 rota × üretim build için tekrarlandı — §5 kapanış kaydı.
 
 ---
 
@@ -171,20 +174,46 @@ stripHtml("<p>&#99999999999;</p>")→ RangeError
 
 | Risk                                      | Neden kabul edildi                                                                               | Plan                                                                          |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
-| `style-src 'unsafe-inline'`               | Bkz. B-9: nonce + inline style nitelikleri birlikte çalışmaz; script tarafı sertleştirildi       | Gerekirse `style-src-attr 'unsafe-inline'` + nonce'lu `style-src-elem` ayrımı |
+| `style-src 'unsafe-inline'`               | ✅ **KAPANDI (12 Eki 2026, B-13):** `style-src 'self'` + `style-src-elem 'self' 'nonce-…'` + `style-src-attr 'unsafe-inline'`. Üretim HTML'inde nonce'suz inline `<style>` yok (0/12 rota); nitelik stilleri `style-src-attr` ile çalışıyor | —                                                                             |
 | Google Fonts dış kaynak                   | ✅ **KAPANDI (8 Eki 2026):** yazı tipleri `next/font` ile self-host edildi (`Inter`, `Newsreader`, `JetBrains Mono`); `style-src`/`font-src` artık yalnızca `'self'`. Regresyon kapısı: `security-check` (dış host yasağı) + `ui-check`. | —                                                                             |
-| COEP yok (`Cross-Origin-Embedder-Policy`) | `require-corp` dış font CDN'i ile uyumsuzdu; **artık dış font yok**, denenebilir                  | `require-corp` denenip görsel doğrulama yapılacak                             |
+| COEP yok (`Cross-Origin-Embedder-Policy`) | ✅ **KAPANDI (12 Eki 2026, B-13):** `require-corp` açıldı. Dış alt kaynak yok (0/12 rotada dış `src`); kendi yanıtlarımız CORP `same-origin` taşıyor | —                                                                             |
 | Uygulama seviyesinde rate limiting yok    | Vercel platform koruması mevcut; site yalnızca okuma yapar; API rotası yok                       | Gerekirse Vercel WAF / Upstash Ratelimit                                      |
 | Dev-only zafiyetler (B-8/B-10)            | Artık gerçekten dev-only: drizzle-kit `devDependencies`'te (`c87361b`), `npm audit --omit=dev` → 0; kod prod bundle'ına girmiyor | Dependabot + drizzle-kit'in esbuild'i güncelleyen sürümü çıkınca yükselt          |
 | `data/feed.json` repo'da commit ediliyor  | MVP deposu; içerik yalnızca başlık + kısa alıntı                                                 | A adımı: Postgres'e geçiş, `data/` gitignore                                  |
 | `readLimitedText` fazla ayırma            | Limiti aşan chunk `total`'a eklenip diziye alınmıyor → chunk başına en fazla ~64 KB fazla bellek | Kozmetik; limit sınırına çekilebilir                                          |
+
+### B-13 — `style-src 'unsafe-inline'` ve COEP kapatıldı (Düşük → kapandı, Tur 4 / 12 Eki 2026)
+
+**Sorun:** İki kalan risk B-9/B-8'den devralınmıştı: (1) `style-src 'unsafe-inline'` — nonce ile birlikte kullanılamadığı için ertelenmişti; (2) `Cross-Origin-Embedder-Policy` hiç yoktu (dış font CDN'i varken açılamıyordu).
+**Düzeltme:**
+
+- `src/lib/security/csp.ts` — stil direktifleri ayrıldı: `style-src 'self'` (CSP2 tabanı) + `style-src-elem 'self' 'nonce-…'` + `style-src-attr 'unsafe-inline'`. Dev tek direktifte kalır (Next dev `<style>` enjekte eder).
+- `next.config.ts` — `Cross-Origin-Embedder-Policy: require-corp` eklendi.
+- `scripts/security-check.ts` — 5 yeni kapı: `style-src`'te `'unsafe-inline'` yok, `style-src-elem` nonce'lu ve inline'sız, `style-src-attr` inline nitelik izni, dış host yasağı `style-src-elem`'i de kapsar, `next.config.ts` COEP tanımlar (58 → **63 test**).
+
+**Ölçümler** (üretim build + `next start`, headless Chrome):
+
+| Ölçüm | Nasıl | Sonuç |
+| --- | --- | --- |
+| Nonce'suz inline `<style>` | 12 rota × HTML (home, timeline, figures, locations, locations/[slug], signals, sources, methodology ×2 dil, event/[slug], 404) | **0** inline `<style>`; her rotada 9–14 `<script>`, hepsi nonce'lu |
+| Dış alt kaynak (COEP ön koşulu) | aynı 12 rota, `src="http…"` taraması | **0** dış `src` (görseller `/world-map*.svg`, stiller `/ _next/static`) |
+| Nitelik stilleri hâlâ uygulanıyor | CDP `getComputedStyle` | `--reveal-delay: 60ms → transitionDelay 0.06s`, `120ms → 0.12s`; harita işaretçisi `left:73.6% → 811px` (1102px genişlikte) |
+| CSP/COEP ihlali | CDP `Log` domain + konsol | **0** ihlal, 0 hata |
+| Görsel regresyon | önce/sonra ekran görüntüsü pixel diff (PIL) | ÖNCE↔SONRA farkı (home 2458 px, timeline 625 px) **aynı build'in iki çekimi arasındaki farktan küçük** (3412 / 627 px — dinamik “son tarama” saatleri); yerleşim değişmedi |
+| Dev tarafı | `next dev` başlıkları | `style-src 'self' 'unsafe-inline'` (tek direktif), COEP açık |
+
+**Kabul edilen artık:** `style-src-attr 'unsafe-inline'` duruyor — nitelik stilleri script çalıştıramaz (yalnızca `--reveal-delay`, `left/top`, `aspect-ratio` gibi değerler); kritik olan `<style>` elemanı tarafı artık nonce'lu. CSP2 tarayıcılar (`style-src-elem`/`-attr` bilmeyenler) yalnızca `style-src 'self'` görür → kademeli animasyon gecikmesini kaybeder, içerik gizlenmez.
+
+**Bu turda ayrıca:** `SECURITY.md` kaldırıldı (bildirim yolu README §Güvenlik ve bu dosyada tutuluyor).
+
+**Ek bulgu (kapsam dışı, düzeltilmedi):** `--reveal-delay` niteliği `.card-lift` sınıflı elemanlarda etkisiz — `.card-lift`'in `transition` kısayolu `.reveal`'in kısayolunu ezdiği için bu kartlarda gecikme (ve opacity geçişi) uygulanmıyor. CSP ile ilgisi yok; ölçüm sırasında görüldü, ayrı bir UI işi.
 
 ---
 
 ## 6. Regresyon koruması
 
 ```bash
-npm run security-check     # 58 test (9 Eki 2026, B-10 kapısı eklendikten sonra)
+npm run security-check     # 63 test (12 Eki 2026, B-13 kapıları eklendikten sonra; B-10'da 58 idi)
 npm run typecheck
 ```
 
@@ -197,7 +226,8 @@ npm run typecheck
 | Şema filtresi       | `javascript:`, `data:`, `vbscript:`, `file:`, göreli yol, boş, `null`, bozuk URL                                                                                                        |
 | Bozuk varlık (B-6)  | aşırı büyük/taşan/sınır üstü/vekil/NUL kod noktaları fırlatmaz; geçerli varlıklar çözülür                                                                                               |
 | Log maskeleme (B-7) | `userinfo` + `?password=` + `&pwd=` sızdırmaz                                                                                                                                           |
-| CSP (B-9)           | nonce `script-src`'te, `'unsafe-inline'` yok, `style-src` inline'ı korur, `'unsafe-eval'` yalnızca dev, `upgrade-insecure-requests` yalnızca üretim, `next.config.ts`'te statik CSP yok |
+| CSP (B-9/B-13)      | nonce `script-src`'te, `'unsafe-inline'` yok; `style-src`'te `'unsafe-inline'` yok, `style-src-elem` nonce'lu, `style-src-attr` inline nitelik izni; `'unsafe-eval'` yalnızca dev, `upgrade-insecure-requests` yalnızca üretim, `next.config.ts`'te statik CSP yok |
+| COEP (B-13)         | `next.config.ts` `Cross-Origin-Embedder-Policy: require-corp` tanımlar (geri alınırsa test kırılır)                                                                                     |
 | Feed                | `data/feed.json` içindeki tüm bağlantılar http(s)                                                                                                                                       |
 | Bağımlılık hijyeni (B-10) | `drizzle-kit` prod bağımlılığı değil (yalnızca migration CLI) — `package.json` üzerinden doğrulanır                                                                       |
 
@@ -214,6 +244,8 @@ npm run typecheck
 - [ ] Vercel ortam değişkenleri Production/Preview ayrımıyla tanımlanır
 - [x] Deploy sonrası başlıklar **ve nonce'lu CSP** yeniden doğrulanır; tarayıcı konsolunda CSP ihlali olmamalı *(9 Eki 2026: alias üzerinden doğrulandı — CSP nonce'lu, 14/14 `<script>` nonce taşıyor, `X-Powered-By` yok; Vercel bot challenge bazı curl isteklerini 403 ile kesiyor)*
 - [x] Nonce'lu CSP üretimde test edilir (`'unsafe-eval'` görünmemeli, `upgrade-insecure-requests` görünmeli) *(9 Eki 2026: ikisi de doğrulandı)*
+- [x] COEP `require-corp` açık ve dış alt kaynak yok *(12 Eki 2026: 12 rotada dış `src` 0, CDP'de 0 ihlal)*
+- [x] Stil tarafı sertleştirildi: `style-src`'te `'unsafe-inline'` yok, `style-src-elem` nonce'lu *(12 Eki 2026: nonce'suz inline `<style>` 0/12 rota, nitelik stilleri çalışıyor)*
 - [x] `main` dalı korumalı: PR zorunlu, force-push/dal silme kapalı, `enforce_admins: true` (B-11)
 - [x] PR kapısı: `.github/workflows/ci.yml` → `npm ci` + `npm run check-all`, `main`'de zorunlu status check (sırsız ve DB'siz koşar)
 - [x] `npm audit --omit=dev` temiz *(9 Eki 2026: 0 — drizzle-kit `devDependencies`'e taşındı, `c87361b`. Tam `npm audit` hâlâ 4 moderate, dev-only)*

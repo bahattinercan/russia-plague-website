@@ -222,12 +222,21 @@ Depoda fiilen taranan kaynak sayısı **45** (`registry.ts → SOURCES`); bunlar
 | [`docs/harita-plani.md`](docs/harita-plani.md) | Dünya haritası: ölçümler, kapılar, kararlar | uygulandı |
 | [`docs/ceviri-plani.md`](docs/ceviri-plani.md) | TR çeviri planı: sağlayıcı, doğrulama kapıları, veri modeli | uygulandı |
 | [`docs/kaynak-envanteri.md`](docs/kaynak-envanteri.md) | Kaynak listesi, erişim testleri, yedek yollar | test 6 Eki 2026 |
-| [`docs/guvenlik-denetimi.md`](docs/guvenlik-denetimi.md) | Güvenlik denetimi: bulgular, düzeltmeler, kalan riskler | 3 tur tamamlandı |
+| [`docs/guvenlik-denetimi.md`](docs/guvenlik-denetimi.md) | Güvenlik denetimi: bulgular, düzeltmeler, kalan riskler | 4 tur tamamlandı |
 | [`docs/dispatch-tetikleme.md`](docs/dispatch-tetikleme.md) | Cron: GitHub `schedule` neden yetmiyor, cron-job.org kurulumu | kurulu (jobId #8605239) |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Katkı kuralları: pazarlık konusu olmayan editoryal ilkeler, tier/trust değişikliği, kapılar | yayında |
-| [`SECURITY.md`](SECURITY.md) | Güvenlik bildirme yolu, kapsam, bilinen açık riskler | yayında |
 
 > Bu dosyalardaki sayılar **ölçüm tarihine** bağlıdır ve feed penceresiyle birlikte değişir. Bir ölçümün tarihi yazılıysa o anın değeridir; güncel durumu anlamak için kapıları yeniden koşmak gerekir (`npm run check-all`).
+
+---
+
+## Güvenlik
+
+- **Zafiyet bildirimi özel yapılır:** GitHub → **Security → Report a vulnerability** (özel advisory) veya `bahattin.ercan.43@gmail.com`. Açık issue açma — düzeltilmemiş bir sorunu herkese gösterir.
+- Bildirimde beklenen: adım adım yeniden üretme, etki (hangi veri/sır/başlık), varsa önerilen düzeltme.
+- Yanıt hedefi: **7 gün** içinde durum değerlendirmesi, **30 gün** içinde düzeltme veya gerekçeli ret. Bug bounty yoktur.
+- Kapsam: `src/`, `scripts/`, `.github/workflows/`, `next.config.ts`, `package.json`; CSP/nonce üretimi, dış veri işleme (`stripHtml`, `safeExternalUrl`), log maskeleme, bağımlılık zinciri. Haber içeriğinin doğruluğu kapsam dışıdır (editoryal konu).
+- Uygulanan korumalar, regresyon kapıları (`npm run security-check`) ve **kalan riskler**: [`docs/guvenlik-denetimi.md`](docs/guvenlik-denetimi.md).
 
 ---
 
@@ -245,6 +254,6 @@ Kod: **MIT** — [`LICENSE`](LICENSE) dosyası depoda, `package.json` `MIT`. Pro
 Toplanan içerik (haber başlıkları, özetler, bağlantılar) ilgili yayıncıların telifine tabidir; lisans yalnızca kodu ve dokümantasyonu kapsar.
 
 - Katkı kuralları (tier/trust değişikliğinin gerekçesi, kapılar, commit konvansiyonu): [`CONTRIBUTING.md`](CONTRIBUTING.md)
-- Güvenlik sorunlarını **özel** bildirme yolu ve bilinen açık riskler: [`SECURITY.md`](SECURITY.md)
+- Güvenlik: bildirim yolu ve kalan riskler için yukarıdaki [Güvenlik](#güvenlik) bölümü
 
 > Katkı için temel kural: kaynak envanteri ve güven puanları `src/lib/sources/registry.ts` içinde elle ve sürümlenir — değişiklikler ölçüme dayalı gerekçeli olmalı (metodoloji sayfası bunu yayınlar).
