@@ -46,6 +46,26 @@ const CONTEXT_TERMS = [
 ];
 
 /**
+ * Terimi "kelime BAŞINDA" eşleştiren regex.
+ *
+ * ÖLÇÜM (12 Eki 2026, canlı feed): düz `includes()` kısa terimlerde kelime
+ * İÇİNDE eşleşiyordu ve akışa gerçek yanlış pozitifler soktu:
+ *   'pest' (DE "Pest" = veba) → "shar**pest**", "Buda**pest**"
+ *   'olum' (TR "ölüm")        → "c**olum**n"
+ * Örnek: "Russian Attack on Ukrainian City Kills 20…" haberi özetindeki
+ * "sharpest" + başlıktaki "Russian" bağlamıyla veba haberi sayıldı.
+ *
+ * Kural: terim kelimenin başında olmalı, sonu serbest (ek alabilir:
+ * "vebadan", "случаи", "cases", "infections") ama kelime ortasında eşleşmez.
+ */
+function termRe(term: string): RegExp {
+  return new RegExp(`(?<![\\p{L}\\p{N}])${term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'u');
+}
+
+const DISEASE_RE = DISEASE_TERMS.map(termRe);
+const CONTEXT_RE = CONTEXT_TERMS.map(termRe);
+
+/**
  * Tarih/arkeoloji gürültüsü. Ölçüldü: "The earliest known plague outbreak
  * happened in what is now Russia 5,500 years ago" haberleri akışa giriyordu.
  * Bu tür içerik ancak GÜNCEL salgın işareti varsa tutulur.
@@ -70,9 +90,9 @@ const CURRENT_MARKERS = [
  */
 export function isRelevant(...parts: (string | null | undefined)[]): boolean {
   const text = fold(parts.filter(Boolean).join(' '));
-  const hasDisease = DISEASE_TERMS.some((t) => text.includes(t));
+  const hasDisease = DISEASE_RE.some((re) => re.test(text));
   if (!hasDisease) return false;
-  if (!CONTEXT_TERMS.some((t) => text.includes(t))) return false;
+  if (!CONTEXT_RE.some((re) => re.test(text))) return false;
 
   const looksHistorical = NOISE_PATTERNS.some((t) => text.includes(t));
   if (looksHistorical && !CURRENT_MARKERS.some((t) => text.includes(t))) return false;
