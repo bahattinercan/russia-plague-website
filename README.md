@@ -11,13 +11,15 @@ Rusya'daki şüpheli veba (pnömonik/hıyarcıklı) olayları hakkındaki haberl
 
 Tam otomatik bir sistem doğrulama iddia edemez. Bu proje yalnızca **hangi kaynağın ne bildirdiğini** raporlar.
 
-| Etiket | Anlamı |
-|---|---|
-| ✅ Resmî açıklama | WHO / CDC / ECDC / resmî devlet kurumu açıklaması |
-| 🟢 Çoklu bağımsız kaynak bildiriyor | ≥2 farklı bağımsızlık grubu aynı olayı bildirdi |
-| 🟡 Tek kaynak bildiriyor | Yalnızca 1 grup bildirdi |
-| 🟠 Doğrulanmamış iddia | Telegram / kayıt dışı yayıncı / sosyal sinyal |
-| 🔴 Çelişkili bilgi | Aynı olay için zıt iddialar var (deneysel) |
+| Simge | Etiket | Anlamı |
+|---|---|---|
+| `§` | Resmî açıklama | WHO / CDC / ECDC / resmî devlet kurumu açıklaması |
+| `◆` | Çoklu bağımsız kaynak bildiriyor | ≥2 farklı bağımsızlık grubu aynı olayı bildirdi |
+| `◇` | Tek kaynak bildiriyor | Yalnızca 1 grup bildirdi |
+| `?` | Doğrulanmamış iddia | Telegram / kayıt dışı yayıncı / sosyal sinyal |
+| `⇄` | Çelişkili bilgi | Aynı olay için zıt iddialar var (deneysel) |
+
+Rozet simgesi ve renk tonu `src/components/LabelBadge.tsx` içinde tanımlıdır (`GLYPH` / `TONE`); etiket anahtarları: `official · corroborated · single · unverified · contradicted`.
 
 Sitede **"doğrulandı", "teyit edildi", "confirmed", "verified" ifadeleri hiçbir yerde geçmez.**
 
@@ -31,27 +33,30 @@ Aynı sahiplik çatısındaki kaynaklar **tek kaynak** sayılır. TASS + RIA + R
 
 ```bash
 npm install
+npm run dev              # geliştirme sunucusu (http://localhost:3000)
+npm run build            # üretim derlemesi (Vercel ile aynı çıktı)
 npm run ingest          # tüm kaynakları tara, data/feed.json yaz
 npm run ingest -- --dry # yazmadan raporla
 npm run ingest -- --only=tass,meduza,reuters
 npm run typecheck
 npm run ui-check         # arayüz kapıları: kontrast (AA), yüzey ayrışması, opaklık/mikro punto kuralları, sözlük paritesi
 npm run layout-check     # yerleşim kapıları: 360–1440 px yatay taşma, mobil satır düzeni, sayfa bütçesi (Chrome gerekir)
+npm run relevance-check  # ilgililik filtresi: ilgisiz haber sızması / gerçek olayın kaçması
 npm run build:world-map  # dünya haritası varlıklarını yeniden üret (Natural Earth 110m → public/world-map*.svg; internet gerekir)
-npm run security-check   # güvenlik regresyon testleri (ReDoS, URL şeması, varlık DoS, log maskeleme, nonce CSP)
+npm run security-check   # güvenlik regresyon testleri (ReDoS, URL şeması, varlık DoS, log maskeleme, nonce CSP, COEP)
 npm run translation-check # çeviri doğrulama kapıları (ağsız)
 npm run geo-check        # konum çıkarımı + kapsama oranı
 npm run figures-check    # küratörlü rakamların gerçek kaynak cümlesine bağlılığı
 npm run summarize-check  # editoryal dil kapısı (yasak sözcükler)
 npm run db:check         # Neon bağlantısı + şema + satır sayıları
-npm run check-all        # typecheck + ui-check + security-check + translation-check + geo-check + summarize-check + figures-check
+npm run check-all        # typecheck + ui-check + security-check + translation-check + geo-check + relevance-check + summarize-check + figures-check
 ```
 
-`check-all` `layout-check`'i **içermaz** (Chrome gerektirir); `ui-check` 19, `security-check` 58, `translation-check` 30, `geo-check` 24, `figures-check` 59, `summarize-check` 22 kapı koşar.
+`check-all` `layout-check`'i **içermez** (Chrome gerektirir); `ui-check` 19, `security-check` 63, `translation-check` 30, `geo-check` 24, `relevance-check` 23, `figures-check` 59 (tazeliğe göre 1'i uyarıya dönebilir), `summarize-check` 22 kapı koşar.
 
 `main` dalı korumalıdır (PR zorunlu, admin dahil, force-push ve dal silme kapalı). PR'larda `.github/workflows/ci.yml` `npm ci` + `npm run check-all` koşar ve bu check korumada **zorunludur**. Kapılar **sırsız ve DB'siz** çalışır (`figures-check` `data/feed.json` yedeğine düşer), bu yüzden fork PR'larında da aynı sonucu verir.
 
-Örnek çıktı (7 Eki 2026 koşusu, `data/feed.json`):
+Örnek çıktı (7 Eki 2026 koşusu, `data/feed.json`; sayılar o günün envanterine aittir — bugün 45 kaynak taranıyor ve JSON yedeği ~450 KB):
 
 ```
 ── KAYNAK SAĞLIĞI ────────────────────────────────────────────────────────────
@@ -74,8 +79,9 @@ Süre                  : 8495 ms
 
 ### Yayın (Vercel)
 
-Bu depo Vercel projesine bağlıdır: **`main` dalına yapılan her push otomatik production deploy tetikler**
-(Vercel → Project → Git, production dalı `main`). PR/dal push'ları preview deploy üretir.
+Bu depo Vercel projesine bağlıdır: **`main`'e merge edilen her değişiklik otomatik production deploy tetikler**
+(Vercel → Project → Git, production dalı `main`; `main` korumalı olduğu için doğrudan push yoktur). Dal push'ları
+preview deploy üretir; preview adresleri **Vercel Authentication** ile korunur (curl ile başlık okunamaz, production okunur).
 
 Vercel proje adı `plague-tracker`, canlı adres `https://plague-tracker.vercel.app` (özel alan adı yok).
 Deploy durumu: `npx vercel ls plague-tracker`.
@@ -145,13 +151,15 @@ npm run ingest          # tarar, Postgres'e (yoksa JSON'a) yazar
 |---|---|---|
 | Lokal | `.env.local` (gitignore'da) | `DATABASE_URL` |
 | Cron | GitHub → Settings → Secrets → **`DATABASE_URL`** | yoksa ingest JSON'a düşer, cron yine çalışır |
-| Cron tetikleyici (yalnızca yerel) | `.env.local` → **`GITHUB_TRIGGER_TOKEN`** (fine-grained PAT, Actions: RW), **`CRONJOB_API_KEY`** | cron-job.org'a yüklenen sırlar; `npm run cron:setup` / `npm run ingest:trigger` bunları okur |
+| Cron tetikleyici (yalnızca yerel) | `.env.local` → **`GITHUB_TRIGGER_TOKEN`** (fine-grained PAT, Actions: RW; yedek ad `GH_TOKEN`), **`CRONJOB_API_KEY`** | cron-job.org'a yüklenen sırlar; `npm run cron:setup` / `npm run ingest:trigger` bunları okur |
 | Site | Vercel → Environment Variables → **`DATABASE_URL`** | Neon pooler bağlantısı |
-| Çeviri (lokal/cron/Vercel) | `DEEPL_API_KEY` **veya** `OPENAI_API_KEY` | Tanımlıysa TR çeviri o sağlayıcıyla yapılır |
+| Site (opsiyonel) | `NEXT_PUBLIC_SITE_URL` | Tanımlanırsa `sitemap.xml`/`robots.txt` alan adı istek başlıklarından değil buradan türetilir |
+| Çeviri (lokal/cron/Vercel) | `DEEPL_API_KEY` **veya** `OPENAI_API_KEY` | Tanımlıysa TR çeviri o sağlayıcıyla yapılır (DeepL'de yedek ad: `TRANSLATE_API_KEY`) |
 | Çeviri (tercihe bağlı) | `TRANSLATE_PROVIDER` (`auto`/`deepl`/`openai`/`google`/`off`) | Tanımsızsa `auto`: DeepL → OpenAI → anahtarsız Google |
 | Çeviri (opsiyonel) | `TRANSLATE_MAX_MS`, `TRANSLATE_BUDGET_CHARS`, `TRANSLATE_CONCURRENCY` | Cron bütçesi ve kota koruması |
+| Yerel kapı (yalnızca makinede) | `CHROME_PATH` | `layout-check` Chrome'u buradan bulur; verilmezse Chrome PATH'te aranır, bulunamazsa kapı SKIP olur |
 
-**Cron:** İki tetikleyici var. **Asıl olan** dış zamanlayıcı: cron-job.org 10 dakikada bir `workflow_dispatch` API'sini çağırır — kurulum `npm run cron:setup` (`docs/dispatch-tetikleme.md`). `.github/workflows/ingest.yml` içindeki `schedule: */10` yalnızca **yedektir**; GitHub ücretsiz katmanda zamanlanmış işleri saatlerce geciktirir veya atlar (ölçüm: 2 günde 3 çalışma). İkisi de `concurrency: ingest` grubunda, üst üste binme olmaz.
+**Cron:** İki tetikleyici var. **Asıl olan** dış zamanlayıcı: cron-job.org 10 dakikada bir `workflow_dispatch` API'sini çağırır — kurulum `npm run cron:setup` (`docs/dispatch-tetikleme.md`). `.github/workflows/ingest.yml` içindeki `schedule: */10` yalnızca **yedektir**; GitHub ücretsiz katmanda zamanlanmış işleri geciktirir veya atlar — ölçüm (7 Eki 2026): 7 saatlik pencerede tek bir zamanlanmış çalışma düştü, 8'i hiç gelmedi (`gh run list --workflow=ingest.yml` → `schedule: 1`). İkisi de `concurrency: ingest` grubunda, üst üste binme olmaz.
 
 İş başarısız olursa `ingest-failure` etiketli bir issue açılır (dead man's switch) ve `data/feed.json` debug artifact'ı yüklenir. Dikkat: bu switch **yalnızca başarısız çalışmada** tetiklenir — hiç tetikleme gelmezse (PAT süresi dolması gibi) veri sessizce bayatlar, bu yüzden cron-job.org'un e-posta bildirimi açık olmalı.
 
@@ -172,7 +180,7 @@ Bilgi mimarisi ve gerekçeleri: [`docs/arayuz-plani.md`](docs/arayuz-plani.md).
 
 Ek olarak `sitemap.xml`, `robots.txt` (ikisi de `force-dynamic` — `data/feed.json` izlendiği için derleme anına donmamalı), dil duyarlı `not-found.tsx` ve `[...rest]` yakalayıcı. Alan adı istek başlıklarından türetilir, `NEXT_PUBLIC_SITE_URL` ile sabitlenebilir.
 
-**Harita:** `Bölgeler` bölümündeki dünya haritası **bağlam katmanıdır** — satır içi SVG, JS'siz, bağımlılıksız. İşaretçideki sayı **olay sayısıdır, vaka sayısı değildir**. Ülke boyaması (koroplet) yok: konum kapsaması %60 kapısını geçmiyor (`docs/harita-plani.md`).
+**Harita:** `Bölgeler` bölümündeki dünya haritası **bağlam katmanıdır** — `public/world-map*.svg` statik varlığı `<img>` ile servis edilir (self-host, `next/image` yok), JS gerekmez, dış karo servisi kullanılmaz. İşaretçideki sayı **olay sayısıdır, vaka sayısı değildir**. Ülke boyaması (koroplet) yok: konum kapsaması %60 kapısını geçmiyor (`docs/harita-plani.md`).
 
 **Akış filtreleri JS'siz çalışır:** durum URL'de taşınır (`?label=single&q=sibirya&page=2`), form `GET` ile gönderilir. Sunucuda filtreleme yapıldığı için 450 KB'lık feed tarayıcıya gönderilmez.
 
