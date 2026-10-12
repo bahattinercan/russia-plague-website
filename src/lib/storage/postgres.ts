@@ -243,7 +243,46 @@ export async function saveFeedToPostgres(feed: FeedFile): Promise<SaveResult> {
       ...feed.signals,
     ];
 
-    const articleRows = allArticles.map((a) => [
+    // ── Kimlik uzlaştırması ─────────────────────────────────────────────
+    // `id = shortHash(sourceSlug|canonicalUrl)`; yayıncı adı değişince AYNI
+    // canonical_url yeni bir id alır. ÖLÇÜM (12 Eki 2026): Google News
+    // yayıncı adı "Sözcü" → "Sözcü Gazetesi" olmuş, slug
+    // `unknown-sozcu` → `unknown-sozcu-gazetesi`; aynı 4 haber için yeni id
+    // üretildi. `articles_canonical_url_key` tekilliği yüzünden INSERT 23505
+    // fırlattı ve transaction'ın TAMAMI düştü:
+    //   "⚠ Postgres'e yazılamadı … duplicate key value violates unique
+    //    constraint articles_canonical_url_key · 23505"
+    // Ingest sessizce JSON'a düştüğü için site 10 Eki 23:32'deki yazımdan
+    // beri bayat kaldı (Neon'a 38 saatte yalnızca 3 başarılı yazım).
+    // Çözüm: o URL için DB'de bir satır varsa ONUN id'sini benimse — kimlik
+    // kaymaz, tekillik korunur, event_articles bağlantıları tutarlı kalır.
+    const existingIdRows = await client.query(
+      'SELECT canonical_url, id FROM articles WHERE canonical_url = ANY($1::text[])',
+      [[...new Set(allArticles.map((a) => a.canonicalUrl))]],
+    );
+    const idByUrl = new Map<string, string>(
+      (existingIdRows.rows as { canonical_url: string; id: string }[]).map((r) => [
+        r.canonical_url,
+        r.id,
+      ]),
+    );
+    let adoptedIds = 0;
+    for (const article of allArticles) {
+      const existingId = idByUrl.get(article.canonicalUrl);
+      if (existingId && existingId !== article.id) {
+        article.id = existingId;
+        adoptedIds++;
+      }
+    }
+    if (adoptedIds > 0) {
+      console.log(`ℹ ${adoptedIds} makale DB'deki mevcut id'yi benimsedi (yayıncı adı değişmiş)`);
+    }
+
+    // Aynı id iki kez INSERT edilirse Postgres "ON CONFLICT DO UPDATE command
+    // cannot affect row a second time" verir; batch içinde tekilleştir.
+    const uniqueArticles = [...new Map(allArticles.map((a) => [a.id, a])).values()];
+
+    const articleRows = uniqueArticles.map((a) => [
       a.id,
       a.sourceSlug,
       a.sourceName,
