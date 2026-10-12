@@ -53,6 +53,18 @@ check(
   'RU: вспышка чумы (Kiril kökü ek alır)',
   relevant('В России вспышка чумы', 'Введён карантин в Иркутске'),
 );
+check(
+  'RU: çekim hali (чумы/чуму) yalnız başına yeterli',
+  relevant('Посольство США призвало американцев покинуть Россию из-за распространения чумы', ''),
+);
+check(
+  'RU: противочумный институт (anti-plague)',
+  relevant('После гибели лаборантки противочумного института введён карантин', 'Иркутская область'),
+);
+check(
+  'EN: plague isim / iyelik hali korunur',
+  relevant("Plague's spread in Siberia alarms officials", 'New cases reported'),
+);
 check('DE/FR: Pest (veba)', relevant('Pest in Russia: Behörden melden Fälle', ''));
 
 console.log('\n── Konu dışı haberler ELENMELİ ─────────────────────────────────');
@@ -79,11 +91,37 @@ check(
   'hastalık terimi yoksa bağlam yeterli değil',
   !relevant('Russia launches missile strike on Kyiv', 'Deaths reported, hospitals overwhelmed'),
 );
+check(
+  'ÖLÇÜM: ABC/Wuhan — "plagued by the coronavirus outbreak"',
+  !relevant(
+    'Chinese court sentenced former mayor of Wuhan city to 14 years in prison for bribery',
+    'A former Chinese mayor of a central Chinese city plagued by the coronavirus outbreak more than six years ago has been sentenced',
+  ),
+);
+check(
+  'ÖLÇÜM: ABC/Ukrayna — "shortage has plagued Ukraine"',
+  !relevant(
+    'Ukraine grapples with a shortage of troops at the front after over 4 years of war',
+    "A shortage of combat-ready troops has plagued Ukraine ever since Russia's full-scale invasion in 2022",
+  ),
+);
+check('pesticide veba sayılmaz', !relevant('Russia ramps up pesticide exports', 'Farmers in Siberia'));
+check(
+  'yalın чум (tek çadır) veba sayılmaz',
+  // NOT: 'чумы' biçimi belirsizdir (veba tamlayanı / çadır çoğulu). DB
+  // ölçümünde 6 kullanım da veba tamlayanıydı, o yüzden biçim korunuyor;
+  // yalnızca yalın 'чум' dışarıda.
+  !relevant('Оленевод поставил новый чум в Сибири', ''),
+);
 
 console.log('\n── Tarih/arkeoloji gürültüsü ───────────────────────────────────');
 check(
   'antik veba + güncel işaret yok → elenir',
   !relevant('Plague found in Siberia 5,500 years ago', 'Archaeologists found skeletons'),
+);
+check(
+  "ÖLÇÜM: 'outbreak' tek başına tarih filtresini açmaz",
+  !relevant('Plague outbreak in Siberia 5,500 years ago', 'Archaeologists found skeletons'),
 );
 check(
   'antik veba + güncel işaret var → tutulur',
