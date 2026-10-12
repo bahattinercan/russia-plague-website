@@ -21,16 +21,43 @@ import {
 
 // ───────────────────────────── İlgililik filtresi ─────────────────────────────
 
-/** Hastalık terimleri (fold edilmiş biçimde yazılır). */
-const DISEASE_TERMS = [
+/**
+ * Hastalık terimleri — REGEX KAYNAĞI olarak yazılır (fold edilmiş metne uygulanır).
+ *
+ * Neden düz kelime değil: kısa/çok dilli terimler ya kelime içinde ya da farklı
+ * sözcük türlerinde eşleşiyordu. ÖLÇÜLEN yanlış pozitifler:
+ *   'pest' (DE "Pest" = veba) → "sharpest" / "Budapest" (kelime içi!)
+ *                                → kelime başı şartı + 'pesticide' guard'ı
+ *   'plague' FİİL             → "plagued by corruption",
+ *                                "shortage has plagued Ukraine"
+ *                                → (?![di]) guard'ı (bkz. aşağıdaki ölçüm)
+ *   'чума' yalın hali         → "случай чумы" kaçıyordu → çekim ekleri listesi
+ *
+ * Tümü fold() sonrası metne uygulanır: küçük harf, TR diakritikleri sadeleşmiş,
+ * kesme işareti atılmış. Sol sınır (kelime başı) kuralı `termRe`/`patternRe`
+ * içinde uygulanır; burada yazılan desenler onu TEKRARLAMAZ.
+ */
+const DISEASE_PATTERNS = [
   // TR
   'veba', 'hiyarcikli', 'pnomoni', 'salgin',
   // EN
-  'plague', 'bubonic', 'pneumonic', 'yersinia', 'black death', 'anti-plague',
+  // ÖLÇÜM (canlı feed + DB, 90 gün): 'plague' fiil hali iki haberi akışa soktu —
+  // ABC "Chinese court sentenced former mayor of Wuhan city…" ("plagued by the
+  // coronavirus outbreak") ve ABC "Ukraine grapples with a shortage of troops…"
+  // ("shortage has plagued Ukraine ever since Russia's invasion"). İkisi de
+  // veba haberi değil. 'plague' isim/isim tamlaması ("plague cases", "plague
+  // deaths") ve iyelik ('s → fold'da kaybolur, "plagues") korunur, yalnızca
+  // 'plagued' elenir.
+  'plague(?![di])', 'bubonic', 'pneumonic', 'yersinia', 'black death', 'anti-plague',
   // RU
-  'чума', 'бубонн', 'легочн', 'вспышк',
-  // DE/FR
-  'pest', 'peste',
+  // Yalın hâl yetmiyor: "случай чумы", "легочной чумой" kaçıyordu. Çekim ekleri
+  // listelendi; yalın 'чум' (ren geyiği çadırı) KASTEN dışarıda.
+  // 'противочумный' (anti-plague enstitüsü) Rus haberlerinde standart ad —
+  // ölçüm: DB'de 1 makalede geçiyor ve eski filtre hiç görmüyordu.
+  '(?:противо)?чум(?:а|ы|у|е|ой|ной|ная|ное|ные|ный|ного|ному)',
+  'бубонн', 'легочн', 'вспышк',
+  // DE/FR — 'pest' kısa: "pesticide"/"pester" elenmeli.
+  'pest(?![a-z])', 'peste',
 ];
 
 /** Bağlam terimleri: hastalık + bağlam birlikte aranır. */
@@ -46,6 +73,31 @@ const CONTEXT_TERMS = [
 ];
 
 /**
+ * Terimi "kelime BAŞINDA" eşleştiren regex.
+ *
+ * ÖLÇÜM (12 Eki 2026, canlı feed): düz `includes()` kısa terimlerde kelime
+ * İÇİNDE eşleşiyordu ve akışa gerçek yanlış pozitifler soktu:
+ *   'pest' (DE "Pest" = veba) → "shar**pest**", "Buda**pest**"
+ *   'olum' (TR "ölüm")        → "c**olum**n"
+ * Örnek: "Russian Attack on Ukrainian City Kills 20…" haberi özetindeki
+ * "sharpest" + başlıktaki "Russian" bağlamıyla veba haberi sayıldı.
+ *
+ * Kural: terim kelimenin başında olmalı, sonu serbest (ek alabilir:
+ * "vebadan", "случаи", "cases", "infections") ama kelime ortasında eşleşmez.
+ */
+function termRe(term: string): RegExp {
+  return patternRe(term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+}
+
+/** Aynı sol sınır kuralı, ama desen ham regex kaynağı olarak verilir. */
+function patternRe(source: string): RegExp {
+  return new RegExp(`(?<![\\p{L}\\p{N}])${source}`, 'u');
+}
+
+const DISEASE_RE = DISEASE_PATTERNS.map(patternRe);
+const CONTEXT_RE = CONTEXT_TERMS.map(termRe);
+
+/**
  * Tarih/arkeoloji gürültüsü. Ölçüldü: "The earliest known plague outbreak
  * happened in what is now Russia 5,500 years ago" haberleri akışa giriyordu.
  * Bu tür içerik ancak GÜNCEL salgın işareti varsa tutulur.
@@ -57,11 +109,17 @@ const NOISE_PATTERNS = [
 ];
 
 const CURRENT_MARKERS = [
-  '2026', 'case', 'quarantine', 'outbreak', 'died', 'death', 'infected',
+  '2026', 'case', 'quarantine', 'died', 'death', 'infected',
   'patient', 'hospital', 'laboratory', 'lab worker', 'cdc', 'who ', 'monitoring',
   'vaka', 'karantina', 'olum', 'hastane', 'laboratuvar',
   'случа', 'карантин', 'больниц', 'лаборатор',
 ];
+// NOT: 'outbreak' bu listeden ÇIKARILDI. ÖLÇÜM: DB'de tek bir makaleyi
+// kurtarıyordu ve o makale yanlış pozitifti ("Chinese court sentenced former
+// mayor of Wuhan city…", özetinde "plagued by the coronavirus outbreak more
+// than six years ago"). 'outbreak' zaten konu kelimesi; güncellik işareti
+// değil. Bu yüzden tarih/arkeoloji içeriğini kurtarmamalı (artık kurtarmıyor).
+// 'outbreak' CONTEXT_TERMS içinde kalmaya devam ediyor.
 
 /**
  * Bir metnin bu izleme konusuyla ilgili olup olmadığı.
@@ -70,9 +128,9 @@ const CURRENT_MARKERS = [
  */
 export function isRelevant(...parts: (string | null | undefined)[]): boolean {
   const text = fold(parts.filter(Boolean).join(' '));
-  const hasDisease = DISEASE_TERMS.some((t) => text.includes(t));
+  const hasDisease = DISEASE_RE.some((re) => re.test(text));
   if (!hasDisease) return false;
-  if (!CONTEXT_TERMS.some((t) => text.includes(t))) return false;
+  if (!CONTEXT_RE.some((re) => re.test(text))) return false;
 
   const looksHistorical = NOISE_PATTERNS.some((t) => text.includes(t));
   if (looksHistorical && !CURRENT_MARKERS.some((t) => text.includes(t))) return false;
