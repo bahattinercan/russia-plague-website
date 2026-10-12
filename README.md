@@ -119,8 +119,8 @@ Stack: Next.js 16.4 (App Router) + TypeScript 7 + Node 24 + Tailwind v4 + Drizzl
 
 ### Güvenlik
 
-- **CSP nonce tabanlı:** `script-src` istek başına üretilen nonce ile çalışır (`'unsafe-inline'` yok). `style-src` bilinçli olarak `'unsafe-inline'` tutuyor (React inline `style` nitelikleri — nonce ile birlikte çalışmaz). Yazı tipleri `next/font` ile self-host: `style-src`/`font-src` yalnızca `'self'`.
-- Ek olarak HSTS, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP ve CORP başlıkları `next.config.ts`'te tanımlıdır; CSP `proxy.ts`'te üretilir (statik CSP yok, çakışma olmasın diye).
+- **CSP nonce tabanlı:** `script-src` istek başına üretilen nonce ile çalışır (`'unsafe-inline'` yok). Stil tarafı ayrıdır: `style-src 'self'` + nonce'lu `style-src-elem` + `style-src-attr 'unsafe-inline'` (React'in SSR inline `style` nitelikleri nonce'lu bir direktifle birlikte çalışmadığı için ayrıldı). Yazı tipleri `next/font` ile self-host: stil/font yalnızca `'self'` (+`data:`).
+- Ek olarak HSTS, `X-Frame-Options: DENY`, `nosniff`, `Referrer-Policy`, `Permissions-Policy`, COOP, **COEP `require-corp`** ve CORP başlıkları `next.config.ts`'te tanımlıdır; CSP `proxy.ts`'te üretilir (statik CSP yok, çakışma olmasın diye).
 - **Dış veriye güvenilmez:** her bağlantı `safeExternalUrl()` (yalnızca http/https), her metin `stripHtml()` (linear zamanlı, 400 KB sınırlı) filtresinden geçer.
 - **Regresyon testleri:** `npm run security-check` — ayrıntılar ve kalan riskler: [`docs/guvenlik-denetimi.md`](docs/guvenlik-denetimi.md).
 
@@ -225,6 +225,7 @@ Depoda fiilen taranan kaynak sayısı **45** (`registry.ts → SOURCES`); bunlar
 | [`docs/guvenlik-denetimi.md`](docs/guvenlik-denetimi.md) | Güvenlik denetimi: bulgular, düzeltmeler, kalan riskler | 4 tur tamamlandı |
 | [`docs/dispatch-tetikleme.md`](docs/dispatch-tetikleme.md) | Cron: GitHub `schedule` neden yetmiyor, cron-job.org kurulumu | kurulu (jobId #8605239) |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Katkı kuralları: pazarlık konusu olmayan editoryal ilkeler, tier/trust değişikliği, kapılar | yayında |
+| [`SECURITY.md`](SECURITY.md) | Güvenlik bildirme yolu, kapsam, zaten uygulanan korumalar, kalan riskler | 12 Eki 2026 |
 
 > Bu dosyalardaki sayılar **ölçüm tarihine** bağlıdır ve feed penceresiyle birlikte değişir. Bir ölçümün tarihi yazılıysa o anın değeridir; güncel durumu anlamak için kapıları yeniden koşmak gerekir (`npm run check-all`).
 
@@ -232,11 +233,9 @@ Depoda fiilen taranan kaynak sayısı **45** (`registry.ts → SOURCES`); bunlar
 
 ## Güvenlik
 
-- **Zafiyet bildirimi özel yapılır:** GitHub → **Security → Report a vulnerability** (özel advisory) veya `bahattin.ercan.43@gmail.com`. Açık issue açma — düzeltilmemiş bir sorunu herkese gösterir.
-- Bildirimde beklenen: adım adım yeniden üretme, etki (hangi veri/sır/başlık), varsa önerilen düzeltme.
-- Yanıt hedefi: **7 gün** içinde durum değerlendirmesi, **30 gün** içinde düzeltme veya gerekçeli ret. Bug bounty yoktur.
-- Kapsam: `src/`, `scripts/`, `.github/workflows/`, `next.config.ts`, `package.json`; CSP/nonce üretimi, dış veri işleme (`stripHtml`, `safeExternalUrl`), log maskeleme, bağımlılık zinciri. Haber içeriğinin doğruluğu kapsam dışıdır (editoryal konu).
-- Uygulanan korumalar, regresyon kapıları (`npm run security-check`) ve **kalan riskler**: [`docs/guvenlik-denetimi.md`](docs/guvenlik-denetimi.md).
+- **Zafiyet bildirimi özel yapılır:** GitHub → **Security → Report a vulnerability** (özel advisory) veya `bahattin.ercan.43@gmail.com`. **Açık issue açma** — düzeltilmemiş bir sorunu herkese gösterir. Yanıt hedefi: 7 gün triaj, 30 gün düzeltme. Bug bounty yoktur.
+- Zaten uygulanan korumalar, kapsam/kapsam dışı ve **bilinen kalan riskler**: [`SECURITY.md`](SECURITY.md).
+- Denetim kaydı, bulgular ve ölçümler: [`docs/guvenlik-denetimi.md`](docs/guvenlik-denetimi.md). Regresyon kapıları: `npm run security-check` (63 test) + `npm run check-all`.
 
 ---
 
@@ -254,6 +253,6 @@ Kod: **MIT** — [`LICENSE`](LICENSE) dosyası depoda, `package.json` `MIT`. Pro
 Toplanan içerik (haber başlıkları, özetler, bağlantılar) ilgili yayıncıların telifine tabidir; lisans yalnızca kodu ve dokümantasyonu kapsar.
 
 - Katkı kuralları (tier/trust değişikliğinin gerekçesi, kapılar, commit konvansiyonu): [`CONTRIBUTING.md`](CONTRIBUTING.md)
-- Güvenlik: bildirim yolu ve kalan riskler için yukarıdaki [Güvenlik](#güvenlik) bölümü
+- Güvenlik: bildirim yolu, uygulanan korumalar ve kalan riskler: [`SECURITY.md`](SECURITY.md)
 
 > Katkı için temel kural: kaynak envanteri ve güven puanları `src/lib/sources/registry.ts` içinde elle ve sürümlenir — değişiklikler ölçüme dayalı gerekçeli olmalı (metodoloji sayfası bunu yayınlar).
