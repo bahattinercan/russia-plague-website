@@ -37,7 +37,8 @@
 
 **Canlı başlık doğrulaması** (`GET /tr`, `next dev`):
 
-> 9 Eki 2026 notu: Vercel'in bot koruması `curl -I` isteklerini `403 challenge` ile yanıtlıyor (`X-Vercel-Mitigated: challenge`). Canlı başlıklar curl ile değil tarayıcıdan doğrulanmalı; aşağıdaki çıktı dev sunucusundan alınmıştır.
+> 9 Eki 2026 notu: Vercel'in bot koruması `curl -I` isteklerini o gün `403 challenge` ile yanıtlıyordu (`X-Vercel-Mitigated: challenge`); aşağıdaki çıktı dev sunucusundan alınmıştır.
+> **12 Eki 2026 (B-13):** üretimde challenge gelmedi, başlıklar `curl` ile doğrulandı — `Cross-Origin-Embedder-Policy: require-corp` + ayrık stil direktifleri döndü; aynı istekteki HTML'de 14/14 `<script>` nonce'lu, nonce'suz inline `<style>` 0, dış `src` 0. Yani “canlıyı yalnızca tarayıcıdan doğrula” kısıtı artık geçerli değil; challenge aralıklı geliyor, geldiğinde tarayıcıya düşülür.
 
 ```
 content-security-policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-src 'none';
@@ -201,6 +202,7 @@ stripHtml("<p>&#99999999999;</p>")→ RangeError
 | CSP/COEP ihlali | CDP `Log` domain + konsol | **0** ihlal, 0 hata |
 | Görsel regresyon | önce/sonra ekran görüntüsü pixel diff (PIL) | ÖNCE↔SONRA farkı (home 2458 px, timeline 625 px) **aynı build'in iki çekimi arasındaki farktan küçük** (3412 / 627 px — dinamik “son tarama” saatleri); yerleşim değişmedi |
 | Dev tarafı | `next dev` başlıkları | `style-src 'self' 'unsafe-inline'` (tek direktif), COEP açık |
+| **Canlı üretim** | `curl -D -` (başlık ve gövde AYNI istekte — nonce istek başına değişir) | COEP `require-corp`; `style-src 'self'` + `style-src-elem 'self' 'nonce-…'` + `style-src-attr 'unsafe-inline'`; 14/14 `<script>` nonce'lu, 0 nonce'suz inline `<style>`, 0 dış `src` (`plague-tracker.vercel.app`, deploy sonrası) |
 
 **Kabul edilen artık:** `style-src-attr 'unsafe-inline'` duruyor — nitelik stilleri script çalıştıramaz (yalnızca `--reveal-delay`, `left/top`, `aspect-ratio` gibi değerler); kritik olan `<style>` elemanı tarafı artık nonce'lu. CSP2 tarayıcılar (`style-src-elem`/`-attr` bilmeyenler) yalnızca `style-src 'self'` görür → kademeli animasyon gecikmesini kaybeder, içerik gizlenmez.
 
@@ -242,7 +244,7 @@ npm run typecheck
 - [x] Neon bağlantı dizesi yalnızca GitHub Secret / Vercel Env olarak; repoya asla yazılmaz
 - [x] `DATABASE_URL` yoksa uygulama JSON'a düşer (fail-safe), çöker değil
 - [ ] Vercel ortam değişkenleri Production/Preview ayrımıyla tanımlanır
-- [x] Deploy sonrası başlıklar **ve nonce'lu CSP** yeniden doğrulanır; tarayıcı konsolunda CSP ihlali olmamalı *(9 Eki 2026: alias üzerinden doğrulandı — CSP nonce'lu, 14/14 `<script>` nonce taşıyor, `X-Powered-By` yok; Vercel bot challenge bazı curl isteklerini 403 ile kesiyor)*
+- [x] Deploy sonrası başlıklar **ve nonce'lu CSP** yeniden doğrulanır; tarayıcı konsolunda CSP ihlali olmamalı *(9 Eki 2026: alias üzerinden doğrulandı — CSP nonce'lu, 14/14 `<script>` nonce taşıyor, `X-Powered-By` yok; Vercel bot challenge bazı curl isteklerini 403 ile kesiyor)* *(12 Eki 2026: B-13 deploy'u sonrası aynı kontrol curl ile tekrarlandı — COEP + ayrık stil direktifleri, 14/14 script nonce'lu)*
 - [x] Nonce'lu CSP üretimde test edilir (`'unsafe-eval'` görünmemeli, `upgrade-insecure-requests` görünmeli) *(9 Eki 2026: ikisi de doğrulandı)*
 - [x] COEP `require-corp` açık ve dış alt kaynak yok *(12 Eki 2026: 12 rotada dış `src` 0, CDP'de 0 ihlal)*
 - [x] Stil tarafı sertleştirildi: `style-src`'te `'unsafe-inline'` yok, `style-src-elem` nonce'lu *(12 Eki 2026: nonce'suz inline `<style>` 0/12 rota, nitelik stilleri çalışıyor)*
