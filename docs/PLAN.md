@@ -110,7 +110,7 @@ russia-plague-website/
 ├─ docs/                      # PLAN.md, arayuz-plani.md, harita-plani.md, ceviri-plani.md,
 │                             # kaynak-envanteri.md, guvenlik-denetimi.md, dispatch-tetikleme.md
 ├─ public/                    # world-map.svg, world-map-focus.svg
-├─ LICENSE · CONTRIBUTING.md · SECURITY.md · README.md · AGENTS.md
+├─ LICENSE · CONTRIBUTING.md · README.md · AGENTS.md
 ├─ .github/workflows/ingest.yml   # tek workflow (CI workflow'u YOK)
 ```
 
@@ -450,7 +450,7 @@ Ek olarak uygulanan ama planda olmayanlar: `Bölgeler` (`/locations`), `Sinyalle
 | 1 | **Dil:** TR + EN | Rotalar `[lang]` (tr + en); içerik TR çeviri + orijinal başlık. Varsayılan dil `en` (`DEFAULT_LOCALE`); tarayıcı dili TR ise `/tr`, `lang` çerezi geçersiz kılar (`src/proxy.ts`) |
 | 2 | **Otomasyon:** Tam otomatik, **"doğrulanmış" etiketi yok** | İnsan onayı yok → sistem doğrulama iddia etmez; en yüksek etiket "çoklu bağımsız kaynak bildiriyor". Ayrıca bkz. §5.3 dil kuralı |
 | 3 | **Telegram/X katmanı:** Dahil | T5, sadece "doğrulanmamış iddia" olarak; ana akışta tek başına haber sayılmaz |
-| 4 | **Repo:** Public — proje **açık kaynak**, lisans **MIT** (9 Eki 2026) | GitHub Actions cron sınırsız dakika; kaynak kod ve güven puanları şeffaf. `LICENSE` depoda, `package.json` `MIT`; katkı kuralları `CONTRIBUTING.md`, bildirme yolu `SECURITY.md`. Doğrulama: `gh repo view` → PUBLIC. Kota matematiği ve geri dönüş riski: `docs/dispatch-tetikleme.md` |
+| 4 | **Repo:** Public — proje **açık kaynak**, lisans **MIT** (9 Eki 2026) | GitHub Actions cron sınırsız dakika; kaynak kod ve güven puanları şeffaf. `LICENSE` depoda, `package.json` `MIT`; katkı kuralları `CONTRIBUTING.md`, bildirme yolu README §Güvenlik. Doğrulama: `gh repo view` → PUBLIC. Kota matematiği ve geri dönüş riski: `docs/dispatch-tetikleme.md` |
 | 5 | **TR çeviri:** Sağlayıcıdan bağımsız ingest-time çeviri + önbellek (7 Eki 2026) | `auto`: DeepL → OpenAI → anahtarsız Google; makine çevirisi beyanı olay detayında, orijinal başlık her zaman görünür; doğrulama kapıları editoryal kuralı korur. Ayrıntı: `docs/ceviri-plani.md` |
 | 6 | **Marka adı:** `Plague Tracker` (7 Eki 2026) | Wordmark boşluklu yazılır (`Plague Tracker`); crawler User-Agent teknik kimlik olarak boşluksuz kalır (`PlagueTrackerBot`, bkz. `sources/registry.ts`). UI `siteName` artık README ile aynı; eski "What is new about plague" başlığı ve ilk çalışma adı `VebaTakip` kaldırıldı. Alan adı seçimi hâlâ açık. |
 

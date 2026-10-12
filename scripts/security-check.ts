@@ -165,8 +165,12 @@ console.log('\n── CSP: nonce tabanlı politika ─────────�
 const NONCE = 'TESTNONCE123';
 const prodCsp = buildCsp(NONCE, false);
 const devCsp = buildCsp(NONCE, true);
-const scriptSrc = (csp: string) => csp.split('; ').find((d) => d.startsWith('script-src ')) ?? '';
-const styleSrc = (csp: string) => csp.split('; ').find((d) => d.startsWith('style-src ')) ?? '';
+const directive = (csp: string, name: string) =>
+  csp.split('; ').find((d) => d.startsWith(`${name} `)) ?? '';
+const scriptSrc = (csp: string) => directive(csp, 'script-src');
+const styleSrc = (csp: string) => directive(csp, 'style-src');
+const styleSrcElem = (csp: string) => directive(csp, 'style-src-elem');
+const styleSrcAttr = (csp: string) => directive(csp, 'style-src-attr');
 
 check('script-src nonce içerir', scriptSrc(prodCsp).includes(`'nonce-${NONCE}'`), scriptSrc(prodCsp));
 check(
@@ -174,19 +178,43 @@ check(
   !scriptSrc(prodCsp).includes('unsafe-inline'),
   scriptSrc(prodCsp),
 );
+// Tur 4 (12 Eki 2026): stil tarafı eleman/nitelik olarak ayrıldı. Tek bir
+// `style-src`'te nonce + 'unsafe-inline' bir arada duramaz (CSP3 nonce varken
+// 'unsafe-inline' yok sayılır); ayrım sayesinde enjekte edilen `<style>`
+// bloklanır, React'in nitelik stilleri çalışmaya devam eder.
 check(
-  "style-src 'unsafe-inline' KORUR (React inline style nitelikleri)",
-  styleSrc(prodCsp).includes('unsafe-inline'),
+  "style-src 'unsafe-inline' İÇERMEZ (üretim)",
+  !styleSrc(prodCsp).includes('unsafe-inline'),
   styleSrc(prodCsp),
+);
+check(
+  'style-src-elem nonce içerir',
+  styleSrcElem(prodCsp).includes(`'nonce-${NONCE}'`),
+  styleSrcElem(prodCsp),
+);
+check(
+  "style-src-elem 'unsafe-inline' İÇERMEZ",
+  !styleSrcElem(prodCsp).includes('unsafe-inline'),
+  styleSrcElem(prodCsp),
+);
+check(
+  "style-src-attr 'unsafe-inline' (React inline style nitelikleri)",
+  styleSrcAttr(prodCsp).includes('unsafe-inline'),
+  styleSrcAttr(prodCsp),
+);
+check(
+  "geliştirmede tek style-src inline izni korur (Next dev <style> enjekte eder)",
+  devCsp.includes("style-src 'self' 'unsafe-inline'"),
+  styleSrc(devCsp),
 );
 
 // Yazı tipleri next/font ile kendi sunucumuzdan gelir → dış font CDN'i gerekmez.
 // Bu iki direktife dış host geri gelirse gizlilik notu ve CSP kazancı sessizce bozulur.
 const fontSrc = (csp: string) => csp.split('; ').find((d) => d.startsWith('font-src ')) ?? '';
 check(
-  'style-src dış host içermez (next/font self-host)',
-  !/https?:\/\//.test(styleSrc(prodCsp)),
-  styleSrc(prodCsp),
+  'style-src/style-src-elem dış host içermez (next/font self-host)',
+  !/https?:\/\//.test(styleSrc(prodCsp)) && !/https?:\/\//.test(styleSrcElem(prodCsp)),
+  `${styleSrc(prodCsp)} | ${styleSrcElem(prodCsp)}`,
 );
 check(
   'font-src dış host içermez (next/font self-host)',
@@ -230,6 +258,13 @@ try {
   check(
     "next.config.ts statik CSP başlığı tanımlamaz (nonce proxy.ts'te)",
     !/key:\s*'Content-Security-Policy'/.test(config),
+  );
+  // Tur 4 (12 Eki 2026): COEP açıldı. Sayfa tek bir dış alt kaynak gömerse
+  // (font CDN'i, uzak görsel, iframe) tarayıcı bunu bloklar — bu kapı
+  // yapılandırmanın geri alınmasını engeller.
+  check(
+    "next.config.ts COEP require-corp tanımlar",
+    /key:\s*'Cross-Origin-Embedder-Policy',\s*value:\s*'require-corp'/.test(config),
   );
 } catch {
   console.log('SKIP  next.config.ts okunamadı');
